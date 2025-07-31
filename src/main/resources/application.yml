@@ -1,5 +1,9 @@
 # 공통 설정 (모든 환경에서 사용)
 spring:
+  # Docker Compose 자동 실행 기능 비활성화
+  docker:
+    compose:
+      enabled: false
   # 기본 프로필을 'dev'로 설정
   profiles:
     active: dev
