@@ -2,9 +2,7 @@ package com.allinone.DevView.interview.entity;
 
 import com.allinone.DevView.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,6 +11,8 @@ import java.util.List;
 @Entity
 @Table(name = "interviews")
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Interview {
 
