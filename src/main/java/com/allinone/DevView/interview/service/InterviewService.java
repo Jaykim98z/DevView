@@ -2,7 +2,10 @@ package com.allinone.DevView.interview.service;
 
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
+import com.allinone.DevView.interview.dto.response.QuestionResponse;
 import com.allinone.DevView.interview.entity.Interview;
+import com.allinone.DevView.interview.entity.InterviewQuestion;
+import com.allinone.DevView.interview.repository.InterviewQuestionRepository;
 import com.allinone.DevView.interview.repository.InterviewRepository;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
@@ -16,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final UserRepository userRepository;
+    private final InterviewQuestionRepository interviewQuestionRepository;
+    private final ExternalAiApiService externalAiApiService;
 
     @Transactional
     public InterviewResponse startInterview(StartInterviewRequest request) {
@@ -34,5 +39,26 @@ public class InterviewService {
         Interview savedInterview = interviewRepository.save(interview);
 
         return InterviewResponse.fromEntity(savedInterview);
+    }
+
+    @Transactional
+    public QuestionResponse askQuestion(Long interviewId) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
+
+        String questionText = externalAiApiService.getQuestionFromAi(
+                interview.getJobPosition(),
+                interview.getCareerLevel()
+        );
+
+        InterviewQuestion newQuestion = InterviewQuestion.builder()
+                .interview(interview)
+                .text(questionText)
+                .category(interview.getJobPosition()) // Or some other logic
+                .build();
+
+        InterviewQuestion savedQuestion = interviewQuestionRepository.save(newQuestion);
+
+        return QuestionResponse.fromEntity(savedQuestion);
     }
 }

@@ -2,8 +2,11 @@ package com.allinone.DevView.interview.service;
 
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
+import com.allinone.DevView.interview.dto.response.QuestionResponse;
 import com.allinone.DevView.interview.entity.Interview;
+import com.allinone.DevView.interview.entity.InterviewQuestion;
 import com.allinone.DevView.interview.entity.InterviewType;
+import com.allinone.DevView.interview.repository.InterviewQuestionRepository;
 import com.allinone.DevView.interview.repository.InterviewRepository;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
@@ -32,6 +35,12 @@ public class InterviewServiceTest {
 
     @InjectMocks
     private InterviewService interviewService;
+
+    @Mock
+    private ExternalAiApiService externalAiApiService;
+
+    @Mock
+    private InterviewQuestionRepository interviewQuestionRepository;
 
     @Test
     @DisplayName("면접 시작 - 성공")
@@ -66,5 +75,36 @@ public class InterviewServiceTest {
         assertThat(response.getInterviewId()).isEqualTo(10L);
         assertThat(response.getInterviewType()).isEqualTo(InterviewType.PRACTICE);
         assertThat(response.getJobPosition()).isEqualTo("Backend Developer");
+    }
+
+    @Test
+    @DisplayName("질문 요청 - 성공")
+    void askQuestion_success() {
+        // given
+        Long interviewId = 1L;
+        Interview mockInterview = Interview.builder()
+                .jobPosition("Backend Developer")
+                .careerLevel("Junior")
+                .build();
+        String fakeQuestionText = "What is SOLID?";
+
+        // Use the builder here instead of new()
+        InterviewQuestion fakeSavedQuestion = InterviewQuestion.builder()
+                .id(100L)
+                .text(fakeQuestionText)
+                .interview(mockInterview)
+                .build();
+
+        given(interviewRepository.findById(interviewId)).willReturn(Optional.of(mockInterview));
+        given(externalAiApiService.getQuestionFromAi(any(String.class), any(String.class))).willReturn(fakeQuestionText);
+        given(interviewQuestionRepository.save(any(InterviewQuestion.class))).willReturn(fakeSavedQuestion);
+
+        // when
+        QuestionResponse response = interviewService.askQuestion(interviewId);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getQuestionId()).isEqualTo(100L);
+        assertThat(response.getText()).isEqualTo(fakeQuestionText);
     }
 }
