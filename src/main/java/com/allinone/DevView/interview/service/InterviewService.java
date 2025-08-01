@@ -19,13 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final UserRepository userRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
     private final InterviewAnswerRepository interviewAnswerRepository;
-    private final ExternalAiApiService externalAiApiService;
+    private final ExternalAiApiService gemini;
+    private final ExternalAiApiService alan;
 
     @Transactional
     public InterviewResponse startInterview(StartInterviewRequest request) {
@@ -50,12 +50,21 @@ public class InterviewService {
         Interview interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
 
-        String questionText = externalAiApiService.getQuestionFromAi(
+        String questionText = gemini.getQuestionFromAi(
                 interview.getJobPosition(),
                 interview.getCareerLevel()
         );
 
         return saveQuestion(interview, questionText);
+    }
+
+    public String getRecommendations(Long interviewId) {
+        // ... find interview or other relevant data ...
+        String jobPosition = "Backend"; // Example
+        String careerLevel = "Junior"; // Example
+
+        // Use the 'alan' bean for recommendations
+        return alan.getQuestionFromAi(jobPosition, careerLevel); // This would be a call to a recommendation method
     }
 
     @Transactional

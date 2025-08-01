@@ -40,7 +40,7 @@ spring:
   # JPA 설정
   jpa:
     hibernate:
-      ddl-auto: create # 개발 초기에는 create 또는 update 사용
+      ddl-auto: update # 개발 초기에는 create 또는 update 사용
     properties:
       hibernate:
         format_sql: true
