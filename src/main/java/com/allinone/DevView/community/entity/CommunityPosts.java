@@ -1,4 +1,4 @@
 package com.allinone.DevView.community.entity;
 
-public class Post {
+public class CommunityPosts {
 }
