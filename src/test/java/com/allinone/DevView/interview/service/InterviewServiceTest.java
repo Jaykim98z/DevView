@@ -33,14 +33,11 @@ public class InterviewServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    @InjectMocks
-    private InterviewService interviewService;
-
-    @Mock
-    private ExternalAiApiService externalAiApiService;
-
     @Mock
     private InterviewQuestionRepository interviewQuestionRepository;
+
+    @InjectMocks
+    private InterviewService interviewService;
 
     @Test
     @DisplayName("면접 시작 - 성공")
@@ -78,33 +75,33 @@ public class InterviewServiceTest {
     }
 
     @Test
-    @DisplayName("질문 요청 - 성공")
-    void askQuestion_success() {
+    @DisplayName("면접 질문 저장 - 성공")
+    void saveQuestion_success() {
         // given
-        Long interviewId = 1L;
+        // 테스트에 필요한 객체들을 준비합니다.
+        User user = User.builder().id(1L).build();
         Interview mockInterview = Interview.builder()
-                .jobPosition("Backend Developer")
-                .careerLevel("Junior")
+                .id(1L)
+                .user(user)
+                .jobPosition("Backend")
                 .build();
-        String fakeQuestionText = "What is SOLID?";
-
-        // Use the builder here instead of new()
-        InterviewQuestion fakeSavedQuestion = InterviewQuestion.builder()
+        String questionText = "What is SOLID?";
+        InterviewQuestion savedQuestion = InterviewQuestion.builder()
                 .id(100L)
-                .text(fakeQuestionText)
                 .interview(mockInterview)
+                .text(questionText)
                 .build();
 
-        given(interviewRepository.findById(interviewId)).willReturn(Optional.of(mockInterview));
-        given(externalAiApiService.getQuestionFromAi(any(String.class), any(String.class))).willReturn(fakeQuestionText);
-        given(interviewQuestionRepository.save(any(InterviewQuestion.class))).willReturn(fakeSavedQuestion);
+        // interviewQuestionRepository.save가 호출되면, 준비된 객체를 반환하도록 설정
+        given(interviewQuestionRepository.save(any(InterviewQuestion.class))).willReturn(savedQuestion);
 
         // when
-        QuestionResponse response = interviewService.askQuestion(interviewId);
+        // 이제 `saveQuestion` 메서드를 직접 호출하여 테스트합니다.
+        QuestionResponse response = interviewService.saveQuestion(mockInterview, questionText);
 
         // then
         assertThat(response).isNotNull();
         assertThat(response.getQuestionId()).isEqualTo(100L);
-        assertThat(response.getText()).isEqualTo(fakeQuestionText);
+        assertThat(response.getText()).isEqualTo(questionText);
     }
 }

@@ -41,8 +41,7 @@ public class InterviewService {
         return InterviewResponse.fromEntity(savedInterview);
     }
 
-    @Transactional
-    public QuestionResponse askQuestion(Long interviewId) {
+    public QuestionResponse askAndSaveQuestion(Long interviewId) {
         Interview interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
 
@@ -51,10 +50,15 @@ public class InterviewService {
                 interview.getCareerLevel()
         );
 
+        return saveQuestion(interview, questionText);
+    }
+
+    @Transactional
+    public QuestionResponse saveQuestion(Interview interview, String questionText) {
         InterviewQuestion newQuestion = InterviewQuestion.builder()
                 .interview(interview)
                 .text(questionText)
-                .category(interview.getJobPosition()) // Or some other logic
+                .category(interview.getJobPosition())
                 .build();
 
         InterviewQuestion savedQuestion = interviewQuestionRepository.save(newQuestion);

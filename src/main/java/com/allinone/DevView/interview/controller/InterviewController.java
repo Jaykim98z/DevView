@@ -2,14 +2,12 @@ package com.allinone.DevView.interview.controller;
 
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
+import com.allinone.DevView.interview.dto.response.QuestionResponse;
 import com.allinone.DevView.interview.service.InterviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/interviews")
@@ -22,5 +20,12 @@ public class InterviewController {
         InterviewResponse response = interviewService.startInterview(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/{interviewId}/questions")
+    public ResponseEntity<QuestionResponse> askQuestion(@PathVariable Long interviewId) {
+        QuestionResponse response = interviewService.askAndSaveQuestion(interviewId);
+
+        return ResponseEntity.ok(response);
     }
 }
