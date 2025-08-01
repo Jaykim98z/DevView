@@ -1,10 +1,14 @@
 package com.allinone.DevView.interview.service;
 
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
+import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
+import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
 import com.allinone.DevView.interview.entity.Interview;
+import com.allinone.DevView.interview.entity.InterviewAnswer;
 import com.allinone.DevView.interview.entity.InterviewQuestion;
+import com.allinone.DevView.interview.repository.InterviewAnswerRepository;
 import com.allinone.DevView.interview.repository.InterviewQuestionRepository;
 import com.allinone.DevView.interview.repository.InterviewRepository;
 import com.allinone.DevView.user.entity.User;
@@ -20,6 +24,7 @@ public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final UserRepository userRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
+    private final InterviewAnswerRepository interviewAnswerRepository;
     private final ExternalAiApiService externalAiApiService;
 
     @Transactional
@@ -64,5 +69,20 @@ public class InterviewService {
         InterviewQuestion savedQuestion = interviewQuestionRepository.save(newQuestion);
 
         return QuestionResponse.fromEntity(savedQuestion);
+    }
+
+    @Transactional
+    public AnswerResponse submitAnswer(SubmitAnswerRequest request) {
+        InterviewQuestion question = interviewQuestionRepository.findById(request.getQuestionId())
+                .orElseThrow(() -> new IllegalArgumentException("Question not found"));
+
+        InterviewAnswer newAnswer = InterviewAnswer.builder()
+                .question(question)
+                .answerText(request.getAnswerText())
+                .build();
+
+        InterviewAnswer savedAnswer = interviewAnswerRepository.save(newAnswer);
+
+        return AnswerResponse.fromEntity(savedAnswer);
     }
 }

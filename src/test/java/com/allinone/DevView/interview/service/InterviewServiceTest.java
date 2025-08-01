@@ -1,11 +1,15 @@
 package com.allinone.DevView.interview.service;
 
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
+import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
+import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
 import com.allinone.DevView.interview.entity.Interview;
+import com.allinone.DevView.interview.entity.InterviewAnswer;
 import com.allinone.DevView.interview.entity.InterviewQuestion;
 import com.allinone.DevView.interview.entity.InterviewType;
+import com.allinone.DevView.interview.repository.InterviewAnswerRepository;
 import com.allinone.DevView.interview.repository.InterviewQuestionRepository;
 import com.allinone.DevView.interview.repository.InterviewRepository;
 import com.allinone.DevView.user.entity.User;
@@ -35,6 +39,9 @@ public class InterviewServiceTest {
 
     @Mock
     private InterviewQuestionRepository interviewQuestionRepository;
+
+    @Mock
+    private InterviewAnswerRepository interviewAnswerRepository;
 
     @InjectMocks
     private InterviewService interviewService;
@@ -103,5 +110,34 @@ public class InterviewServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getQuestionId()).isEqualTo(100L);
         assertThat(response.getText()).isEqualTo(questionText);
+    }
+
+    @Test
+    @DisplayName("답변 제출 - 성공")
+    void submitAnswer_success() {
+        // given
+        SubmitAnswerRequest request = new SubmitAnswerRequest();
+        ReflectionTestUtils.setField(request, "questionId", 100L);
+        ReflectionTestUtils.setField(request, "answerText", "It is a set of principles for object-oriented design.");
+
+        InterviewQuestion mockQuestion = InterviewQuestion.builder().id(100L).build();
+
+        // Use the builder to create the test object
+        InterviewAnswer savedAnswer = InterviewAnswer.builder()
+                .id(1L)
+                .question(mockQuestion)
+                .answerText(request.getAnswerText())
+                .build();
+
+        given(interviewQuestionRepository.findById(request.getQuestionId())).willReturn(Optional.of(mockQuestion));
+        given(interviewAnswerRepository.save(any(InterviewAnswer.class))).willReturn(savedAnswer);
+
+        // when
+        AnswerResponse response = interviewService.submitAnswer(request);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getAnswerId()).isEqualTo(1L);
+        assertThat(response.getQuestionId()).isEqualTo(100L);
     }
 }
