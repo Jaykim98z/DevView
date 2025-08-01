@@ -1,10 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8" />
+    <title>커뮤니티 - AI 면접 시뮬레이터</title>
+    <link rel="stylesheet" href="/css/community.css" />
 </head>
 <body>
+
+<header>
+    <h1>커뮤니티</h1>
+    <p>다른 개발자들의 면접 결과를 확인해보세요</p>
+    <p>총 <span th:text="${postList.size()}"></span>개의 면접 결과</p>
+</header>
+
+<div class="filter-bar">
+    <form method="get" action="/community/search">
+        <select name="sort">
+            <option value="latest" th:selected="${sort == 'latest'}">최신순</option>
+            <option value="popular" th:selected="${sort == 'popular'}">인기순</option>
+        </select>
+
+        <div class="category-buttons">
+            <button type="submit" name="category" value="ALL" th:classappend="${category == 'ALL'} ? 'active'">전체</button>
+            <button type="submit" name="category" value="BACKEND" th:classappend="${category == 'BACKEND'} ? 'active'">백엔드</button>
+            <button type="submit" name="category" value="FRONTEND" th:classappend="${category == 'FRONTEND'} ? 'active'">프론트엔드</button>
+            <button type="submit" name="category" value="FULLSTACK" th:classappend="${category == 'FULLSTACK'} ? 'active'">풀스택</button>
+            <button type="submit" name="category" value="DEVOPS" th:classappend="${category == 'DEVOPS'} ? 'active'">DevOps</button>
+        </div>
+
+        <div class="level-buttons">
+            <button type="submit" name="level" value="JUNIOR" th:classappend="${level == 'JUNIOR'} ? 'active'">주니어</button>
+            <button type="submit" name="level" value="MID" th:classappend="${level == 'MID'} ? 'active'">미드레벨</button>
+            <button type="submit" name="level" value="SENIOR" th:classappend="${level == 'SENIOR'} ? 'active'">시니어</button>
+        </div>
+
+        <input type="text" name="query" placeholder="면접 결과 검색..." th:value="${query}" />
+        <button type="submit">검색</button>
+    </form>
+</div>
+
+<section class="post-list">
+    <div class="post-card" th:each="post : ${postList}">
+        <div class="post-header">
+            <span class="writer" th:text="${post.writerName}">작성자</span>
+            <span class="tag" th:text="${post.category} + ' · ' + ${post.level}">백엔드 · 주니어</span>
+        </div>
+        <h3 class="post-title">
+            <a th:href="@{'/community/' + ${post.id}}" th:text="${post.title}">제목</a>
+        </h3>
+        <p class="summary" th:text="${post.summary}">내용 요약</p>
+        <div class="info-row">
+            <span class="badge tech" th:text="${post.type}">기술면접</span>
+            <span class="score" th:text="${post.score + '점 · ' + post.grade}">85점 · B등급</span>
+        </div>
+        <div class="action-row">
+            <span class="views">👁️ <span th:text="${post.viewCount}">0</span></span>
+            <span class="likes">❤️ <span th:text="${post.likeCount}">0</span></span>
+            <span class="scraps">📌 <span th:text="${post.scrapCount}">0</span></span>
+            <a class="details-link" th:href="@{'/community/' + ${post.id}}">자세히 보기</a>
+        </div>
+    </div>
+</section>
 
 </body>
 </html>
