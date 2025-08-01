@@ -4,63 +4,113 @@
     <meta charset="UTF-8" />
     <title>커뮤니티 - AI 면접 시뮬레이터</title>
     <link rel="stylesheet" href="/css/community.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
 
-<header>
-    <h1>커뮤니티</h1>
-    <p>다른 개발자들의 면접 결과를 확인해보세요</p>
-    <p>총 <span th:text="${postList.size()}"></span>개의 면접 결과</p>
-</header>
-
-<div class="filter-bar">
-    <form method="get" action="/community/search">
-        <select name="sort">
-            <option value="latest" th:selected="${sort == 'latest'}">최신순</option>
-            <option value="popular" th:selected="${sort == 'popular'}">인기순</option>
-        </select>
-
-        <div class="category-buttons">
-            <button type="submit" name="category" value="ALL" th:classappend="${category == 'ALL'} ? 'active'">전체</button>
-            <button type="submit" name="category" value="BACKEND" th:classappend="${category == 'BACKEND'} ? 'active'">백엔드</button>
-            <button type="submit" name="category" value="FRONTEND" th:classappend="${category == 'FRONTEND'} ? 'active'">프론트엔드</button>
-            <button type="submit" name="category" value="FULLSTACK" th:classappend="${category == 'FULLSTACK'} ? 'active'">풀스택</button>
-            <button type="submit" name="category" value="DEVOPS" th:classappend="${category == 'DEVOPS'} ? 'active'">DevOps</button>
+<header class="navbar">
+    <div class="nav-container">
+        <div class="nav-left">
+            <h1 class="logo">
+                <i class="fas fa-robot"></i>
+                AI Interview
+            </h1>
+            <nav class="nav-menu">
+                <a href="#" class="nav-link active">커뮤니티</a>
+                <a href="#" class="nav-link">랭킹</a>
+                <a href="#" class="nav-link">면접연습</a>
+            </nav>
         </div>
-
-        <div class="level-buttons">
-            <button type="submit" name="level" value="JUNIOR" th:classappend="${level == 'JUNIOR'} ? 'active'">주니어</button>
-            <button type="submit" name="level" value="MID" th:classappend="${level == 'MID'} ? 'active'">미드레벨</button>
-            <button type="submit" name="level" value="SENIOR" th:classappend="${level == 'SENIOR'} ? 'active'">시니어</button>
-        </div>
-
-        <input type="text" name="query" placeholder="면접 결과 검색..." th:value="${query}" />
-        <button type="submit">검색</button>
-    </form>
-</div>
-
-<section class="post-list">
-    <div class="post-card" th:each="post : ${postList}">
-        <div class="post-header">
-            <span class="writer" th:text="${post.writerName}">작성자</span>
-            <span class="tag" th:text="${post.category} + ' · ' + ${post.level}">백엔드 · 주니어</span>
-        </div>
-        <h3 class="post-title">
-            <a th:href="@{'/community/' + ${post.id}}" th:text="${post.title}">제목</a>
-        </h3>
-        <p class="summary" th:text="${post.summary}">내용 요약</p>
-        <div class="info-row">
-            <span class="badge tech" th:text="${post.type}">기술면접</span>
-            <span class="score" th:text="${post.score + '점 · ' + post.grade}">85점 · B등급</span>
-        </div>
-        <div class="action-row">
-            <span class="views">👁️ <span th:text="${post.viewCount}">0</span></span>
-            <span class="likes">❤️ <span th:text="${post.likeCount}">0</span></span>
-            <span class="scraps">📌 <span th:text="${post.scrapCount}">0</span></span>
-            <a class="details-link" th:href="@{'/community/' + ${post.id}}">자세히 보기</a>
+        <div class="nav-right">
+            <div class="search-container">
+                <input type="search" placeholder="검색어를 입력하세요" class="search-input">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="auth-buttons">
+                <button class="btn btn-outline">로그인</button>
+                <button class="btn btn-primary">회원가입</button>
+            </div>
         </div>
     </div>
-</section>
+</header>
+
+<main class="main-container">
+    <div class="page-header">
+        <div class="container">
+            <h2 class="page-title">커뮤니티</h2>
+            <p class="page-description">다른 개발자들의 면접 결과를 확인하고 피드백을 주고받아 보세요</p>
+        </div>
+    </div>
+
+    <div class="filters-section">
+        <div class="container">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="field-filter">분야</label>
+                    <select id="field-filter" class="filter-select">
+                        <option value="">전체</option>
+                        <option value="backend">백엔드</option>
+                        <option value="frontend">프론트엔드</option>
+                        <option value="devops">DevOps</option>
+                        <option value="ai">AI/ML</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="level-filter">경력</label>
+                    <select id="level-filter" class="filter-select">
+                        <option value="">전체</option>
+                        <option value="junior">주니어</option>
+                        <option value="mid">미드레벨</option>
+                        <option value="senior">시니어</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="sort-filter">정렬</label>
+                    <select id="sort-filter" class="filter-select">
+                        <option value="latest">최신순</option>
+                        <option value="popular">인기순</option>
+                        <option value="views">조회수순</option>
+                    </select>
+                </div>
+
+                <div class="search-group">
+                    <input type="search" id="keyword-search" placeholder="제목, 내용으로 검색" class="keyword-input">
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="posts-section">
+        <div class="container">
+            <div class="posts-grid">
+                <article class="post-card" data-id="1">
+                </article>
+
+                <article class="post-card" data-id="2">
+                </article>
+
+                <article class="post-card" data-id="3">
+                </article>
+            </div>
+
+            <div class="load-more-section">
+                <button class="btn btn-outline load-more-btn">
+                    <i class="fas fa-plus"></i>
+                    더 많은 게시글 보기
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="/js/community.js"></script>
 
 </body>
 </html>
