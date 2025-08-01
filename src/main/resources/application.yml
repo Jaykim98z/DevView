@@ -1,5 +1,9 @@
 # 공통 설정 (모든 환경에서 사용)
 spring:
+  # Docker Compose 자동 실행 기능 비활성화
+  docker:
+    compose:
+      enabled: false
   # 기본 프로필을 'dev'로 설정
   profiles:
     active: dev
@@ -22,6 +26,11 @@ spring:
   config:
     activate:
       on-profile: "dev"
+
+  sql:
+    init:
+      mode: always
+
   # PostgreSQL 설정 (개발용)
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -31,7 +40,7 @@ spring:
   # JPA 설정
   jpa:
     hibernate:
-      ddl-auto: create # 개발 초기에는 create 또는 update 사용
+      ddl-auto: update # 개발 초기에는 create 또는 update 사용
     properties:
       hibernate:
         format_sql: true

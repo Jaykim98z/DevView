@@ -1,0 +1,1 @@
+INSERT INTO users (user_id, username, password, email, created_at) VALUES (1, 'testuser', 'password123', 'test@example.com', NOW()) ON CONFLICT (user_id) DO NOTHING;
