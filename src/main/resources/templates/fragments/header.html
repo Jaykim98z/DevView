@@ -1,10 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<!-- templates/fragments/header.html -->
+<header class="header">
+    <div class="logo">
+        <a href="/">
+            <img src="/img/logo.png" alt="DevView 로고">
+            <span class="logo-text">DevView</span>
+        </a>
+    </div>
 
-</body>
-</html>
+    <nav class="nav-menu">
+        <a href="/community">커뮤니티</a>
+        <a href="/ranking">랭킹</a>
+    </nav>
+
+    <div class="search-box">
+        <input type="text" placeholder="검색어를 입력하세요...">
+    </div>
+
+    <div class="user-menu" th:classappend="${session.user != null} ? ' logged-in' : ' logged-out'">
+        <a class="start-btn" href="/interview/start">
+            <button>
+                <img src="/img/play.png" alt="시작 아이콘"> 시작하기
+            </button>
+        </a>
+
+        <!-- 로그인 전 -->
+        <div th:if="${session.user != null}">
+            <a href="/logout">로그아웃</a>
+            <a href="/mypage">
+                <i class="fa fa-user"></i> 마이페이지
+            </a>
+        </div>
+
+        <!-- 로그인 후 -->
+        <div th:if="${session.user == null}">
+            <a href="/login">로그인</a>
+            <a href="/mypage">
+                <i class="fa fa-user"></i> 마이페이지
+            </a>
+        </div>
+    </div>
+</header>

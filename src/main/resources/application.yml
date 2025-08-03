@@ -4,8 +4,17 @@ spring:
   profiles:
     active: dev
   # Thymeleaf 캐시 비활성화 (개발 중 즉시 반영)
+
   thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
     cache: false
+  web:
+    resources:
+      static-locations: classpath:/static/
+  docker:
+    compose:
+      enabled: false
 
 # Gemini API 키 설정 (환경변수에서 가져옴)
 gemini:
@@ -23,11 +32,11 @@ spring:
     activate:
       on-profile: "dev"
   # PostgreSQL 설정 (개발용)
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/devview_dev # 개발용 DB 이름
-    username: postgres # 개발용 DB 사용자 이름
-    password: ${DEV_DB_PASSWORD} # 환경변수에서 가져옴
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://localhost:5432/devview_dev # 개발용 DB 이름
+#    username: postgres # 개발용 DB 사용자 이름
+#    password: ${DEV_DB_PASSWORD} # 환경변수에서 가져옴
   # JPA 설정
   jpa:
     hibernate:

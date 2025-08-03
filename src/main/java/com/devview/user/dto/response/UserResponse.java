@@ -1,0 +1,56 @@
+package com.devview.user.dto.response;
+
+import com.devview.user.entity.User;
+import lombok.Builder;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+
+/**
+ * 사용자 정보 응답 DTO
+ */
+@Getter
+@Builder
+public class UserResponse {
+
+    /**
+     * 사용자 ID
+     */
+    private Long userId;
+
+    /**
+     * 사용자명
+     */
+    private String username;
+
+    /**
+     * 이메일
+     */
+    private String email;
+
+    /**
+     * 가입 방식 (LOCAL, GOOGLE)
+     */
+    private String provider;
+
+    /**
+     * 계정 생성일
+     */
+    private LocalDateTime createdAt;
+
+    /**
+     * User 엔티티를 UserResponse DTO로 변환하는 정적 메서드
+     *
+     * @param user User 엔티티
+     * @return UserResponse DTO
+     */
+    public static UserResponse from(User user) {
+        return UserResponse.builder()
+                .userId(user.getUserId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .provider(user.getProvider())
+                .createdAt(user.getCreatedAt())
+                .build();
+    }
+}
