@@ -4,13 +4,13 @@ import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
 import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
+import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
-import com.allinone.DevView.interview.entity.Interview;
-import com.allinone.DevView.interview.entity.InterviewAnswer;
-import com.allinone.DevView.interview.entity.InterviewQuestion;
+import com.allinone.DevView.interview.entity.*;
 import com.allinone.DevView.interview.repository.InterviewAnswerRepository;
 import com.allinone.DevView.interview.repository.InterviewQuestionRepository;
 import com.allinone.DevView.interview.repository.InterviewRepository;
+import com.allinone.DevView.interview.repository.InterviewResultRepository;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +26,7 @@ public class InterviewService {
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final ExternalAiApiService gemini;
     private final ExternalAiApiService alan;
+    private final InterviewResultRepository interviewResultRepository;
 
     @Transactional
     public InterviewResponse startInterview(StartInterviewRequest request) {
@@ -93,5 +94,29 @@ public class InterviewService {
         InterviewAnswer savedAnswer = interviewAnswerRepository.save(newAnswer);
 
         return AnswerResponse.fromEntity(savedAnswer);
+    }
+
+    @Transactional
+    public InterviewResultResponse endInterview(Long interviewId) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
+
+        interview.endInterviewSession();
+
+        // 임시 결과 데이터를 생성합니다. (TODO: 추후 AI 분석 로직으로 대체)
+        int score = 85;
+        Grade grade = Grade.B;
+        String feedback = "전반적으로 좋은 답변이었지만, 몇 가지 부분에서 보충이 필요해 보입니다.";
+
+        InterviewResult result = InterviewResult.builder()
+                .interview(interview)
+                .totalScore(score)
+                .grade(grade)
+                .feedback(feedback)
+                .build();
+
+        InterviewResult savedResult = interviewResultRepository.save(result);
+
+        return InterviewResultResponse.fromEntity(savedResult);
     }
 }
