@@ -1,0 +1,69 @@
+# 공통 설정 (모든 환경에서 사용)
+spring:
+  # Docker Compose 자동 실행 기능 비활성화
+  docker:
+    compose:
+      enabled: false
+  # 기본 프로필을 'dev'로 설정
+  profiles:
+    active: dev
+  # Thymeleaf 캐시 비활성화 (개발 중 즉시 반영)
+  thymeleaf:
+    cache: false
+
+# Gemini API 키 설정 (환경변수에서 가져옴)
+gemini:
+  api-key: ${GEMINI_API_KEY}
+
+# Alan API 키 설정 (환경변수에서 가져옴)
+alan:
+  api-key: ${ALAN_API_KEY}
+
+---
+
+# 개발(dev) 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+
+  sql:
+    init:
+      mode: always
+
+  # PostgreSQL 설정 (개발용)
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/devview_dev # 개발용 DB 이름
+    username: postgres # 개발용 DB 사용자 이름
+    password: ${DEV_DB_PASSWORD} # 환경변수에서 가져옴
+  # JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: update # 개발 초기에는 create 또는 update 사용
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+    defer-datasource-initialization: true
+
+---
+
+# 운영(prod) 환경 설정
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+  # PostgreSQL 설정 (운영용)
+  datasource:
+    url: ${PROD_DB_URL} # 운영용 DB 주소 (환경변수)
+    username: ${PROD_DB_USERNAME} # 운영용 DB 사용자 이름 (환경변수)
+    password: ${PROD_DB_PASSWORD} # 운영용 DB 비밀번호 (환경변수)
+  # JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: validate # 운영 환경에서는 스키마 변경을 자동으로 하지 않음
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false

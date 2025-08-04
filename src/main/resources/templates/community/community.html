@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>커뮤니티 - AI 면접 시뮬레이터</title>
+    <link rel="stylesheet" href="/css/community.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<header class="navbar">
+    <div class="nav-container">
+        <div class="nav-left">
+            <h1 class="logo">
+                <i class="fas fa-robot"></i>
+                AI Interview
+            </h1>
+            <nav class="nav-menu">
+                <a href="#" class="nav-link active">커뮤니티</a>
+                <a href="#" class="nav-link">랭킹</a>
+                <a href="#" class="nav-link">면접연습</a>
+            </nav>
+        </div>
+        <div class="nav-right">
+            <div class="search-container">
+                <input type="search" placeholder="검색어를 입력하세요" class="search-input">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="auth-buttons">
+                <button class="btn btn-outline">로그인</button>
+                <button class="btn btn-primary">회원가입</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="main-container">
+    <div class="page-header">
+        <div class="container">
+            <h2 class="page-title">커뮤니티</h2>
+            <p class="page-description">다른 개발자들의 면접 결과를 확인하고 피드백을 주고받아 보세요</p>
+        </div>
+    </div>
+
+    <div class="filters-section">
+        <div class="container">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="field-filter">분야</label>
+                    <select id="field-filter" class="filter-select">
+                        <option value="">전체</option>
+                        <option value="backend">백엔드</option>
+                        <option value="frontend">프론트엔드</option>
+                        <option value="devops">DevOps</option>
+                        <option value="ai">AI/ML</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="level-filter">경력</label>
+                    <select id="level-filter" class="filter-select">
+                        <option value="">전체</option>
+                        <option value="junior">주니어</option>
+                        <option value="mid">미드레벨</option>
+                        <option value="senior">시니어</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="sort-filter">정렬</label>
+                    <select id="sort-filter" class="filter-select">
+                        <option value="latest">최신순</option>
+                        <option value="popular">인기순</option>
+                        <option value="views">조회수순</option>
+                    </select>
+                </div>
+
+                <div class="search-group">
+                    <input type="search" id="keyword-search" placeholder="제목, 내용으로 검색" class="keyword-input">
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="posts-section">
+        <div class="container">
+            <div class="posts-grid">
+                <article class="post-card" data-id="1">
+                </article>
+
+                <article class="post-card" data-id="2">
+                </article>
+
+                <article class="post-card" data-id="3">
+                </article>
+            </div>
+
+            <div class="load-more-section">
+                <button class="btn btn-outline load-more-btn">
+                    <i class="fas fa-plus"></i>
+                    더 많은 게시글 보기
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="/js/community.js"></script>
+
+</body>
+</html>

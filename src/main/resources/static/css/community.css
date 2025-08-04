@@ -1,0 +1,256 @@
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar {
+  background-color: #fff;
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.nav-container {
+  max-width: 1140px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-right: 24px;
+  color: #444;
+}
+
+.nav-menu .nav-link {
+  margin-right: 16px;
+  text-decoration: none;
+  color: #666;
+  font-weight: 500;
+}
+
+.nav-link.active {
+  color: #007bff;
+  font-weight: 700;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-btn {
+  background: #007bff;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  margin-left: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-outline {
+  border: 1px solid #007bff;
+  background-color: transparent;
+  color: #007bff;
+}
+
+.btn-outline:hover {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border: none;
+  color: white;
+}
+
+.page-header {
+  text-align: center;
+  padding: 40px 0 10px;
+}
+
+.page-title {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.page-description {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.filters-section {
+  background: #f4f4f4;
+  padding: 20px 0;
+}
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.filter-select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.keyword-input {
+  padding: 6px 10px;
+  width: 220px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.posts-section {
+  padding: 30px 0;
+  background: #f9f9f9;
+}
+
+.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.post-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  padding: 16px;
+  transition: transform 0.2s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-4px);
+}
+
+.card-header,
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.author-info {
+  display: flex;
+  align-items: center;
+}
+
+.author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.author-name {
+  font-weight: 600;
+}
+
+.post-date {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.post-badges .badge {
+  background-color: #eee;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  margin-left: 4px;
+}
+
+.badge-backend { background-color: #e0f7fa; color: #00796b; }
+.badge-frontend { background-color: #fce4ec; color: #d81b60; }
+.badge-devops { background-color: #ede7f6; color: #5e35b1; }
+.badge-ai { background-color: #f3e5f5; color: #8e24aa; }
+
+.badge-junior { background-color: #e8f5e9; color: #388e3c; }
+.badge-mid { background-color: #fff3e0; color: #f57c00; }
+.badge-senior { background-color: #ffebee; color: #c62828; }
+
+.post-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 12px 0 6px;
+}
+
+.post-summary {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.post-score {
+  margin: 12px 0;
+}
+
+.score-item {
+  font-weight: 600;
+}
+
+.card-footer .stats {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-btn.active i {
+  color: #e63946;
+}
+
+.load-more-section {
+  text-align: center;
+  margin-top: 24px;
+}
