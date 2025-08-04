@@ -2,7 +2,6 @@ package com.devview.user.controller;
 
 import com.devview.user.dto.request.LoginRequest;
 import com.devview.user.entity.User;
-import com.devview.user.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

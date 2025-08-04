@@ -1,0 +1,227 @@
+/* =========================   [공통 기본 스타일]========================= */
+body {
+    font-family: "Noto Sans KR", sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h1, h3 {
+    margin-top: 0;
+}
+
+/* =========================   [Breadcrumb]========================= */
+.breadcrumb {
+    font-size: 0.9em;
+    margin-bottom: 16px;
+    color: #6c757d;
+}
+
+/* =========================   [공통 버튼 스타일]========================= */
+.edit-btn, .save-btn, .cancel-btn,
+.btn-upload, .btn-delete {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9em;
+    text-align: center;
+    text-decoration: none;
+}
+
+.edit-btn, .save-btn {
+    background-color: #007bff;
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+}
+
+.btn-upload {
+    background-color: #17a2b8;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+}
+
+/* =========================   [프로필 카드 및 요약]========================= */
+.profile-card {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 24px;
+}
+
+.profile-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+}
+
+.profile-info p {
+    margin: 4px 0;
+    color: #555;
+}
+
+.profile-actions {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.summary {
+    display: flex;
+    justify-content: space-around;
+    margin: 30px 0;
+    background: #f1f3f5;
+    border-radius: 8px;
+    padding: 20px 0;
+}
+
+.summary div {
+    text-align: center;
+}
+
+/* =========================   [점수 그래프]========================= */
+.score-graph {
+    margin-bottom: 40px;
+}
+
+/* =========================   [면접 결과 및 스크랩 리스트]========================= */
+.interview-list ul,
+.scrap-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.interview-list li,
+.scrap-section li {
+    background-color: #f8f9fa;
+    margin-bottom: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s ease-in-out;
+}
+
+.interview-list li:hover,
+.scrap-section li:hover {
+    background-color: #e9ecef;
+}
+
+.grade {
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 14px;
+    font-size: 0.9em;
+    color: white;
+}
+
+.grade-a { background-color: #28a745; }
+.grade-b { background-color: #17a2b8; }
+.grade-c { background-color: #ffc107; }
+.grade-f { background-color: #dc3545; }
+
+.scrap-item h4 {
+    margin: 0;
+    font-weight: bold;
+}
+
+.scrap-item .meta {
+    font-size: 0.85em;
+    color: #555;
+    margin-top: 4px;
+}
+/* =========================   [mypage-edit.html 전용]========================= */
+.form-box {
+    background: #f9f9f9;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+}
+
+.upload-section {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.image-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-img-preview {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+}
+
+.upload-box {
+    width: 300px;
+    height: 150px;
+    border: 2px dashed #adb5bd;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    padding: 10px;
+    color: #6c757d;
+}
+
+.upload-box:hover {
+    background: #e9ecef;
+    transition: background 0.2s ease-in-out;
+}
+
+/* =========================   [입력 폼 및 액션 버튼]========================= */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
