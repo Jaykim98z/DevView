@@ -86,7 +86,7 @@ public class InterviewServiceTest {
     void saveQuestion_success() {
         // given
         // 테스트에 필요한 객체들을 준비합니다.
-        User user = User.builder().id(1L).build();
+        User user = User.builder().userId(1L).build();
         Interview mockInterview = Interview.builder()
                 .id(1L)
                 .user(user)
