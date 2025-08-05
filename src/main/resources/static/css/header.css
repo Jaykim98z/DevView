@@ -1,0 +1,115 @@
+/* 헤더 전체 */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    font-family: 'Noto Sans KR', sans-serif;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* 로고 */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.logo img {
+    height: 32px;
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* 메뉴 */
+.nav-menu a {
+    margin: 0 12px;
+    text-decoration: none;
+    color: #34495e;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.nav-menu a:hover {
+    color: #2980b9;
+}
+
+/* 검색창 */
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    width: 280px;
+    padding: 6px 32px 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.search-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 14px;
+}
+
+/* 유저 메뉴 */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.user-menu a {
+    color: #34495e;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.user-menu a:hover {
+    color: #2980b9;
+}
+
+/* 시작하기 버튼 */
+.start-btn {
+    background-color: #3498db;
+    color: white;
+    border-radius: 6px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    text-decoration: none;
+}
+
+.start-btn:hover {
+    background-color: #2980b9;
+}
+
+.start-btn img {
+    height: 14px;
+}
+
+/* 로그인 상태별 스타일 차별화 */
+.user-menu.logged-in a:first-child {
+    font-weight: bold;
+    color: #e74c3c; /* 로그아웃 버튼 빨간색 */
+}
+
+.user-menu.logged-out a:first-child {
+    font-weight: bold;
+    color: #27ae60; /* 로그인 버튼 초록색 */
+}
