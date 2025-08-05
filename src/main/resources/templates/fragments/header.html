@@ -1,10 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<header class="header">
+    <!-- 로고 -->
+    <div class="logo">
+        <a href="/">
+            <img src="/img/logo.png" alt="DevView 로고">
+            <span class="logo-text">DevView</span>
+        </a>
+    </div>
 
-</body>
-</html>
+    <!-- 네비게이션 메뉴 -->
+    <nav class="nav-menu">
+        <a href="/community">커뮤니티</a>
+        <a href="/ranking">랭킹</a>
+    </nav>
+
+    <!-- 검색창 -->
+    <div class="search-box">
+        <input type="text" placeholder="검색어를 입력하세요..." aria-label="검색어 입력">
+        <i class="fa fa-search search-icon" aria-hidden="true"></i>
+    </div>
+
+    <!-- 유저 메뉴 -->
+    <div class="user-menu" th:classappend="${session.user != null} ? ' logged-in' : ' logged-out'">
+
+        <!-- 시작하기 버튼 -->
+        <a class="start-btn" href="/interview/start">
+            <img src="/img/play.png" alt="시작 아이콘"> 시작하기
+        </a>
+
+        <!-- 로그인 전 -->
+        <div th:if="${session.user == null}">
+            <a href="/login">로그인</a>
+            <a href="/mypage">
+                <i class="fa fa-user" aria-hidden="true"></i> 마이페이지
+            </a>
+        </div>
+
+        <!-- 로그인 후 -->
+        <div th:if="${session.user != null}">
+            <a href="/logout">로그아웃</a>
+            <a href="/mypage">
+                <i class="fa fa-user" aria-hidden="true"></i> 마이페이지
+            </a>
+        </div>
+    </div>
+</header>
