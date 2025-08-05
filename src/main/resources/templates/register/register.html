@@ -1,10 +1,146 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' - DevView'">회원가입 - DevView</title>
+    <link rel="stylesheet" href="/css/register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+<!-- 헤더 -->
+<header class="header">
+    <div class="header-container">
+        <div class="logo">
+            <img src="/img/logo.svg" alt="DevView" class="logo-image">
+        </div>
+        <a href="/user/" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            메인으로
+        </a>
+    </div>
+</header>
 
+<!-- 메인 컨텐츠 -->
+<main class="main-container">
+    <div class="register-card">
+        <h1 class="register-title">회원가입</h1>
+
+        <form id="registerForm" class="register-form">
+            <!-- 이메일 필드 -->
+            <div class="form-group">
+                <label for="email" class="form-label">이메일</label>
+                <div class="input-group">
+                    <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="form-input"
+                            placeholder="이메일을 입력해주세요"
+                            maxlength="100"
+                            required
+                    >
+                    <button type="button" class="duplicate-check-btn" id="emailCheckBtn">
+                        중복 확인
+                    </button>
+                </div>
+                <div class="form-hint">로그인 시 사용할 이메일입니다</div>
+                <div class="error-message" id="emailError"></div>
+                <div class="success-message" id="emailSuccess"></div>
+            </div>
+
+            <!-- 비밀번호 필드 -->
+            <div class="form-group">
+                <label for="password" class="form-label">비밀번호</label>
+                <div class="input-group">
+                    <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="form-input"
+                            placeholder="비밀번호를 입력해주세요"
+                            maxlength="20"
+                            required
+                    >
+                    <button type="button" class="password-toggle" id="passwordToggle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="form-hint">영어+숫자+특수문자 조합 8자리 이상 20자리 이하</div>
+                <div class="password-strength">
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <span class="strength-text">약</span>
+                </div>
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <!-- 비밀번호 확인 필드 -->
+            <div class="form-group">
+                <label for="passwordConfirm" class="form-label">비밀번호 확인</label>
+                <div class="input-group">
+                    <input
+                            type="password"
+                            id="passwordConfirm"
+                            name="passwordConfirm"
+                            class="form-input"
+                            placeholder="비밀번호를 다시 입력해주세요"
+                            maxlength="20"
+                            required
+                    >
+                    <button type="button" class="password-toggle" id="passwordConfirmToggle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="passwordConfirmError"></div>
+                <div class="success-message" id="passwordConfirmSuccess"></div>
+            </div>
+
+            <!-- 이름 필드 -->
+            <div class="form-group">
+                <label for="username" class="form-label">이름</label>
+                <div class="input-group">
+                    <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            class="form-input"
+                            placeholder="이름을 입력해주세요"
+                            maxlength="20"
+                            required
+                    >
+                    <button type="button" class="duplicate-check-btn" id="usernameCheckBtn">
+                        중복 확인
+                    </button>
+                </div>
+                <div class="form-hint">사이트에서 사용할 닉네임입니다</div>
+                <div class="error-message" id="usernameError"></div>
+                <div class="success-message" id="usernameSuccess"></div>
+            </div>
+
+            <!-- 회원가입 버튼 -->
+            <button type="submit" class="register-submit-btn" id="registerSubmitBtn" disabled>
+                회원가입 완료
+            </button>
+        </form>
+
+        <!-- 로그인 링크 -->
+        <div class="login-link">
+            계정이 있으신가요?
+            <a href="/user/login" class="link">로그인</a>
+        </div>
+    </div>
+</main>
+
+<!-- 로딩 스피너 -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>처리 중...</p>
+    </div>
+</div>
+
+<script src="/js/register.js"></script>
 </body>
 </html>
