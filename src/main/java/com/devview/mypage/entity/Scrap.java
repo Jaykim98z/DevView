@@ -1,15 +1,15 @@
 package com.devview.mypage.entity;
 
-import com.devview.user.entity.User; // ✅ 정확한 경로로 import 추가
+import com.devview.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "scraps")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Scrap {
@@ -18,15 +18,17 @@ public class Scrap {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;        // 콘텐츠 제목
+    private String title;
 
-    private String link;         // 외부 또는 내부 링크
+    private String link;
 
     private int likeCount;
 
     private int commentCount;
+}
 
-    private LocalDateTime createdAt;
+
+private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

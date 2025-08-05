@@ -1,44 +1,62 @@
-package com.devview.mypage.mapper;
+package com.devview.mypage.service;
 
-import com.devview.mypage.dto.InterviewDto;
-import com.devview.mypage.dto.ScrapDto;
-import com.devview.mypage.entity.Interview;
+import com.devview.interview.entity.Interview;
+import com.devview.interview.repository.InterviewRepository;
+import com.devview.mypage.dto.MypageResponseDto;
+import com.devview.mypage.dto.UserProfileUpdateRequest;
 import com.devview.mypage.entity.Scrap;
-import org.springframework.stereotype.Component;
+import com.devview.mypage.mapper.MypageMapper;
+import com.devview.mypage.repository.ScrapRepository;
+import com.devview.user.entity.User;
+import com.devview.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@Component
-public class MypageMapper {
+@Service
+@RequiredArgsConstructor
+public class MypageService {
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+    private final UserRepository userRepository;
+    private final InterviewRepository interviewRepository;
+    private final ScrapRepository scrapRepository;
+    private final MypageMapper mypageMapper;
 
-    public InterviewDto toInterviewDto(Interview interview) {
-        int score = interview.getScore();
-        String grade = calculateGrade(score);
+    public MypageResponseDto getMypageData(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        return InterviewDto.builder()
-                .id(interview.getId())
-                .title(interview.getTitle())
-                .date(interview.getInterviewDate().format(DATE_FORMATTER))
-                .score(score)
-                .grade(grade)
+        List<Interview> interviews = interviewRepository.findByUserId(userId);
+        List<Scrap> scraps = scrapRepository.findByUserId(userId);
+
+        return MypageResponseDto.builder()
+                .email(user.getEmail())
+                .job(user.getJob())
+                .careerLevel(user.getCareerLevel())
+                .profileImageUrl(user.getProfileImageUrl())
+                .userId(user.getUserId())
+                .createdAt(user.getCreatedAt())
+                .interviews(interviews.stream()
+                        .map(mypageMapper::toInterviewDto)
+                        .collect(Collectors.toList()))
+                .scraps(scraps.stream()
+                        .map(mypageMapper::toScrapDto)
+                        .collect(Collectors.toList()))
                 .build();
     }
 
-    public ScrapDto toScrapDto(Scrap scrap) {
-        return ScrapDto.builder()
-                .title(scrap.getTitle())
-                .link(scrap.getLink())
-                .likes(scrap.getLikeCount())
-                .comments(scrap.getCommentCount())
-                .build();
-    }
+    @Transactional
+    public void updateUserProfile(Long userId, UserProfileUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-    private String calculateGrade(int score) {
-        if (score >= 90) return "A";
-        if (score >= 80) return "B";
-        if (score >= 70) return "C";
-        return "F";
+        user.setName(request.getName());
+        user.setJob(request.getJob());
+        user.setCareerLevel(request.getCareerLevel());
+
+        userRepository.save(user);
     }
 }

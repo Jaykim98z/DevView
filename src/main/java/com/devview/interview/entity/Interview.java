@@ -1,14 +1,14 @@
-package com.devview.mypage.entity;
+package com.devview.interview.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "interviews")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Interview {
@@ -17,13 +17,9 @@ public class Interview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title; // 예: "Spring 기초 면접"
+    private String title;
 
-    private int score; // 예: 80
+    private int score;
 
-    private LocalDate interviewDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    private LocalDateTime interviewDate;
 }

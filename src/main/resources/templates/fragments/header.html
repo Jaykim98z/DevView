@@ -2,7 +2,7 @@
     <!-- 로고 -->
     <div class="logo">
         <a href="/">
-            <img src="/img/logo.png" alt="DevView 로고">
+            <img src="/img/logo.svg" alt="DevView 로고">
             <span class="logo-text">DevView</span>
         </a>
     </div>
@@ -24,14 +24,14 @@
 
         <!-- 시작하기 버튼 -->
         <a class="start-btn" href="/interview/start">
-            <img src="/img/play.png" alt="시작 아이콘"> 시작하기
+            <img src="/img/play.svg" alt="시작 아이콘"> 시작하기
         </a>
 
         <!-- 로그인 전 -->
         <div th:if="${session.user == null}">
             <a href="/login">로그인</a>
             <a href="/mypage">
-                <i class="fa fa-user" aria-hidden="true"></i> 마이페이지
+                <img src="/img/my.svg" alt="마이페이지 아이콘"> 마이페이지
             </a>
         </div>
 
@@ -39,7 +39,7 @@
         <div th:if="${session.user != null}">
             <a href="/logout">로그아웃</a>
             <a href="/mypage">
-                <i class="fa fa-user" aria-hidden="true"></i> 마이페이지
+                <img src="/img/my.svg" alt="마이페이지 아이콘"> 마이페이지
             </a>
         </div>
     </div>

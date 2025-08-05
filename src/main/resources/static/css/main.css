@@ -198,3 +198,55 @@ section h2 img {
     border-radius: 50%;
     margin-bottom: 12px;
 }
+/* 버튼 hover 효과 */
+.btn-primary:hover {
+    background-color: #2980B9;
+}
+.btn-secondary:hover {
+    background-color: #e6e6e6;
+}
+
+/* Hero 이미지 크기 확장 */
+.hero-image img {
+    max-width: 400px;
+    height: auto;
+}
+
+/* 가이드 설명 추가 스타일 */
+.step p {
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 2px 0;
+}
+/* 반응형 레이아웃 */
+@media (max-width: 768px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .hero-text {
+        max-width: 100%;
+    }
+
+    .hero-image img {
+        max-width: 280px;
+        margin-top: 20px;
+    }
+
+    .feature-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .guide-steps {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .review-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+}
