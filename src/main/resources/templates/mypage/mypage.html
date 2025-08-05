@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>마이페이지</title>
+    <link rel="stylesheet" th:href="@{/css/mypage.css}">
+    <script th:src="@{/js/mypage.js}"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- CDN 실패 시 fallback (선택적으로 static/js/chart.min.js 제공 시 적용) -->
+    <script>
+        if (typeof Chart === 'undefined') {
+            document.write('<script src="/js/chart.js"><\/script>');
+        }
+    </script>
+</head>
+<body>
+
+<!-- ✅ 공통 헤더 포함 -->
+<div th:replace="fragments/header :: header"></div>
+
+<div class="container">
+    <h1>마이페이지</h1>
+
+    <!-- 프로필 카드 -->
+    <div class="profile-card">
+        <!-- 프로필 이미지가 있는 경우 -->
+        <img th:if="${user.profileImageUrl != null}"
+             th:src="@{${user.profileImageUrl}}"
+             alt="프로필 이미지" class="profile-img"/>
+
+        <!-- 없는 경우 기본 이미지 출력 -->
+        <img th:if="${user.profileImageUrl == null}"
+             th:src="@{/img/avatar_ai.png}"
+             alt="기본 이미지" class="profile-img"/>
+
+
+        <div class="profile-info">
+            <h2 th:text="${user.name}">홍길동</h2>
+            <p th:text="|직군: ${user.job}|">백엔드</p>
+            <p th:text="|경력: ${user.careerLevel}|">주니어</p>
+            <p th:text="|이메일: ${user.email}|">user@example.com</p>
+            <p th:text="|가입일: ${#temporals.format(user.joinedAt, 'yyyy.MM.dd')}|">2024.08.01</p>
+        </div>
+
+        <div class="profile-actions">
+            <form th:action="@{/mypage/profile/image}" method="post" enctype="multipart/form-data">
+                <input type="file" name="imageFile">
+                <button type="submit">프로필 이미지 업로드</button>
+            </form>
+            <form th:action="@{/mypage/profile/image/delete}" method="post">
+                <button type="submit">이미지 삭제</button>
+            </form>
+            <a th:href="@{/mypage/edit}" class="edit-btn">프로필 수정</a>
+        </div>
+    </div>
+
+    <!-- 면접 요약 -->
+    <div class="summary">
+        <div>
+            <h3>총 면접</h3>
+            <p th:text="${user.totalInterviews}">3</p>
+        </div>
+        <div>
+            <h3>평균 점수</h3>
+            <p th:text="${user.avgScore}">82</p>
+        </div>
+        <div>
+            <h3>등급</h3>
+            <p th:text="${user.grade}">B</p>
+        </div>
+    </div>
+
+    <!-- 점수 변화 그래프 -->
+    <div class="score-graph">
+        <h3>점수 변화</h3>
+        <canvas id="scoreChart"
+                th:attr="data-labels=${scoreGraph.labelsJson}, data-scores=${scoreGraph.scoresJson}">
+        </canvas>
+    </div>
+
+    <!-- 면접 목록 -->
+    <div class="interview-list">
+        <h3>면접 이력</h3>
+        <ul>
+            <li th:each="interview : ${user.interviews}">
+                <a th:href="@{'/interview/' + ${interview.id}}">
+                    <span th:text="${#temporals.format(interview.date, 'yyyy.MM.dd')}">2024.08.01</span>
+                    <strong th:text="${interview.title}">Java 기초 면접</strong>
+                    <span th:text="${interview.score + '점'}">85점</span>
+                    <span class="grade" th:text="${interview.grade}"
+                          th:class="'grade ' + ${interview.gradeStyle}">B</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="career-chart-section">
+        <h3>관심 직무 분포</h3>
+        <canvas id="careerChart"></canvas>
+    </div>
+    <!-- 스크랩 콘텐츠 -->
+    <div class="scrap-section">
+        <h3>스크랩 콘텐츠</h3>
+        <ul>
+            <li th:each="scrap : ${user.scraps}">
+                <a th:href="${scrap.link}" target="_blank">
+                    <h4 th:text="${scrap.title}">Spring 핵심정리</h4>
+                    <div class="meta">
+                        <span>❤️ <span th:text="${scrap.likes}">12</span></span>
+                        <span>💬 <span th:text="${scrap.comments}">3</span></span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>
