@@ -3,20 +3,23 @@ package com.allinone.DevView.community.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "scraps")
+@Table(name = "Scraps")
 @Getter
+@Setter
 @NoArgsConstructor
 public class Scraps {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "scrap_id")
+    private Long scrapId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
-    private CommunityPosts post;
+    @Column(name = "post_id", nullable = false)
+    private Long postId;
 
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 }

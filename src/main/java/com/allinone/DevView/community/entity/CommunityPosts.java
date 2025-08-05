@@ -1,57 +1,50 @@
 package com.allinone.DevView.community.entity;
 
 import com.allinone.DevView.common.enums.Grade;
-import com.allinone.DevView.common.enums.InterviewType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "community_posts")
+@Table(name = "CommunityPosts")
 @Getter
+@Setter
 @NoArgsConstructor
 public class CommunityPosts {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Long id;
 
-    private String writerName;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    private String category;
-
-    private String level;
-
+    @Column(name = "title", length = 50, nullable = false)
     private String title;
 
-    @Column(length = 1000)
-    private String summary;
+    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
+    private String content;
 
-    private String type;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-    private int score;
+    @Column(name = "category")
+    private String category;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "grade", length = 20)
     private Grade grade;
 
-    private int viewCount;
+    @Column(name = "level")
+    private String level;
 
-    private int likeCount;
-
-    private int scrapCount;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private InterviewType interviewType;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
 }

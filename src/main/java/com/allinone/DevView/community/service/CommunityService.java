@@ -1,47 +1,117 @@
 package com.allinone.DevView.community.service;
 
-import com.allinone.DevView.community.dto.PostResponseDto;
+import com.allinone.DevView.community.entity.CommunityPosts;
+import com.allinone.DevView.community.entity.Comments;
+import com.allinone.DevView.community.entity.Likes;
+import com.allinone.DevView.community.entity.LikesId;
+import com.allinone.DevView.community.entity.Scraps;
+import com.allinone.DevView.community.repository.CommunityPostsRepository;
+import com.allinone.DevView.community.repository.CommentsRepository;
+import com.allinone.DevView.community.repository.LikesRepository;
+import com.allinone.DevView.community.repository.ScrapsRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CommunityService {
 
-    public List<PostResponseDto> getAllPosts() {
-        List<PostResponseDto> postList = new ArrayList<>();
+    private final CommunityPostsRepository postsRepository;
+    private final CommentsRepository commentsRepository;
+    private final LikesRepository likesRepository;
+    private final ScrapsRepository scrapsRepository;
 
-        postList.add(PostResponseDto.builder()
-                .id(1L)
-                .title("AI 모의면접 후기")
-                .writerName("김개발")
-                .summary("이력서 기반 질문이 좋았어요")
-                .category("BACKEND")
-                .level("JUNIOR")
-                .type("기술면접")
-                .score(85)
-                .grade("B")
-                .viewCount(120)
-                .likeCount(15)
-                .scrapCount(3)
-                .build());
-
-        postList.add(PostResponseDto.builder()
-                .id(2L)
-                .title("SI 기업 1차 면접 후기")
-                .writerName("이코더")
-                .summary("자바 기초 문제 출제됨")
-                .category("FRONTEND")
-                .level("MID")
-                .type("기술면접")
-                .score(70)
-                .grade("C")
-                .viewCount(50)
-                .likeCount(10)
-                .scrapCount(2)
-                .build());
-
-        return postList;
+    public List<CommunityPosts> getAllPosts() {
+        return postsRepository.findAll();
     }
+
+    public Optional<CommunityPosts> getPostById(Long postId) {
+        return postsRepository.findById(postId);
+    }
+
+    @Transactional
+    public CommunityPosts createPost(CommunityPosts post) {
+        return postsRepository.save(post);
+    }
+
+    @Transactional
+    public CommunityPosts updatePost(Long postId, CommunityPosts updatedPost) {
+        Optional<CommunityPosts> existingPostOpt = postsRepository.findById(postId);
+        if (existingPostOpt.isEmpty()) {
+            throw new RuntimeException("Post not found");
+        }
+        CommunityPosts existingPost = existingPostOpt.get();
+        existingPost.setTitle(updatedPost.getTitle());
+        existingPost.setContent(updatedPost.getContent());
+        return postsRepository.save(existingPost);
+    }
+
+    @Transactional
+    public void deletePost(Long postId) {
+        postsRepository.deleteById(postId);
+    }
+
+    public List<Comments> getCommentsByPostId(Long postId) {
+        return commentsRepository.findByPostIdOrderByCreatedAtAsc(postId);
+    }
+
+    @Transactional
+    public Comments createComment(Comments comment) {
+        return commentsRepository.save(comment);
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId) {
+        commentsRepository.deleteById(commentId);
+    }
+
+    @Transactional
+    public Likes addLike(Long userId, Long postId) {
+        LikesId likeId = new LikesId();
+        likeId.setUserId(userId);
+        likeId.setPostId(postId);
+        if (likesRepository.existsByUserIdAndPostId(userId, postId)) {
+            throw new RuntimeException("Already liked");
+        }
+        Likes like = new Likes();
+        like.setUserId(userId);
+        like.setPostId(postId);
+        return likesRepository.save(like);
+    }
+
+    @Transactional
+    public void removeLike(Long userId, Long postId) {
+        LikesId likeId = new LikesId();
+        likeId.setUserId(userId);
+        likeId.setPostId(postId);
+        likesRepository.deleteById(likeId);
+    }
+
+
+    @Transactional
+    public Scraps addScrap(Scraps scrap) {
+        return scrapsRepository.save(scrap);
+    }
+
+    @Transactional
+    public void removeScrap(Long scrapId) {
+        scrapsRepository.deleteById(scrapId);
+    }
+
+    public List<Likes> getLikesByUserId(Long userId) {
+        return likesRepository.findByUserId(userId);
+    }
+
+    public long countLikesByPostId(Long postId) {
+        return likesRepository.findByPostId(postId).size();
+    }
+
+    public List<Scraps> getScrapsByUserId(Long userId) {
+        return scrapsRepository.findByUserId(userId);
+    }
+
 }
