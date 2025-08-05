@@ -28,8 +28,9 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 // 요청 경로별 인가 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 개발초기 단계에서 임시로 모든 요청 접근 가능
-                        .anyRequest().permitAll());
+                        // 개발 단계에서 모든 요청 허용
+                        .anyRequest().permitAll()
+                );
 
         return http.build();
     }
