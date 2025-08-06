@@ -4,14 +4,13 @@ import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
 import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
+import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
-import com.allinone.DevView.interview.entity.Interview;
-import com.allinone.DevView.interview.entity.InterviewAnswer;
-import com.allinone.DevView.interview.entity.InterviewQuestion;
-import com.allinone.DevView.interview.entity.InterviewType;
+import com.allinone.DevView.interview.entity.*;
 import com.allinone.DevView.interview.repository.InterviewAnswerRepository;
 import com.allinone.DevView.interview.repository.InterviewQuestionRepository;
 import com.allinone.DevView.interview.repository.InterviewRepository;
+import com.allinone.DevView.interview.repository.InterviewResultRepository;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,6 +42,12 @@ public class InterviewServiceTest {
 
     @Mock
     private InterviewAnswerRepository interviewAnswerRepository;
+
+    @Mock
+    private InterviewResultRepository interviewResultRepository;
+
+    @Mock
+    private ExternalAiApiService gemini;
 
     @InjectMocks
     private InterviewService interviewService;
@@ -139,5 +145,68 @@ public class InterviewServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getAnswerId()).isEqualTo(1L);
         assertThat(response.getQuestionId()).isEqualTo(100L);
+    }
+
+    @Test
+    @DisplayName("면접 종료 - 성공")
+    void endInterview_success() {
+        // given
+        Long interviewId = 1L;
+        Interview mockInterview = Interview.builder()
+                .id(interviewId)
+                .questions(new ArrayList<>())
+                .jobPosition("Backend")
+                .careerLevel("Junior")
+                .build();
+
+        // 테스트용으로 생성될 가짜 결과 객체
+        InterviewResult mockResult = InterviewResult.builder()
+                .id(1L)
+                .interview(mockInterview)
+                .totalScore(85)
+                .grade(Grade.B)
+                .feedback("Good job overall.")
+                .build();
+
+        // Tell the mock gemini service what to return when called
+        String fakeAiResponse = "SCORE: 85\nFEEDBACK: Good job overall.";
+        given(gemini.generateContent(any(String.class))).willReturn(fakeAiResponse);
+
+        given(interviewRepository.findByIdWithQuestions(interviewId)).willReturn(Optional.of(mockInterview));
+        given(interviewResultRepository.save(any(InterviewResult.class))).willReturn(mockResult);
+
+        // when
+        InterviewResultResponse response = interviewService.endInterview(interviewId);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getInterviewId()).isEqualTo(interviewId);
+        assertThat(response.getGrade()).isEqualTo(Grade.B);
+        assertThat(response.getFeedback()).isEqualTo("Good job overall.");
+    }
+
+    @Test
+    @DisplayName("면접 결과 조회 - 성공")
+    void getInterviewResult_success() {
+        // given
+        Long interviewId = 1L;
+        Interview mockInterview = Interview.builder().id(interviewId).build();
+        InterviewResult mockResult = InterviewResult.builder()
+                .id(1L)
+                .interview(mockInterview)
+                .totalScore(85)
+                .grade(Grade.B)
+                .feedback("Good job.")
+                .build();
+
+        given(interviewResultRepository.findByInterviewId(interviewId)).willReturn(Optional.of(mockResult));
+
+        // when
+        InterviewResultResponse response = interviewService.getInterviewResult(interviewId);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getInterviewId()).isEqualTo(interviewId);
+        assertThat(response.getResultId()).isEqualTo(1L);
     }
 }

@@ -40,7 +40,7 @@ gemini:
 
 # Alan API 키 설정 (환경변수에서 가져옴)
 alan:
-  api-key: ${ALAN_API_KEY}
+  client-id: ${ALAN_CLIENT_ID}
 
 ---
 

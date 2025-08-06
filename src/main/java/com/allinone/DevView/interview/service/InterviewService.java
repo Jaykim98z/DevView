@@ -4,19 +4,24 @@ import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
 import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
+import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
-import com.allinone.DevView.interview.entity.Interview;
-import com.allinone.DevView.interview.entity.InterviewAnswer;
-import com.allinone.DevView.interview.entity.InterviewQuestion;
+import com.allinone.DevView.interview.entity.*;
 import com.allinone.DevView.interview.repository.InterviewAnswerRepository;
 import com.allinone.DevView.interview.repository.InterviewQuestionRepository;
 import com.allinone.DevView.interview.repository.InterviewRepository;
+import com.allinone.DevView.interview.repository.InterviewResultRepository;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InterviewService {
@@ -26,6 +31,7 @@ public class InterviewService {
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final ExternalAiApiService gemini;
     private final ExternalAiApiService alan;
+    private final InterviewResultRepository interviewResultRepository;
 
     @Transactional
     public InterviewResponse startInterview(StartInterviewRequest request) {
@@ -58,15 +64,6 @@ public class InterviewService {
         return saveQuestion(interview, questionText);
     }
 
-    public String getRecommendations(Long interviewId) {
-        // ... find interview or other relevant data ...
-        String jobPosition = "Backend"; // Example
-        String careerLevel = "Junior"; // Example
-
-        // Use the 'alan' bean for recommendations
-        return alan.getQuestionFromAi(jobPosition, careerLevel); // This would be a call to a recommendation method
-    }
-
     @Transactional
     public QuestionResponse saveQuestion(Interview interview, String questionText) {
         InterviewQuestion newQuestion = InterviewQuestion.builder()
@@ -93,5 +90,94 @@ public class InterviewService {
         InterviewAnswer savedAnswer = interviewAnswerRepository.save(newAnswer);
 
         return AnswerResponse.fromEntity(savedAnswer);
+    }
+
+    @Transactional
+    public InterviewResultResponse endInterview(Long interviewId) {
+        Interview interview = interviewRepository.findByIdWithQuestions(interviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
+
+        // Fetch questions and answers from the database
+        // NOTE: This is a simple fetch. In a real-world scenario with many Q&As,
+        // you would use a more optimized query.
+        List<InterviewQuestion> questions = interview.getQuestions();
+        List<InterviewAnswer> answers = interviewAnswerRepository.findByQuestionIn(questions);
+
+        // 2. Create a transcript for the AI to analyze.
+        String transcript = questions.stream()
+                .map(q -> {
+                    String answerText = answers.stream()
+                            .filter(a -> a.getQuestion().getId().equals(q.getId()))
+                            .findFirst()
+                            .map(InterviewAnswer::getAnswerText)
+                            .orElse("No answer provided.");
+                    return "Q: " + q.getText() + "\nA: " + answerText;
+                })
+                .collect(Collectors.joining("\n\n"));
+
+        log.info("Generated Transcript for AI Analysis:\n{}", transcript);
+
+        // 3. Create the prompt for Gemini.
+        String prompt = "As an expert interviewer, please evaluate the following interview transcript for a " +
+                interview.getJobPosition() + " role. Provide a total score from 0 to 100 and constructive " +
+                "feedback based on the answers. Format your response as follows:\n\n" +
+                "SCORE: [Your Score]\n" +
+                "FEEDBACK: [Your Feedback]\n\n" +
+                "Here is the transcript:\n" + transcript;
+
+        log.info("Generated Prompt for Gemini:\n{}", prompt);
+
+        String aiResponse = gemini.generateContent(prompt);
+
+        int score = parseScore(aiResponse);
+        String feedback = parseFeedback(aiResponse);
+        Grade grade = calculateGrade(score);
+
+        interview.endInterviewSession();
+
+        InterviewResult result = InterviewResult.builder()
+                .interview(interview)
+                .totalScore(score)
+                .grade(grade)
+                .feedback(feedback)
+                .build();
+
+        InterviewResult savedResult = interviewResultRepository.save(result);
+
+        return InterviewResultResponse.fromEntity(savedResult);
+    }
+
+    private int parseScore(String response) {
+        try {
+            return Integer.parseInt(response.split("SCORE:")[1].split("\n")[0].trim());
+        } catch (Exception e) {
+            log.error("Failed to parse score from AI response: {}", response, e);
+            return 0;
+        }
+    }
+
+    private String parseFeedback(String response) {
+        try {
+            return response.split("FEEDBACK:")[1].trim();
+        } catch (Exception e) {
+            log.error("Failed to parse feedback from AI response: {}", response, e);
+            return "Feedback analysis failed.";
+        }
+    }
+
+    private Grade calculateGrade(int score) {
+        if (score >= 90) return Grade.A;
+        if (score >= 80) return Grade.B;
+        if (score >= 70) return Grade.C;
+        if (score >= 60) return Grade.D;
+        return Grade.F;
+    }
+
+    @Transactional(readOnly = true)
+    public InterviewResultResponse getInterviewResult(Long interviewId) {
+        InterviewResult result = interviewResultRepository.findByInterviewId(interviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Interview result not found for interviewId: " + interviewId));
+
+        return InterviewResultResponse.fromEntity(result);
     }
 }
