@@ -25,8 +25,8 @@ public class CommunityService {
     private final LikesRepository likesRepository;
     private final ScrapsRepository scrapsRepository;
 
-    public List<CommunityPosts> getAllPosts() {
-        return postsRepository.findAll();
+    public List<CommunityPosts> getAllPostsWithUserData() {
+        return postsRepository.findAllWithUser();
     }
 
     public Optional<CommunityPosts> getPostById(Long postId) {

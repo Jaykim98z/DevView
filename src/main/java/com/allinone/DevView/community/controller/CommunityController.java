@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/community")
+@RequestMapping("/community/community")
 @RequiredArgsConstructor
 public class CommunityController {
 
@@ -20,7 +20,7 @@ public class CommunityController {
 
     @GetMapping("/posts")
     public List<CommunityPosts> getAllPosts() {
-        return communityService.getAllPosts();
+        return communityService.getAllPostsWithUserData();
     }
 
     @GetMapping("/posts/{id}")
