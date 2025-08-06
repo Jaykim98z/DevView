@@ -1,9 +1,8 @@
-<header class="header">
+<header th:fragment="header" class="header">
     <!-- 로고 -->
     <div class="logo">
         <a href="/">
             <img src="/img/logo.svg" alt="DevView 로고">
-            <span class="logo-text">DevView</span>
         </a>
     </div>
 
@@ -14,10 +13,12 @@
     </nav>
 
     <!-- 검색창 -->
-    <div class="search-box">
-        <input type="text" placeholder="검색어를 입력하세요..." aria-label="검색어 입력">
-        <i class="fa fa-search search-icon" aria-hidden="true"></i>
-    </div>
+    <form class="search-box" action="/search" method="get">
+        <input type="text" name="query" placeholder="검색어를 입력하세요..." aria-label="검색어 입력">
+        <button type="submit" class="search-btn">
+            <img src="/img/search.svg" alt="검색">
+        </button>
+    </form>
 
     <!-- 유저 메뉴 -->
     <div class="user-menu" th:classappend="${session.user != null} ? ' logged-in' : ' logged-out'">
@@ -39,7 +40,7 @@
         <div th:if="${session.user != null}">
             <a href="/logout">로그아웃</a>
             <a href="/mypage">
-                <img src="/img/my.svg" alt="마이페이지 아이콘"> 마이페이지
+                <img src="/img/my.svg" alt="마이페이지 아이콘">
             </a>
         </div>
     </div>

@@ -1,10 +1,167 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8" />
+    <title>커뮤니티 - AI 면접 시뮬레이터</title>
+    <link rel="stylesheet" href="/css/community.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
+
+<header class="navbar">
+    <div class="nav-container">
+        <div class="nav-left">
+            <h1 class="logo">
+                <i class="fas fa-robot"></i>
+                AI Interview
+            </h1>
+            <nav class="nav-menu">
+                <a href="#" class="nav-link active">커뮤니티</a>
+                <a href="#" class="nav-link">랭킹</a>
+                <a href="#" class="nav-link">면접연습</a>
+            </nav>
+        </div>
+        <div class="nav-right">
+            <div class="search-container">
+                <input type="search" placeholder="검색어를 입력하세요" class="search-input">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+            <div class="auth-buttons">
+                <button class="btn btn-outline">로그인</button>
+                <button class="btn btn-primary">회원가입</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="main-container">
+    <div class="page-header">
+        <div class="container">
+            <h2 class="page-title">커뮤니티</h2>
+            <p class="page-description">다른 개발자들의 면접 결과를 확인하고 피드백을 주고받아 보세요</p>
+        </div>
+    </div>
+
+    <div class="filters-section">
+        <div class="container">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="field-filter">분야</label>
+                    <select id="field-filter" class="filter-select">
+                        <option value="">전체</option>
+                        <option value="backend">백엔드</option>
+                        <option value="frontend">프론트엔드</option>
+                        <option value="devops">DevOps</option>
+                        <option value="ai">AI/ML</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="level-filter">경력</label>
+                    <select id="level-filter" class="filter-select">
+                        <option value="">전체</option>
+                        <option value="junior">주니어</option>
+                        <option value="mid">미드레벨</option>
+                        <option value="senior">시니어</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="sort-filter">정렬</label>
+                    <select id="sort-filter" class="filter-select">
+                        <option value="latest">최신순</option>
+                        <option value="popular">인기순</option>
+                        <option value="views">조회수순</option>
+                    </select>
+                </div>
+
+                <div class="search-group">
+                    <input type="search" id="keyword-search" placeholder="제목, 내용으로 검색" class="keyword-input">
+                    <button class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="posts-section">
+        <div class="container">
+            <div class="posts-grid">
+                <article class="post-card" data-id="1">
+                    <header class="post-card-header">
+                        <img src="/images/profile1.jpg" alt="프로필" class="post-profile-img" />
+                        <div class="post-author-info">
+                            <div class="author-name">김개발</div>
+                            <div class="author-tags">
+                                <span class="tech-tag">백엔드</span>
+                                <span class="level-tag">주니어</span>
+                            </div>
+                        </div>
+                    </header>
+                    <h3 class="post-title">Spring Boot 마이크로서비스 이커머스 설계 면접 후기</h3>
+                    <p class="post-summary">MSA 개발과 API Gateway 설계에 관한 내용으로, 데이터 흐름과 분산 시스템 설계 경험을 공유합니다.</p>
+                    <footer class="post-footer">
+                        <span><i class="fas fa-heart"></i> 124</span>
+                        <span><i class="fas fa-comment"></i> 23</span>
+                        <span><i class="fas fa-eye"></i> 52</span>
+                    </footer>
+                </article>
+
+                <article class="post-card" data-id="2">
+                    <header class="post-card-header">
+                        <img src="/images/profile2.jpg" alt="프로필" class="post-profile-img" />
+                        <div class="post-author-info">
+                            <div class="author-name">박프론트</div>
+                            <div class="author-tags">
+                                <span class="tech-tag">프론트엔드</span>
+                                <span class="level-tag">주니어</span>
+                            </div>
+                        </div>
+                    </header>
+                    <h3 class="post-title">React 성능 최적화 및 상태관리 면접 경험</h3>
+                    <p class="post-summary">Virtual DOM과 Redux를 활용한 상태 관리 방법, 최적화 사례와 문제 해결 경험을 이야기합니다.</p>
+                    <footer class="post-footer">
+                        <span><i class="fas fa-heart"></i> 89</span>
+                        <span><i class="fas fa-comment"></i> 45</span>
+                        <span><i class="fas fa-eye"></i> 12</span>
+                    </footer>
+                </article>
+
+                <article class="post-card" data-id="3">
+                    <header class="post-card-header">
+                        <img src="/images/profile3.jpg" alt="프로필" class="post-profile-img" />
+                        <div class="post-author-info">
+                            <div class="author-name">이풀스토트</div>
+                            <div class="author-tags">
+                                <span class="tech-tag">풀스택</span>
+                                <span class="level-tag">미드레벨</span>
+                            </div>
+                        </div>
+                    </header>
+                    <h3 class="post-title">대용량 트래픽 처리를 위한 시스템 설계 면접</h3>
+                    <p class="post-summary">로드밸런싱, 캐시 전략, 마스터-슬레이브 데이터 복제 구성 경험과 문제 해결 방법을 공유합니다.</p>
+                    <footer class="post-footer">
+                        <span><i class="fas fa-heart"></i> 176</span>
+                        <span><i class="fas fa-comment"></i> 12</span>
+                        <span><i class="fas fa-eye"></i> 53</span>
+                    </footer>
+                </article>
+            </div>
+
+            <div class="load-more-section">
+                <button class="btn btn-outline load-more-btn">
+                    <i class="fas fa-plus"></i>
+                    더 많은 게시글 보기
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="/js/community.js"></script>
 
 </body>
 </html>
