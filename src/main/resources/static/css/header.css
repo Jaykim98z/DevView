@@ -34,7 +34,7 @@
 .nav-menu a {
     margin: 0 12px;
     text-decoration: none;
-    color: #34495e;
+    color: #374b5f;
     font-weight: 500;
     font-size: 15px;
 }
@@ -61,7 +61,7 @@
     right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    color: #999;
+    color: #e5e7eb;
     font-size: 14px;
 }
 
@@ -84,7 +84,7 @@
 
 /* 시작하기 버튼 */
 .start-btn {
-    background-color: #3498db;
+    background-color: #4ab2e3;
     color: white;
     border-radius: 6px;
     font-size: 14px;
