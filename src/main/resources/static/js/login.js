@@ -135,7 +135,7 @@ class LoginForm {
                 sessionStorage.setItem('user', JSON.stringify(userData));
 
                 // 메인 페이지로 리다이렉트
-                window.location.href = '/user/';
+                window.location.href = '/';
 
             } else {
                 const errorData = await response.json();
@@ -159,23 +159,17 @@ class LoginForm {
     }
 
     async handleGoogleLogin() {
-        // TODO: Google OAuth2 로그인 구현
-        alert('Google 로그인 기능은 현재 개발 중입니다.');
-
-        // 추후 구현 예정:
-        // 1. Google OAuth2 설정
-        // 2. 백엔드 OAuth2 엔드포인트 연동
-        // 3. JWT 토큰 처리
-
-        /*
+        // Google OAuth2 로그인 시작
         try {
-            // Google OAuth2 로그인 처리
+            console.log('Google OAuth2 로그인 시작');
+
+            // Spring Security OAuth2 엔드포인트로 리다이렉트
             window.location.href = '/oauth2/authorization/google';
+
         } catch (error) {
             console.error('Google 로그인 오류:', error);
             alert('Google 로그인 중 오류가 발생했습니다.');
         }
-        */
     }
 
     validateEmail(email) {
