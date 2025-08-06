@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,6 +45,9 @@ public class InterviewServiceTest {
 
     @Mock
     private InterviewResultRepository interviewResultRepository;
+
+    @Mock
+    private ExternalAiApiService gemini;
 
     @InjectMocks
     private InterviewService interviewService;
@@ -148,7 +152,12 @@ public class InterviewServiceTest {
     void endInterview_success() {
         // given
         Long interviewId = 1L;
-        Interview mockInterview = Interview.builder().id(interviewId).build();
+        Interview mockInterview = Interview.builder()
+                .id(interviewId)
+                .questions(new ArrayList<>())
+                .jobPosition("Backend")
+                .careerLevel("Junior")
+                .build();
 
         // 테스트용으로 생성될 가짜 결과 객체
         InterviewResult mockResult = InterviewResult.builder()
@@ -159,7 +168,11 @@ public class InterviewServiceTest {
                 .feedback("Good job overall.")
                 .build();
 
-        given(interviewRepository.findById(interviewId)).willReturn(Optional.of(mockInterview));
+        // Tell the mock gemini service what to return when called
+        String fakeAiResponse = "SCORE: 85\nFEEDBACK: Good job overall.";
+        given(gemini.generateContent(any(String.class))).willReturn(fakeAiResponse);
+
+        given(interviewRepository.findByIdWithQuestions(interviewId)).willReturn(Optional.of(mockInterview));
         given(interviewResultRepository.save(any(InterviewResult.class))).willReturn(mockResult);
 
         // when
@@ -170,5 +183,30 @@ public class InterviewServiceTest {
         assertThat(response.getInterviewId()).isEqualTo(interviewId);
         assertThat(response.getGrade()).isEqualTo(Grade.B);
         assertThat(response.getFeedback()).isEqualTo("Good job overall.");
+    }
+
+    @Test
+    @DisplayName("면접 결과 조회 - 성공")
+    void getInterviewResult_success() {
+        // given
+        Long interviewId = 1L;
+        Interview mockInterview = Interview.builder().id(interviewId).build();
+        InterviewResult mockResult = InterviewResult.builder()
+                .id(1L)
+                .interview(mockInterview)
+                .totalScore(85)
+                .grade(Grade.B)
+                .feedback("Good job.")
+                .build();
+
+        given(interviewResultRepository.findByInterviewId(interviewId)).willReturn(Optional.of(mockResult));
+
+        // when
+        InterviewResultResponse response = interviewService.getInterviewResult(interviewId);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getInterviewId()).isEqualTo(interviewId);
+        assertThat(response.getResultId()).isEqualTo(1L);
     }
 }

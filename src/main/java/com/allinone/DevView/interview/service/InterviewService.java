@@ -172,4 +172,12 @@ public class InterviewService {
         if (score >= 60) return Grade.D;
         return Grade.F;
     }
+
+    @Transactional(readOnly = true)
+    public InterviewResultResponse getInterviewResult(Long interviewId) {
+        InterviewResult result = interviewResultRepository.findByInterviewId(interviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Interview result not found for interviewId: " + interviewId));
+
+        return InterviewResultResponse.fromEntity(result);
+    }
 }
