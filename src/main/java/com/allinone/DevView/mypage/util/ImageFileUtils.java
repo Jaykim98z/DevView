@@ -1,4 +1,4 @@
-package com.devview.mypage.util;
+package com.allinone.DevView.mypage.util;
 
 import org.springframework.web.multipart.MultipartFile;
 

@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     // 비밀번호 암호화 Bean
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -20,16 +21,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // stateless한 rest api를 개발할 것이므로 csrf 방어는 일단 비활성화
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // CSRF 비활성화
 
-                // form-login, http-basic 비활성화
-                .formLogin(form -> form.disable())
+                // 로그인 설정
+                .formLogin(form -> form
+                        .loginPage("/login")              // 커스텀 로그인 페이지 경로
+                        .defaultSuccessUrl("/mypage")     // 로그인 성공 시 이동 경로
+                        .permitAll()
+                )
+
+                // HTTP Basic 인증 비활성화
                 .httpBasic(basic -> basic.disable())
-                // 요청 경로별 인가 설정
+
+                // 요청 경로별 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
-                        // 개발 단계에서 모든 요청 허용
-                        .anyRequest().permitAll()
+                        .requestMatchers("/mypage/**").authenticated() // mypage는 인증 필요
+                        .anyRequest().permitAll() // 나머지는 허용
+                )
+
+                // 로그아웃 설정
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/") // 로그아웃 성공 시 메인 페이지
+                        .permitAll()
                 );
 
         return http.build();

@@ -1,8 +1,8 @@
-package com.devview.mypage.service;
+package com.allinone.DevView.mypage.service;
 
-import com.devview.user.entity.User;
-import com.devview.user.repository.UserRepository;
-import com.devview.mypage.util.ImageFileUtils;
+import com.allinone.DevView.user.entity.User;
+import com.allinone.DevView.user.repository.UserRepository;
+import com.allinone.DevView.mypage.util.ImageFileUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

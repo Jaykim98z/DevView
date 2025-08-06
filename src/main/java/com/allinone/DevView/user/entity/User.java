@@ -3,13 +3,13 @@ package com.allinone.DevView.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
-/**
- * 사용자 엔티티 - ERD 기준 단순 설계
- */
 @Entity
 @Table(name = "Users")
 @Getter @Setter
@@ -44,50 +44,30 @@ public class User {
     private String providerId; // 구글 OAuth2 사용자 ID
 
     // ========================================
-    // 연관관계 매핑 (필요한 것만)
+    // 추가된 필드 (job, careerLevel, profileImageUrl)
     // ========================================
 
-//    /**
-//     * 사용자 프로필 (1:1 관계)
-//     */
-//    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private UserProfile userProfile;
-//
-//    /**
-//     * 작성한 커뮤니티 게시글들 (1:N 관계)
-//     */
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private List<CommunityPost> communityPosts;
-//
-//    /**
-//     * 참여한 인터뷰들 (1:N 관계)
-//     */
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private List<Interview> interviews;
-//
-//    /**
-//     * 좋아요한 게시글들 (1:N 관계)
-//     */
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private List<Like> likes;
-//
-//    /**
-//     * 스크랩한 게시글들 (1:N 관계)
-//     */
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private List<Scrap> scraps;
-//
-//    /**
-//     * 작성한 댓글들 (1:N 관계)
-//     */
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private List<Comment> comments;
-//
-//    /**
-//     * 랭킹 정보 (1:1 관계)
-//     */
-//    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private Ranking ranking;
+    @Column(name = "job", length = 100)
+    private String job;
+
+    @Column(name = "career_level", length = 100)
+    private String careerLevel;
+
+    @Column(name = "profile_image_url", length = 255)
+    private String profileImageUrl;
+
+    // ========================================
+    // 추가된 Getter 메서드
+    // ========================================
+    // ID 값을 반환하는 메서드
+    public Long getId() {
+        return this.userId;
+    }
+
+    // 사용자 권한을 반환하는 메서드 (단일 권한 예시로 "ROLE_USER")
+    public List<GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+    }
 
     // ========================================
     // 전용 생성자들 (정적 팩토리 메서드)
@@ -122,7 +102,6 @@ public class User {
     // ========================================
     // 기본 유틸리티 메서드
     // ========================================
-
     /**
      * 구글 OAuth2 사용자인지 확인
      */
@@ -142,5 +121,32 @@ public class User {
      */
     public boolean requiresPassword() {
         return isLocalUser();
+    }
+
+    // ========================================
+    // 추가된 setter 메서드
+    // ========================================
+    public void setJob(String job) {
+        this.job = job;
+    }
+
+    public void setCareerLevel(String careerLevel) {
+        this.careerLevel = careerLevel;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public void setName(String name) {
+        this.username = name;  // 'name'을 'username'으로 매핑
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getName() {
+        return this.username;
     }
 }

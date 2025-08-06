@@ -1,11 +1,12 @@
-package com.devview.mypage.service;
+package com.allinone.DevView.mypage.service;
 
-import com.devview.mypage.dto.*;
-import com.devview.mypage.mapper.MypageMapper;
-import com.devview.interview.repository.InterviewRepository;
-import com.devview.mypage.repository.ScrapRepository;
-import com.devview.user.entity.User;
-import com.devview.user.repository.UserRepository;
+import com.allinone.DevView.interview.repository.InterviewRepository;
+import com.allinone.DevView.mypage.dto.*;
+import com.allinone.DevView.mypage.mapper.MypageMapper;
+import com.allinone.DevView.interview.repository.InterviewRepository;
+import com.allinone.DevView.mypage.repository.ScrapRepository;
+import com.allinone.DevView.user.entity.User;
+import com.allinone.DevView.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -61,7 +62,7 @@ public class MypageService {
     }
 
     public ScoreGraphDto getScoreGraphData(Long userId) {
-        List<com.devview.mypage.entity.Interview> interviews = interviewRepository.findAllByUserId(userId).stream()
+        List<com.allinone.DevView.interview.entity.Interview> interviews = interviewRepository.findAllByUserId(userId).stream()
                 .sorted(Comparator.comparing(i -> i.getInterviewDate()))
                 .toList();
 

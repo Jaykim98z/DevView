@@ -1,8 +1,8 @@
 package com.allinone.DevView.mypage.controller;
 
-import com.devview.mypage.dto.UserProfileUpdateRequest;
-import com.devview.mypage.service.MypageService;
-import com.devview.security.CustomUserDetails;
+import com.allinone.DevView.mypage.dto.UserProfileUpdateRequest;
+import com.allinone.DevView.mypage.service.MypageService;
+import com.allinone.DevView.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
