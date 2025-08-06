@@ -8,35 +8,9 @@
 </head>
 <body>
 
-<header class="navbar">
-    <div class="nav-container">
-        <div class="nav-left">
-            <h1 class="logo">
-                <i class="fas fa-robot"></i>
-                AI Interview
-            </h1>
-            <nav class="nav-menu">
-                <a href="#" class="nav-link active">커뮤니티</a>
-                <a href="#" class="nav-link">랭킹</a>
-                <a href="#" class="nav-link">면접연습</a>
-            </nav>
-        </div>
-        <div class="nav-right">
-            <div class="search-container">
-                <input type="search" placeholder="검색어를 입력하세요" class="search-input">
-                <button class="search-btn">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-            <div class="auth-buttons">
-                <button class="btn btn-outline">로그인</button>
-                <button class="btn btn-primary">회원가입</button>
-            </div>
-        </div>
-    </div>
-</header>
 
 <main class="main-container">
+    <p th:text="'총 게시글 수: ' + ${posts.size()}"></p>
     <div class="page-header">
         <div class="container">
             <h2 class="page-title">커뮤니티</h2>
@@ -92,17 +66,24 @@
             <div class="posts-grid">
                 <div th:each="post : ${posts}" class="post-card" th:data-id="${post.id}">
                     <header class="post-card-header">
-                        <img th:src="@{${post.profileImage}}" alt="프로필" class="post-profile-img" />
                         <div class="post-author-info">
-                            <div class="author-name" th:text="${post.authorName}"></div>
+                            <div class="author-name" th:text="${post.username}">작성자</div>
                             <div class="author-tags">
-                                <span class="tech-tag" th:text="${post.techTag}"></span>
-                                <span class="level-tag" th:text="${post.levelTag}"></span>
+                                <span class="tech-tag" th:text="${post.techTag}">백엔드</span>
+                                <span class="level-tag" th:text="${post.levelTag}">주니어</span>
                             </div>
                         </div>
                     </header>
-                    <h3 class="post-title" th:text="${post.title}"></h3>
-                    <p class="post-summary" th:text="${post.summary}"></p>
+
+                    <h3 class="post-title" th:text="${post.title}">게시글 제목</h3>
+                    <p class="post-summary" th:text="${post.summary}">게시글 요약</p>
+
+                    <div class="post-badges">
+                        <span class="badge badge-type" th:text="${post.interviewTypeLabel}">기술면접</span>
+                        <span class="score" th:text="${post.score} + '점'">90점</span>
+                        <span class="grade" th:text="'• ' + ${post.grade} + '등급'">• A등급</span>
+                    </div>
+
                     <footer class="post-footer">
                         <button class="like-btn action-btn"
                                 th:data-post-id="${post.id}"
@@ -112,6 +93,7 @@
                             <i th:class="${post.liked} ? 'fas fa-heart' : 'far fa-heart'"></i>
                             <span th:text="${post.likeCount}">0</span>
                         </button>
+
                         <button class="bookmark-btn action-btn"
                                 th:data-post-id="${post.id}"
                                 th:data-user-id="${post.userId}"
@@ -121,11 +103,15 @@
                             <i th:class="${post.bookmarked} ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
                             <span th:text="${post.scrapCount}">0</span>
                         </button>
-                        <span><i class="fas fa-comment"></i> <span th:text="${post.commentCount}"></span></span>
-                        <span><i class="fas fa-eye"></i> <span th:text="${post.viewCount}"></span></span>
+
+                        <span><i class="fas fa-comment"></i> <span th:text="${post.commentCount}">0</span></span>
+                        <span><i class="fas fa-eye"></i> <span th:text="${post.viewCount}">0</span></span>
                     </footer>
+
+                    <a class="read-more" th:href="@{'/community/posts/' + ${post.id} + '/detail'}">자세히 보기</a>
                 </div>
             </div>
+
 
             <div class="load-more-section">
                 <button class="btn btn-outline load-more-btn">
@@ -136,8 +122,6 @@
         </div>
     </div>
 </main>
-
 <script src="/js/community.js"></script>
-
 </body>
 </html>

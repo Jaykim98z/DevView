@@ -1,10 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8" />
+    <title>게시글 상세보기</title>
+    <link rel="stylesheet" href="/css/post-detail.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
+<main class="main-container">
+    <div class="post-detail-card">
+        <header class="post-header">
+            <img th:src="@{${post.profileImage}}" alt="프로필" class="profile-img" />
+            <div class="user-info">
+                <span class="username" th:text="${post.username}">김개발</span>
+                <span class="user-role" th:text="${post.techTag} + ' • ' + ${post.levelTag}">백엔드 • 주니어</span>
+                <span class="post-date" th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}">2일 전</span>
+            </div>
+        </header>
 
+        <h2 class="post-title" th:text="${post.title}">Spring Boot 마이크로서비스 아키텍처 설계 면접 후기</h2>
+
+        <div class="badges">
+            <span class="badge badge-tech" th:text="${post.interviewTypeLabel}">기술면접</span>
+            <span class="score">[[${post.score}]] 점</span>
+            <span class="grade">• [[${post.grade}]]등급</span>
+        </div>
+
+        <div class="post-summary" th:text="${post.summary}">
+            면접에서 MSA 패턴과 API Gateway 설계에 대한 질문이 많이 나왔습니다...
+        </div>
+
+        <footer class="post-footer">
+            <span><i class="fas fa-eye"></i> [[${post.viewCount}]]</span>
+            <span><i class="fas fa-heart"></i> [[${post.likeCount}]]</span>
+            <span><i class="fas fa-comment"></i> [[${post.commentCount}]]</span>
+            <span><i class="fas fa-bookmark"></i> [[${post.scrapCount}]]</span>
+            <a class="read-more" th:href="@{'/community/posts/' + ${post.id}}">자세히 보기</a>
+        </footer>
+    </div>
+</main>
 </body>
 </html>
+>
