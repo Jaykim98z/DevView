@@ -157,17 +157,4 @@ public class UserService {
         return available;
     }
 
-
-    // OAuth2
-    /*
-     * TODO: OAuth2 기능들
-     *
-     * public UserResponse googleLogin(GoogleLoginRequest request) {
-     *     // 구글 OAuth2 로그인 처리
-     * }
-     *
-     * public UserResponse processOAuth2User(String email, String name, String providerId) {
-     *     // OAuth2 사용자 생성/조회 처리
-     * }
-     */
 }
