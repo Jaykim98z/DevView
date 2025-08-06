@@ -36,7 +36,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/devview_dev # 개발용 DB 이름
     username: postgres # 개발용 DB 사용자 이름
-    password: 2327 # 환경변수에서 가져옴
+    password: ${DEV_DB_PASSWORD} # 환경변수에서 가져옴
   # JPA 설정
   jpa:
     hibernate:

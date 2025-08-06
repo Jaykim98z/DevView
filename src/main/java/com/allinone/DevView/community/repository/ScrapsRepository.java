@@ -1,14 +1,16 @@
 package com.allinone.DevView.community.repository;
 
 import com.allinone.DevView.community.entity.Scraps;
-import com.allinone.DevView.community.entity.CommunityPosts;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface ScrapsRepository extends JpaRepository<Scraps, Long> {
-    Optional<Scraps> findByPostIdAndUserId(Long postId, Long userId);
-    int countByPostId(Long postId);
+    List<Scraps> findByUserId(Long userId);
+
+    List<Scraps> findByPostId(Long postId);
+
+    boolean existsByUserIdAndPostId(Long userId, Long postId);
 }
