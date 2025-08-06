@@ -14,9 +14,14 @@ import com.allinone.DevView.interview.repository.InterviewResultRepository;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class InterviewService {
@@ -89,15 +94,46 @@ public class InterviewService {
 
     @Transactional
     public InterviewResultResponse endInterview(Long interviewId) {
-        Interview interview = interviewRepository.findById(interviewId)
+        Interview interview = interviewRepository.findByIdWithQuestions(interviewId)
                 .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
 
-        interview.endInterviewSession();
+        // Fetch questions and answers from the database
+        // NOTE: This is a simple fetch. In a real-world scenario with many Q&As,
+        // you would use a more optimized query.
+        List<InterviewQuestion> questions = interview.getQuestions();
+        List<InterviewAnswer> answers = interviewAnswerRepository.findByQuestionIn(questions);
 
-        // 임시 결과 데이터를 생성합니다. (TODO: 추후 AI 분석 로직으로 대체)
-        int score = 85;
-        Grade grade = Grade.B;
-        String feedback = "전반적으로 좋은 답변이었지만, 몇 가지 부분에서 보충이 필요해 보입니다.";
+        // 2. Create a transcript for the AI to analyze.
+        String transcript = questions.stream()
+                .map(q -> {
+                    String answerText = answers.stream()
+                            .filter(a -> a.getQuestion().getId().equals(q.getId()))
+                            .findFirst()
+                            .map(InterviewAnswer::getAnswerText)
+                            .orElse("No answer provided.");
+                    return "Q: " + q.getText() + "\nA: " + answerText;
+                })
+                .collect(Collectors.joining("\n\n"));
+
+        log.info("Generated Transcript for AI Analysis:\n{}", transcript);
+
+        // 3. Create the prompt for Gemini.
+        String prompt = "As an expert interviewer, please evaluate the following interview transcript for a " +
+                interview.getJobPosition() + " role. Provide a total score from 0 to 100 and constructive " +
+                "feedback based on the answers. Format your response as follows:\n\n" +
+                "SCORE: [Your Score]\n" +
+                "FEEDBACK: [Your Feedback]\n\n" +
+                "Here is the transcript:\n" + transcript;
+
+        log.info("Generated Prompt for Gemini:\n{}", prompt);
+
+        String aiResponse = gemini.generateContent(prompt);
+
+        int score = parseScore(aiResponse);
+        String feedback = parseFeedback(aiResponse);
+        Grade grade = calculateGrade(score);
+
+        interview.endInterviewSession();
 
         InterviewResult result = InterviewResult.builder()
                 .interview(interview)
@@ -109,5 +145,31 @@ public class InterviewService {
         InterviewResult savedResult = interviewResultRepository.save(result);
 
         return InterviewResultResponse.fromEntity(savedResult);
+    }
+
+    private int parseScore(String response) {
+        try {
+            return Integer.parseInt(response.split("SCORE:")[1].split("\n")[0].trim());
+        } catch (Exception e) {
+            log.error("Failed to parse score from AI response: {}", response, e);
+            return 0;
+        }
+    }
+
+    private String parseFeedback(String response) {
+        try {
+            return response.split("FEEDBACK:")[1].trim();
+        } catch (Exception e) {
+            log.error("Failed to parse feedback from AI response: {}", response, e);
+            return "Feedback analysis failed.";
+        }
+    }
+
+    private Grade calculateGrade(int score) {
+        if (score >= 90) return Grade.A;
+        if (score >= 80) return Grade.B;
+        if (score >= 70) return Grade.C;
+        if (score >= 60) return Grade.D;
+        return Grade.F;
     }
 }

@@ -19,7 +19,6 @@ public class GeminiApiService implements ExternalAiApiService {
 
     @Override
     public String getQuestionFromAi(String jobPosition, String careerLevel) {
-        // 1. 프롬프트 생성
         String prompt = String.format(
                 "You are an interviewer for a %s position targeting a %s developer. " +
                         "Please ask one single, clear, and essential technical question relevant to this role. " +
@@ -27,14 +26,15 @@ public class GeminiApiService implements ExternalAiApiService {
                 jobPosition, careerLevel
         );
 
-        // 2. Gemini API에 보낼 요청 객체 생성
+        return generateContent(prompt);
+    }
+
+    public String generateContent(String prompt) {
         GeminiRequestDto requestDto = GeminiRequestDto.from(prompt);
         String urlWithKey = API_URL + "?key=" + apiKey;
 
-        // 3. API 호출 및 응답 받기
         GeminiResponseDto responseDto = restTemplate.postForObject(urlWithKey, requestDto, GeminiResponseDto.class);
 
-        // 4. 응답에서 텍스트 추출하여 반환
         return responseDto != null ? responseDto.extractText() : "Failed to get a response.";
     }
 }

@@ -36,6 +36,16 @@ public class AlanApiService implements ExternalAiApiService {
                 keyword
         );
 
+        return generateContent(prompt);
+    }
+
+    /**
+     * 인터페이스 요구사항을 만족시키는 범용 메서드
+     * @param prompt Alan API에 보낼 전체 프롬프트
+     * @return API 응답의 content 필드
+     */
+    @Override
+    public String generateContent(String prompt) {
         URI uri = UriComponentsBuilder.fromUriString(API_URL)
                 .queryParam("client_id", clientId)
                 .queryParam("content", prompt)
@@ -44,6 +54,6 @@ public class AlanApiService implements ExternalAiApiService {
 
         AlanResponseDto response = restTemplate.getForObject(uri, AlanResponseDto.class);
 
-        return response != null ? response.content() : "Failed to get recommendations.";
+        return response != null ? response.content() : "Failed to get response from Alan.";
     }
 }
