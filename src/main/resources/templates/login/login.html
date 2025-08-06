@@ -1,10 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' - DevView'">로그인 - DevView</title>
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+<!-- 헤더 -->
+<header class="header">
+    <div class="header-container">
+        <div class="logo">
+            <img src="/img/logo.png" alt="DevView" class="logo-image">
+        </div>
+        <a href="/" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            메인으로
+        </a>
+    </div>
+</header>
 
+<!-- 메인 컨텐츠 -->
+<main class="main-container">
+    <div class="login-card">
+        <h1 class="login-title">로그인</h1>
+
+        <form id="loginForm" class="login-form">
+            <!-- 아이디(이메일) 필드 -->
+            <div class="form-group">
+                <label for="email" class="form-label">아이디</label>
+                <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-input"
+                        placeholder="아이디를 입력해주세요"
+                        maxlength="100"
+                        required
+                >
+                <div class="error-message" id="emailError"></div>
+            </div>
+
+            <!-- 비밀번호 필드 -->
+            <div class="form-group">
+                <label for="password" class="form-label">비밀번호</label>
+                <div class="input-group">
+                    <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="form-input"
+                            placeholder="비밀번호를 입력해주세요"
+                            maxlength="20"
+                            required
+                    >
+                    <button type="button" class="password-toggle" id="passwordToggle">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="error-message" id="passwordError"></div>
+            </div>
+
+            <!-- 로그인 버튼 -->
+            <button type="submit" class="login-submit-btn" id="loginSubmitBtn">
+                로그인
+            </button>
+
+            <!-- Google 로그인 버튼 -->
+            <button type="button" class="google-login-btn" id="googleLoginBtn">
+                <img src="/img/google_G_logo.svg" alt="Google" class="google-logo">
+                Google로 로그인
+            </button>
+        </form>
+
+        <!-- 회원가입 링크 -->
+        <div class="register-link">
+            회원이 아니신가요?
+            <a href="/user/register" class="link">회원가입</a>
+        </div>
+    </div>
+</main>
+
+<!-- 로딩 스피너 -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>로그인 중...</p>
+    </div>
+</div>
+
+<script src="/js/login.js"></script>
 </body>
 </html>
