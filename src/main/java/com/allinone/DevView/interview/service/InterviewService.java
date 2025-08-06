@@ -59,15 +59,6 @@ public class InterviewService {
         return saveQuestion(interview, questionText);
     }
 
-    public String getRecommendations(Long interviewId) {
-        // ... find interview or other relevant data ...
-        String jobPosition = "Backend"; // Example
-        String careerLevel = "Junior"; // Example
-
-        // Use the 'alan' bean for recommendations
-        return alan.getQuestionFromAi(jobPosition, careerLevel); // This would be a call to a recommendation method
-    }
-
     @Transactional
     public QuestionResponse saveQuestion(Interview interview, String questionText) {
         InterviewQuestion newQuestion = InterviewQuestion.builder()
