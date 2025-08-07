@@ -1,54 +1,72 @@
 package com.allinone.DevView.community.entity;
 
 import com.allinone.DevView.common.enums.Grade;
-import com.allinone.DevView.common.enums.InterviewType;
+import com.allinone.DevView.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "community_posts")
 @Getter
+@Setter
 @NoArgsConstructor
 public class CommunityPosts {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "post_id")
+    private Long postId;
 
-    private String writerName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    private String category;
-
-    private String level;
-
+    @Column(name = "title", length = 50)
     private String title;
 
-    @Column(length = 1000)
-    private String summary;
+    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
+    private String content;
 
-    private String type;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
-    private int score;
+    @Column(name = "category")
+    private String category;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "grade", length = 20, nullable = false)
     private Grade grade;
 
-    private int viewCount;
+    @Column(name = "level")
+    private String level;
 
+    @Column(name = "like_count", nullable = false)
     private int likeCount;
 
+    @Column(name = "scrap_count", nullable = false)
     private int scrapCount;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private InterviewType interviewType;
+    @Column(name = "view_count", nullable = false)
+    private int viewCount;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "summary", length = 1000)
+    private String summary;
+
+    @Column(name = "interview_type", length = 20, nullable = false)
+    private String interviewType;
+
+    @Column(name = "writer_name")
+    private String writerName;
+
+    @Column(name = "score", nullable = false)
+    private int score;
+
+    @Column(name = "type")
+    private String type;
 
     @PrePersist
     protected void onCreate() {

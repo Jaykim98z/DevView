@@ -1,47 +1,39 @@
-<header th:fragment="header" class="header">
-    <!-- 로고 -->
-    <div class="logo">
-        <a href="/">
-            <img src="/img/logo.svg" alt="DevView 로고">
-        </a>
-    </div>
-
-    <!-- 네비게이션 메뉴 -->
-    <nav class="nav-menu">
-        <a href="/community">커뮤니티</a>
-        <a href="/ranking">랭킹</a>
-    </nav>
-
-    <!-- 검색창 -->
-    <form class="search-box" action="/search" method="get">
-        <input type="text" name="query" placeholder="검색어를 입력하세요..." aria-label="검색어 입력">
-        <button type="submit" class="search-btn">
-            <img src="/img/search.svg" alt="검색">
-        </button>
-    </form>
-
-    <!-- 유저 메뉴 -->
-    <div class="user-menu" th:classappend="${session.user != null} ? ' logged-in' : ' logged-out'">
-
-        <!-- 시작하기 버튼 -->
-        <a class="start-btn" href="/interview/start">
-            <img src="/img/play.svg" alt="시작 아이콘"> 시작하기
-        </a>
-
-        <!-- 로그인 전 -->
-        <div th:if="${session.user == null}">
-            <a href="/login">로그인</a>
-            <a href="/mypage">
-                <img src="/img/my.svg" alt="마이페이지 아이콘"> 마이페이지
-            </a>
+<header class="header">
+    <div class="header-inner">
+        <!--  로고 + 메뉴 -->
+        <div class="left-group">
+            <div class="logo">
+                <a href="/">
+                    <img src="/img/logo.svg" alt="DevView 로고">
+                </a>
+            </div>
+            <nav class="nav-menu">
+                <a href="/community">커뮤니티</a>
+                <a href="/ranking">랭킹</a>
+            </nav>
         </div>
 
-        <!-- 로그인 후 -->
-        <div th:if="${session.user != null}">
-            <a href="/logout">로그아웃</a>
-            <a href="/mypage">
-                <img src="/img/my.svg" alt="마이페이지 아이콘">
+        <!-- 중앙: 검색창 -->
+        <form class="search-box" action="/search" method="get">
+            <input type="text" name="query" placeholder="검색어를 입력하세요..." aria-label="검색어 입력">
+            <button type="submit" class="search-btn">
+                <img src="/img/search.svg" alt="검색">
+            </button>
+        </form>
+
+        <!--  시작하기 + 로그인/마이페이지 -->
+        <div class="user-menu" th:classappend="${session.user != null} ? ' logged-in' : ' logged-out'">
+            <a class="start-btn" href="/interview/start">
+                <img src="/img/play.svg" alt="시작 아이콘"> 시작하기
             </a>
+            <div th:if="${session.user == null}">
+                <a href="/login">로그인</a>
+                <a href="/mypage"><img src="/img/my.svg"> 마이페이지</a>
+            </div>
+            <div th:if="${session.user != null}">
+                <a href="/logout">로그아웃</a>
+                <a href="/mypage"><img src="/img/my.svg"></a>
+            </div>
         </div>
     </div>
 </header>

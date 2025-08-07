@@ -1,9 +1,5 @@
 /* 헤더 전체 */
 .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
-    padding: 12px 24px;
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     font-family: 'Noto Sans KR', sans-serif;
@@ -12,13 +8,30 @@
     z-index: 100;
 }
 
+/* 내부 */
+.header-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80px;
+    box-sizing: border-box;
+}
+
+/* 왼쪽 그룹 */
+.left-group {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
 /* 로고 */
 .logo {
     display: flex;
     align-items: center;
-    gap: 8px;
     text-decoration: none;
-    margin-right: 15px;
 }
 
 .logo img {
@@ -26,35 +39,43 @@
     width: 267px;
 }
 
-
 /* 메뉴 */
+.nav-menu {
+    display: flex;
+    gap: 20px;
+}
+
 .nav-menu a {
-    margin: 0 10px;
     text-decoration: none;
     color: #374b5f;
-    font-weight: 500;
-    font-size: 15px;
+    font-size: 16px;
 }
 
 .nav-menu a:hover {
     color: #2980b9;
 }
 
+/* 검색창 */
 .search-box {
     position: relative;
+    height: 42px;
+    display: flex;
+    align-items: center;
 }
 
 .search-box input {
     width: 280px;
+    height: 100%;
     padding: 6px 40px 6px 12px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 16px;
+    box-sizing: border-box;
 }
 
 .search-btn {
     position: absolute;
-    right: 8px;
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     background: none;
@@ -68,6 +89,7 @@
     width: 16px;
     display: block;
 }
+
 /* 유저 메뉴 */
 .user-menu {
     display: flex;
@@ -76,25 +98,30 @@
 }
 
 .user-menu a {
-    color: #374b5f;
+    color: #374B5F;
     text-decoration: none;
-    font-size: 14px;
-}
-
-.user-menu a:hover {
-    color: #2980b9;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    width: 130px;
 }
 
 /* 시작하기 버튼 */
 .start-btn {
     background-color: #4ab2e3;
+    color: #ffffff !important;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 16px;
+    height: 42px;
+    padding: 0 16px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    padding: 6px 12px;
     text-decoration: none;
+    box-sizing: border-box;
 }
 
 .start-btn img {
@@ -105,9 +132,11 @@
 .user-menu.logged-in a:first-child {
     font-weight: bold;
     color: #e74c3c; /* 로그아웃 버튼 빨간색 */
+    padding-left: 10px;
 }
 
 .user-menu.logged-out a:first-child:not(.start-btn) {
     font-weight: bold;
     color: #4ab2e3;
+    padding-left: 10px;
 }

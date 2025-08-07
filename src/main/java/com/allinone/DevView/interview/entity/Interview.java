@@ -43,35 +43,14 @@ public class Interview {
 
     private LocalDateTime endedAt;
 
-    @Column(nullable = false)
-    private int score; // 면접 점수
-
-    @Column(nullable = true)
-    private String feedback; // 면접 피드백
-
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
 
-    public String getDate() {
-        return createdAt.toLocalDate().toString(); // 날짜만 반환
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public String getInterviewType() {
-        return interviewType.toString();
-    }
-
-    public String getFeedback() {
-        return feedback;
-    }
-
-    // interviewDate를 반환하는 메서드 추가 (혹은 getDate()와 중복될 수 있음)
-    public LocalDateTime getInterviewDate() {
-        return this.createdAt;
+    public void endInterviewSession() {
+        if (this.endedAt == null) {
+            this.endedAt = LocalDateTime.now();
+        }
     }
 }

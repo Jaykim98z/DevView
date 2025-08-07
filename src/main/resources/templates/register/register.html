@@ -10,17 +10,11 @@
 <body>
 <!-- 헤더 -->
 <header class="header">
-    <!-- 로고 -->
-    <div class="logo">
-        <a href="/user/">
-            <img src="/img/logo.png" alt="DevView 로고">
-            <span class="logo-text">DevView</span>
-        </a>
-    </div>
-
-    <!-- 메인으로 버튼 (기존 user-menu 자리에) -->
-    <div class="back-to-main">
-        <a href="/user/" class="back-link">
+    <div class="header-container">
+        <div class="logo">
+            <img src="/img/logo.svg" alt="DevView" class="logo-image">
+        </div>
+        <a href="/" class="back-link">
             <i class="fas fa-arrow-left"></i>
             메인으로
         </a>
@@ -74,10 +68,10 @@
                 </div>
                 <div class="form-hint">영어+숫자+특수문자 조합 8자리 이상 20자리 이하</div>
                 <div class="password-strength">
+                    <span class="strength-text">약</span>
                     <div class="strength-bar">
                         <div class="strength-fill" id="strengthFill"></div>
                     </div>
-                    <span class="strength-text">약</span>
                 </div>
                 <div class="error-message" id="passwordError"></div>
             </div>

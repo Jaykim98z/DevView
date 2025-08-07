@@ -2,14 +2,13 @@ package com.allinone.DevView.interview.repository;
 
 import com.allinone.DevView.interview.entity.Interview;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+import java.util.Optional;
 
 public interface InterviewRepository extends JpaRepository<Interview, Long> {
 
-    // UserId로 면접 데이터를 찾는 메서드
-    List<Interview> findAllByUserId(Long userId);
-
-    // 면접 일자 기준으로 내림차순으로 정렬
-    List<Interview> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+    @Query("SELECT i FROM Interview i JOIN FETCH i.questions WHERE i.id = :interviewId")
+    Optional<Interview> findByIdWithQuestions(@Param("interviewId") Long interviewId);
 }
