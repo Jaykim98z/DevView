@@ -71,6 +71,19 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 인터뷰를 찾을 수 없음 예외 처리
+     * @param e InterviewNotFoundException
+     * @return ResponseEntity<ErrorResponse> 404 Not Found
+     */
+    @ExceptionHandler(InterviewNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleInterviewNotFoundException(InterviewNotFoundException e) {
+        log.warn("인터뷰 조회 실패: {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.of(e.getMessage(), "INTERVIEW_NOT_FOUND");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
      * 기타 모든 예외 처리
      * 위에서 처리되지 않은 모든 예외
      */
