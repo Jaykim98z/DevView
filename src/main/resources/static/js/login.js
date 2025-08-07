@@ -117,34 +117,34 @@ class LoginForm {
         this.showLoading();
 
         try {
+            // Spring Security 폼 로그인 엔드포인트로 전송
             const response = await fetch('/api/users/login', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: JSON.stringify(loginData)
+                body: new URLSearchParams(loginData),
+                credentials: 'same-origin'  // 세션 쿠키 포함
             });
 
             if (response.ok) {
-                const userData = await response.json();
+                const result = await response.json();
 
-                // 로그인 성공 처리
-                alert(`환영합니다, ${userData.username}님!`);
+                if (result.success) {
+                    // 로그인 성공
+                    console.log('로그인 성공:', result.email);
 
-                // 세션 스토리지에 사용자 정보 저장 (간단한 상태 관리)
-                sessionStorage.setItem('user', JSON.stringify(userData));
-
-                // 메인 페이지로 리다이렉트
-                window.location.href = '/';
-
+                    // 메인 페이지로 리다이렉트
+                    window.location.href = '/';
+                } else {
+                    // 로그인 실패
+                    alert(result.message || '로그인에 실패했습니다.');
+                    this.inputs.password.value = '';
+                    this.inputs.password.focus();
+                }
             } else {
                 const errorData = await response.json();
-
-                if (response.status === 400) {
-                    alert(errorData.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
-                } else {
-                    alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
-                }
+                alert(errorData.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
 
                 // 비밀번호 필드 초기화
                 this.inputs.password.value = '';

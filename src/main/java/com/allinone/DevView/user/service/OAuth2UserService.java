@@ -4,6 +4,7 @@ import com.allinone.DevView.user.dto.response.UserResponse;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class OAuth2UserService {
 
     private final UserRepository userRepository;
@@ -27,11 +29,29 @@ public class OAuth2UserService {
      * @return UserResponse DTO
      */
     public UserResponse handleOAuth2User(String email, String name, String providerId) {
-        return userRepository.findByEmail(email)
-                .map(UserResponse::from)
-                .orElseGet(() -> {
-                    User newUser = User.createGoogleUser(name, email, providerId);
-                    return UserResponse.from(userRepository.save(newUser));
-                });
+        log.info("OAuth2 사용자 처리 시작: email={}, name={}", email, name);
+
+        try {
+            return userRepository.findByEmail(email)
+                    .map(existingUser -> {
+                        log.info("기존 OAuth2 사용자 찾음: userId={}, email={}",
+                                existingUser.getUserId(), existingUser.getEmail());
+                        return UserResponse.from(existingUser);
+                    })
+                    .orElseGet(() -> {
+                        log.info("신규 OAuth2 사용자 생성 시도: email={}, name={}", email, name);
+
+                        User newUser = User.createGoogleUser(name, email, providerId);
+                        User savedUser = userRepository.save(newUser);
+
+                        log.info("신규 OAuth2 사용자 저장 성공: userId={}, email={}",
+                                savedUser.getUserId(), savedUser.getEmail());
+
+                        return UserResponse.from(savedUser);
+                    });
+        } catch (Exception e) {
+            log.error("OAuth2 사용자 처리 중 오류 발생: email={}", email, e);
+            throw new RuntimeException("OAuth2 사용자 처리 실패", e);
+        }
     }
 }
