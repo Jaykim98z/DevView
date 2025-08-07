@@ -7,18 +7,13 @@
 
 .footer-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     flex-wrap: wrap;
 }
 
 .footer-column {
-    flex: 1;
     min-width: 180px;
     margin: 16px;
-}
-
-.footer-column.brand {
-    flex: 2;
 }
 
 .footer-column h4 {
