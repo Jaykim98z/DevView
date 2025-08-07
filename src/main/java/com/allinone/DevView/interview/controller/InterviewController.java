@@ -44,4 +44,11 @@ public class InterviewController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{interviewId}/results")
+    public ResponseEntity<InterviewResultResponse> getInterviewResult(@PathVariable Long interviewId) {
+        InterviewResultResponse response = interviewService.getInterviewResult(interviewId);
+
+        return ResponseEntity.ok(response);
+    }
 }

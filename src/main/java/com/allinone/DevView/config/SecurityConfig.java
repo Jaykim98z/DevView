@@ -64,6 +64,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/user/login", "/user/register").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/login/oauth2/code/**", "/oauth2/**").permitAll()
+                        // Swagger 테스트용 임시조치
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/v1/interviews/**").permitAll()
                         // 나머지 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
