@@ -47,4 +47,10 @@ public class Interview {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    public void endInterviewSession() {
+        if (this.endedAt == null) {
+            this.endedAt = LocalDateTime.now();
+        }
+    }
 }

@@ -4,6 +4,7 @@ import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
 import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
+import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
 import com.allinone.DevView.interview.service.InterviewService;
 import lombok.RequiredArgsConstructor;
@@ -35,5 +36,12 @@ public class InterviewController {
     public ResponseEntity<AnswerResponse> submitAnswer(@RequestBody SubmitAnswerRequest request) {
         AnswerResponse response = interviewService.submitAnswer(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/{interviewId}/end")
+    public ResponseEntity<InterviewResultResponse> endInterview(@PathVariable Long interviewId) {
+        InterviewResultResponse response = interviewService.endInterview(interviewId);
+
+        return ResponseEntity.ok(response);
     }
 }

@@ -13,50 +13,68 @@ body {
 }
 
 /* 헤더 스타일 */
+/* 헤더 스타일 - 기존 header.css와 통일 */
 .header {
-    background-color: #fff;
-    border-bottom: 1px solid #e9ecef;
-    padding: 1rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    font-family: 'Noto Sans KR', sans-serif;
     position: sticky;
     top: 0;
     z-index: 100;
 }
 
-.header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
+/* 로고 스타일 - 기존과 동일 */
 .logo {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
+    text-decoration: none;
 }
 
-.logo-image {
-    height: 2rem;
-    width: auto;
-    object-fit: contain;
+.logo a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.logo img {
+    height: 32px;
+}
+
+.logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+/* 메인으로 버튼 스타일 */
+.back-to-main {
+    display: flex;
+    align-items: center;
 }
 
 .back-link {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 6px;
+    color: #34495e;
     text-decoration: none;
-    color: #6c757d;
-    font-size: 0.9rem;
-    transition: color 0.2s;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 .back-link:hover {
-    color: #007bff;
+    color: #2980b9;
 }
 
+.back-link i {
+    font-size: 12px;
+}
 /* 메인 컨텐츠 */
 .main-container {
     display: flex;
