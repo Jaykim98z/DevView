@@ -2,7 +2,6 @@ package com.allinone.DevView.community.dto;
 
 import com.allinone.DevView.common.enums.Grade;
 import com.allinone.DevView.common.enums.InterviewType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,28 +9,78 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class CommunityPostsDto {
 
     private Long id;
-
     private Long userId;
 
-    private String title;
+    private String username;
+    // private String profileImage;
 
+    private String techTag;
+    private String levelTag;
+
+    private String title;
+    private String summary;
     private String content;
 
-    private Grade grade;
+    private InterviewType interviewType;
+    private String interviewTypeLabel;
 
     private int score;
+    private Grade grade;
 
     private int viewCount;
-
     private int likeCount;
-
     private int scrapCount;
 
-    private InterviewType interviewType;
+    private boolean liked;
+    private boolean bookmarked;
+    private Long scrapId;
 
     private LocalDateTime createdAt;
+
+    private int commentCount;
+
+    public CommunityPostsDto(
+            Long id,
+            Long userId,
+            String username,
+            String techTag,
+            String levelTag,
+            String title,
+            String summary,
+            String content,
+            InterviewType interviewType,
+            String interviewTypeLabel,
+            int score,
+            Grade grade,
+            int viewCount,
+            int likeCount,
+            int scrapCount,
+            boolean liked,
+            boolean bookmarked,
+            Long scrapId,
+            LocalDateTime createdAt
+    ) {
+        this.id = id;
+        this.userId = userId;
+        this.username = username;
+        this.techTag = techTag;
+        this.levelTag = levelTag;
+        this.title = title;
+        this.summary = summary;
+        this.content = content;
+        this.interviewType = interviewType;
+        this.interviewTypeLabel = interviewTypeLabel;
+        this.score = score;
+        this.grade = grade;
+        this.viewCount = viewCount;
+        this.likeCount = likeCount;
+        this.scrapCount = scrapCount;
+        this.liked = liked;
+        this.bookmarked = bookmarked;
+        this.scrapId = scrapId;
+        this.createdAt = createdAt;
+    }
 }

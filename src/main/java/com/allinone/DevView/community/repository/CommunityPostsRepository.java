@@ -7,12 +7,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, Long> {
-    @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user")
 
+    // 사용자까지 Fetch Join으로 가져옴
+    @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user")
     List<CommunityPosts> findAllWithUser();
+
+    // 게시글 하나 상세 조회용
+    @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user WHERE p.postId = :postId")
+    Optional<CommunityPosts> findByIdWithUser(Long postId);
 
     List<CommunityPosts> findByCategory(String category);
 
@@ -22,4 +28,3 @@ public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, 
 
     List<CommunityPosts> findByCategoryAndLevel(String category, String level);
 }
-
