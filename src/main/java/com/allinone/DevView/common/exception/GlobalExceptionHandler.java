@@ -1,5 +1,6 @@
 package com.allinone.DevView.common.exception;
 
+import com.allinone.DevView.common.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,6 +67,19 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 인터뷰를 찾을 수 없음 예외 처리
+     * @param e InterviewNotFoundException
+     * @return ResponseEntity<ErrorResponse> 404 Not Found
+     */
+    @ExceptionHandler(InterviewNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleInterviewNotFoundException(InterviewNotFoundException e) {
+        log.warn("인터뷰 조회 실패: {}", e.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.of(e.getMessage(), "INTERVIEW_NOT_FOUND");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    /**
      * 기타 모든 예외 처리
      * 위에서 처리되지 않은 모든 예외
      */
@@ -79,16 +93,5 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
-
-    /**
-     * 오류 응답 DTO
-     */
-    @lombok.Builder
-    @lombok.Getter
-    public static class ErrorResponse {
-        private final String message;
-        private final int status;
-        private final long timestamp = System.currentTimeMillis();
     }
 }
