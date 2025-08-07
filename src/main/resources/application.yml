@@ -11,6 +11,7 @@ spring:
   thymeleaf:
     cache: false
 
+
 # Gemini API 키 설정 (환경변수에서 가져옴)
 gemini:
   api-key: ${GEMINI_API_KEY}

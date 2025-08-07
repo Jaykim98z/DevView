@@ -14,11 +14,13 @@ import com.allinone.DevView.community.repository.ScrapsRepository;
 import com.allinone.DevView.common.enums.InterviewType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
@@ -74,9 +76,6 @@ public class CommunityService {
 
     @Transactional
     public Likes addLike(Long userId, Long postId) {
-        LikesId likeId = new LikesId();
-        likeId.setUserId(userId);
-        likeId.setPostId(postId);
         if (likesRepository.existsByUserIdAndPostId(userId, postId)) {
             throw new RuntimeException("Already liked");
         }
@@ -123,52 +122,58 @@ public class CommunityService {
     }
 
     public List<CommunityPostsDto> getAllPostDtos() {
-        List<CommunityPosts> posts = postsRepository.findAllWithUser(); // 유저 fetch join 포함된 쿼리
+        List<CommunityPosts> posts = postsRepository.findAllWithUser();
 
         return posts.stream().map(post -> {
             var user = post.getUser();
+
+            Long userId = (user != null) ? user.getUserId() : null;
+            String username = (user != null) ? user.getUsername() : "탈퇴한 사용자";
+
+            if (user == null) {
+                log.warn("게시글 ID {} 는 유저 정보가 없습니다.", post.getPostId());
+            }
 
             String summary = post.getContent() != null && post.getContent().length() > 100
                     ? post.getContent().substring(0, 100) + "..."
                     : post.getContent();
 
-            String interviewTypeLabel = switch (post.getInterviewType()) {
-                case "PRACTICE" -> "기술면접";
-                case "REAL"     -> "실무면접";
-                case "GENERAL"  -> "종합면접";
-                case "HR"       -> "인성면접";
-                default         -> "기타";
+            InterviewType interviewType;
+            try {
+                interviewType = InterviewType.valueOf(post.getInterviewType());
+            } catch (IllegalArgumentException | NullPointerException e) {
+                interviewType = InterviewType.GENERAL;
+            }
+
+            String interviewTypeLabel = switch (interviewType) {
+                case PRACTICE -> "기술면접";
+                case REAL     -> "실무면접";
+                case GENERAL  -> "종합면접";
+                case HR       -> "인성면접";
+                default       -> "기타";
             };
 
             return new CommunityPostsDto(
                     post.getPostId(),
-                    user.getUserId(),
-                    user.getUsername(),
-
-                    post.getTechTag(),       // ⚠️ 존재해야 함
-                    post.getLevelTag(),      // ⚠️ 존재해야 함
-
+                    userId,
+                    username,
+                    post.getTechTag(),
+                    post.getLevelTag(),
                     post.getTitle(),
                     summary,
                     post.getContent(),
-
-                    InterviewType.valueOf(post.getInterviewType()),
+                    interviewType,
                     interviewTypeLabel,
-
                     post.getScore(),
                     post.getGrade(),
-
                     post.getViewCount(),
                     post.getLikeCount(),
                     post.getScrapCount(),
-
-                    false,  // liked - 로그인 사용자 기준 처리 필요
-                    false,  // bookmarked - 로그인 사용자 기준 처리 필요
-                    null,   // scrapId - 필요 시 서비스 확장
-
+                    false,  // liked
+                    false,  // bookmarked
+                    null,   // scrapId
                     post.getCreatedAt()
             );
         }).toList();
     }
-
 }

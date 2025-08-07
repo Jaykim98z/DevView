@@ -25,8 +25,12 @@ public class CommunityViewController {
 
     @GetMapping
     public String getCommunityMain(Model model) {
-        List<CommunityPostsDto> posts = communityService.getAllPostDtos();
-        model.addAttribute("posts", posts);
+        try {
+            List<CommunityPostsDto> posts = communityService.getAllPostDtos();
+            model.addAttribute("posts", posts);
+        } catch (Exception e) {
+            e.printStackTrace(); // 로그에 예외 출력
+        }
         return "community/community";
     }
 
