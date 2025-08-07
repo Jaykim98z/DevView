@@ -65,6 +65,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/login/oauth2/code/**", "/oauth2/**").permitAll()
                         // 나머지 요청은 인증 필요
+                        .requestMatchers(
+                                "/swagger*/",     // swagger로 시작하는 모든 경로
+                                "/v3/",          // OpenAPI 3.0 문서
+                                "/webjars/**"      // Swagger UI 리소스
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
 
