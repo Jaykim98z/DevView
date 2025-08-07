@@ -1,5 +1,6 @@
 package com.allinone.DevView.interview.service;
 
+import com.allinone.DevView.common.exception.InterviewNotFoundException;
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
@@ -198,7 +199,7 @@ public class InterviewService {
     @Transactional(readOnly = true)
     public InterviewResultResponse getInterviewResult(Long interviewId) {
         InterviewResult result = interviewResultRepository.findByInterviewId(interviewId)
-                .orElseThrow(() -> new IllegalArgumentException("Interview result not found for interviewId: " + interviewId));
+                .orElseThrow(() -> new InterviewNotFoundException("Interview result not found for interviewId: " + interviewId));
 
         return InterviewResultResponse.fromEntity(result);
     }

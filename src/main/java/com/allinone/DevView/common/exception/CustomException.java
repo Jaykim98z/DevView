@@ -1,4 +1,13 @@
 package com.allinone.DevView.common.exception;
 
-public class CustomException {
+import lombok.Getter;
+
+@Getter
+public class CustomException extends RuntimeException {
+    private final String errorCode;
+
+    public CustomException(String errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
 }
