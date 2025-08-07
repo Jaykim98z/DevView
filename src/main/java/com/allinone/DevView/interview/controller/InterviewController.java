@@ -2,7 +2,6 @@ package com.allinone.DevView.interview.controller;
 
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
-import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
@@ -35,9 +34,10 @@ public class InterviewController {
     }
 
     @PostMapping("/answers")
-    public ResponseEntity<AnswerResponse> submitAnswer(@RequestBody SubmitAnswerRequest request) {
-        AnswerResponse response = interviewService.submitAnswer(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<Void> submitAnswers(@RequestBody SubmitAnswerRequest request) {
+        interviewService.submitAnswers(request);
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{interviewId}/end")

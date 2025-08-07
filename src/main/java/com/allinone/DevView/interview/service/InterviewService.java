@@ -2,7 +2,6 @@ package com.allinone.DevView.interview.service;
 
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
-import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -90,18 +90,28 @@ public class InterviewService {
     }
 
     @Transactional
-    public AnswerResponse submitAnswer(SubmitAnswerRequest request) {
-        InterviewQuestion question = interviewQuestionRepository.findById(request.getQuestionId())
-                .orElseThrow(() -> new IllegalArgumentException("Question not found"));
+    public void submitAnswers(SubmitAnswerRequest request) {
+        List<Long> questionIds = request.getAnswers().stream()
+                .map(SubmitAnswerRequest.AnswerItem::getQuestionId)
+                .collect(Collectors.toList());
 
-        InterviewAnswer newAnswer = InterviewAnswer.builder()
-                .question(question)
-                .answerText(request.getAnswerText())
-                .build();
+        Map<Long, InterviewQuestion> questionMap = interviewQuestionRepository.findAllById(questionIds).stream()
+                .collect(Collectors.toMap(InterviewQuestion::getId, q -> q));
 
-        InterviewAnswer savedAnswer = interviewAnswerRepository.save(newAnswer);
+        List<InterviewAnswer> newAnswers = request.getAnswers().stream()
+                .map(item -> {
+                    InterviewQuestion question = questionMap.get(item.getQuestionId());
+                    if (question == null) {
+                        throw new IllegalArgumentException("Question not found for ID: " + item.getQuestionId());
+                    }
+                    return InterviewAnswer.builder()
+                            .question(question)
+                            .answerText(item.getAnswerText())
+                            .build();
+                })
+                .collect(Collectors.toList());
 
-        return AnswerResponse.fromEntity(savedAnswer);
+        interviewAnswerRepository.saveAll(newAnswers);
     }
 
     @Transactional
