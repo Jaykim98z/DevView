@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.time.LocalDateTime;
+
 /**
  * 전역 예외 처리기
  * 애플리케이션 전체에서 발생하는 예외를 일관성 있게 처리
@@ -25,8 +27,9 @@ public class GlobalExceptionHandler {
         log.error("잘못된 요청: {}", e.getMessage());
 
         ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(String.valueOf(HttpStatus.BAD_REQUEST.value()))
                 .message(e.getMessage())
-                .status(HttpStatus.BAD_REQUEST.value())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         return ResponseEntity.badRequest().body(errorResponse);
@@ -59,8 +62,9 @@ public class GlobalExceptionHandler {
         log.error("런타임 오류 발생", e);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
                 .message("서버 처리 중 오류가 발생했습니다.")
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
@@ -88,8 +92,9 @@ public class GlobalExceptionHandler {
         log.error("예상치 못한 오류 발생", e);
 
         ErrorResponse errorResponse = ErrorResponse.builder()
+                .errorCode(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()))
                 .message("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
