@@ -8,6 +8,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @Service("alan")
 @RequiredArgsConstructor
@@ -20,9 +21,9 @@ public class AlanApiService implements ExternalAiApiService {
     private static final String API_URL = "https://kdt-api-function.azurewebsites.net/api/v1/question";
 
     @Override
-    public String getQuestionFromAi(String jobPosition, String careerLevel) {
+    public List<String> getQuestionFromAi(String jobPosition, String careerLevel) {
         // 이 메서드는 Gemini가 담당하므로 여기서는 간단히 구현
-        return "This method is handled by Gemini Service.";
+        return null;
     }
 
     /**

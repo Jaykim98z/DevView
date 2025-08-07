@@ -52,16 +52,28 @@ public class InterviewService {
         return InterviewResponse.fromEntity(savedInterview);
     }
 
-    public QuestionResponse askAndSaveQuestion(Long interviewId) {
+    public List<QuestionResponse> askAndSaveQuestions(Long interviewId) {
         Interview interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
 
-        String questionText = gemini.getQuestionFromAi(
+        List<String> questionTexts = gemini.getQuestionFromAi(
                 interview.getJobPosition(),
                 interview.getCareerLevel()
         );
 
-        return saveQuestion(interview, questionText);
+        List<InterviewQuestion> newQuestions = questionTexts.stream()
+                .map(text -> InterviewQuestion.builder()
+                        .interview(interview)
+                        .text(text)
+                        .category(interview.getJobPosition())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<InterviewQuestion> savedQuestions = interviewQuestionRepository.saveAll(newQuestions);
+
+        return savedQuestions.stream()
+                .map(QuestionResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Transactional

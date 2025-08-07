@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/interviews")
 @RequiredArgsConstructor
@@ -26,8 +28,8 @@ public class InterviewController {
     }
 
     @PostMapping("/{interviewId}/questions")
-    public ResponseEntity<QuestionResponse> askQuestion(@PathVariable Long interviewId) {
-        QuestionResponse response = interviewService.askAndSaveQuestion(interviewId);
+    public ResponseEntity<List<QuestionResponse>> askQuestions(@PathVariable Long interviewId) {
+        List<QuestionResponse> response = interviewService.askAndSaveQuestions(interviewId);
 
         return ResponseEntity.ok(response);
     }

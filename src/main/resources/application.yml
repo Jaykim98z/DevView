@@ -50,10 +50,6 @@ spring:
     activate:
       on-profile: "dev"
 
-  sql:
-    init:
-      mode: always
-
   # PostgreSQL 설정 (개발용)
   datasource:
     driver-class-name: org.postgresql.Driver
