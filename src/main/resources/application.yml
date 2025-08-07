@@ -11,7 +11,6 @@ spring:
   thymeleaf:
     cache: false
 
-
   # OAuth2 설정
   security:
     oauth2:
@@ -33,7 +32,6 @@ spring:
             user-name-attribute: email
 
 
-
 # Gemini API 키 설정 (환경변수에서 가져옴)
 gemini:
   api-key: ${GEMINI_API_KEY}
@@ -49,10 +47,6 @@ spring:
   config:
     activate:
       on-profile: "dev"
-
-  sql:
-    init:
-      mode: always
 
   # PostgreSQL 설정 (개발용)
   datasource:
