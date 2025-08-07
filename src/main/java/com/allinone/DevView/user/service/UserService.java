@@ -73,6 +73,7 @@ public class UserService {
 
     /**
      * 로그인 처리
+     * 주의: Spring Security 폼 로그인을 사용하는 경우 이 메서드는 직접 호출되지 않음
      *
      * @param request 로그인 요청 데이터
      * @return UserResponse 로그인한 사용자 정보
@@ -88,13 +89,21 @@ public class UserService {
                     return new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
                 });
 
-        // 2. 로컬 사용자인지 확인 (구글 사용자 제외)
+        // 2. OAuth2 사용자인지 확인 (패스워드가 null인 경우)
+        if (user.getPassword() == null) {
+            log.warn("로그인 실패 - OAuth2 사용자: email={}, provider={}",
+                    request.getEmail(), user.getProvider());
+            throw new IllegalArgumentException("소셜 로그인을 이용해주세요.");
+        }
+
+        // 3. 로컬 사용자인지 확인
         if (!user.isLocalUser()) {
-            log.warn("로그인 실패 - 소셜 사용자: email={}, provider={}", request.getEmail(), user.getProvider());
+            log.warn("로그인 실패 - 소셜 사용자: email={}, provider={}",
+                    request.getEmail(), user.getProvider());
             throw new IllegalArgumentException("소셜 로그인 사용자입니다. 해당 방식으로 로그인해주세요.");
         }
 
-        // 3. 비밀번호 일치 확인
+        // 4. 비밀번호 일치 확인
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.warn("로그인 실패 - 비밀번호 불일치: email={}", request.getEmail());
             throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");

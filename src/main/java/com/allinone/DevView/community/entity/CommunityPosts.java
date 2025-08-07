@@ -25,24 +25,31 @@ public class CommunityPosts {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "title", length = 50)
+    @Column(length = 50)
     private String title;
 
-    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "category")
+    @Column(length = 255)
     private String category;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "grade", length = 20, nullable = false)
+    @Column(length = 20, nullable = false)
     private Grade grade;
 
-    @Column(name = "level")
+    @Column(length = 255)
     private String level;
+
+    public String getLevelTag() {
+        return this.level;
+    }
+
+    @Column(name = "tech_tag", length = 50)
+    private String techTag;
 
     @Column(name = "like_count", nullable = false)
     private int likeCount;
@@ -53,23 +60,25 @@ public class CommunityPosts {
     @Column(name = "view_count", nullable = false)
     private int viewCount;
 
-    @Column(name = "summary", length = 1000)
+    @Column(length = 1000)
     private String summary;
 
     @Column(name = "interview_type", length = 20, nullable = false)
     private String interviewType;
 
-    @Column(name = "writer_name")
+    @Column(name = "writer_name", length = 255)
     private String writerName;
 
-    @Column(name = "score", nullable = false)
+    @Column(nullable = false)
     private int score;
 
-    @Column(name = "type")
+    @Column(length = 255)
     private String type;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
     }
 }
