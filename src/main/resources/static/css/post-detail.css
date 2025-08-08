@@ -1,4 +1,6 @@
 html, body {
+  margin: 0;
+  padding: 0;
   background: #f6f8fb;
   color: #2d3a4a;
 }

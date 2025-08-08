@@ -1,24 +1,24 @@
 html, body {
+  margin: 0;
+  padding: 0;
   background: #f6f8fb;
   color: #2d3a4a;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-.community-container {
+:where(.community-container) {
   max-width: 1240px;
   margin: 0 auto;
   padding: 0 16px 56px;
 }
 
-.community-header {
+:where(.community-container) .community-header {
   text-align: center;
   padding: 68px 0 20px;
 }
 
-.community-header h1 {
+:where(.community-container) .community-header h1 {
   margin: 0 0 10px;
   font-size: 46px;
   font-weight: 800;
@@ -26,19 +26,19 @@ html, body {
   color: #27364a;
 }
 
-.community-header p {
+:where(.community-container) .community-header p {
   margin: 0;
   font-size: 18px;
   color: #6b7c93;
 }
 
-.community-header .post-count {
+:where(.community-container) .community-header .post-count {
   margin-top: 8px;
   font-size: 14px;
   color: #8a95a5;
 }
 
-.filter-bar {
+:where(.community-container) .filter-bar {
   margin-top: 18px;
   background: #eff3f6;
   border-radius: 16px;
@@ -49,20 +49,20 @@ html, body {
   box-shadow: 0 8px 18px rgba(27, 39, 51, .06);
 }
 
-.left-controls {
+:where(.community-container) .left-controls {
   display: flex;
   align-items: center;
   gap: 10px;
   grid-column: 1/2;
 }
 
-.left-controls::before {
+:where(.community-container) .left-controls::before {
   content: "정렬:";
   font-size: 14px;
   color: #6b7c93;
 }
 
-.left-controls select {
+:where(.community-container) .left-controls select {
   height: 40px;
   padding: 0 12px;
   border-radius: 10px;
@@ -71,14 +71,14 @@ html, body {
   color: #2d3a4a;
 }
 
-.search-box {
+:where(.community-container) .search-box {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.search-box input[type="text"] {
+:where(.community-container) .search-box input[type="text"] {
   flex: 1;
   height: 48px;
   border-radius: 12px;
@@ -88,11 +88,9 @@ html, body {
   font-size: 16px;
 }
 
-.search-box input::placeholder {
-  color: #9aa7b5;
-}
+:where(.community-container) .search-box input::placeholder { color: #9aa7b5; }
 
-.search-box button {
+:where(.community-container) .search-box button {
   height: 44px;
   width: 44px;
   border-radius: 10px;
@@ -103,11 +101,9 @@ html, body {
   transition: transform .05s;
 }
 
-.search-box button:active {
-  transform: translateY(1px);
-}
+:where(.community-container) .search-box button:active { transform: translateY(1px); }
 
-.tag-filters {
+:where(.community-container) .tag-filters {
   grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
@@ -115,15 +111,15 @@ html, body {
   gap: 20px;
 }
 
-.tag-group-left,
-.tag-group-right {
+:where(.community-container) .tag-group-left,
+:where(.community-container) .tag-group-right {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.tag-filters button {
+:where(.community-container) .tag-filters button {
   height: 36px;
   padding: 0 12px;
   border-radius: 10px;
@@ -137,30 +133,28 @@ html, body {
   transition: border-color .15s, background .15s;
 }
 
-.tag-filters button:hover {
-  border-color: #cfd8e3;
-}
+:where(.community-container) .tag-filters button:hover { border-color: #cfd8e3; }
 
-.tag-filters button.active {
+:where(.community-container) .tag-filters button.active {
   background: #334155;
   color: #fff;
   border-color: #334155;
 }
 
-.tag-group-right button:first-child {
+:where(.community-container) .tag-group-right button:first-child {
   background: #eaf2ff;
   color: #2b6cb0;
   border-color: #d6e6ff;
 }
 
-.card-list {
+:where(.community-container) .card-list {
   width: 100%;
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 }
 
-.post-card {
+:where(.community-container) .post-card {
   width: 100%;
   max-width: none;
   background: #fff;
@@ -174,17 +168,17 @@ html, body {
   transition: box-shadow .15s;
 }
 
-.post-card:hover {
+:where(.community-container) .post-card:hover {
   box-shadow: 0 10px 22px rgba(27, 39, 51, .09);
 }
 
-.user-info {
+:where(.community-container) .user-info {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.profile-img {
+:where(.community-container) .profile-img {
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -192,12 +186,9 @@ html, body {
   border: 1px solid #e6edf5;
 }
 
-.user-info strong {
-  font-weight: 700;
-  color: #253243;
-}
+:where(.community-container) .user-info strong { font-weight: 700; color: #253243; }
 
-.user-meta {
+:where(.community-container) .user-meta {
   display: inline-block;
   margin-left: 8px;
   padding: 2px 8px;
@@ -208,13 +199,13 @@ html, body {
   border-radius: 999px;
 }
 
-.user-time {
+:where(.community-container) .user-time {
   margin-left: 8px;
   font-size: 12px;
   color: #9aa7b5;
 }
 
-.post-title {
+:where(.community-container) .post-title {
   margin: 6px 0 4px;
   font-size: 18px;
   font-weight: 800;
@@ -222,7 +213,7 @@ html, body {
   line-height: 1.25;
 }
 
-.post-summary {
+:where(.community-container) .post-summary {
   margin: 0;
   font-size: 14px;
   color: #667789;
@@ -233,7 +224,7 @@ html, body {
   overflow: hidden;
 }
 
-.post-score {
+:where(.community-container) .post-score {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -247,7 +238,7 @@ html, body {
   font-size: 14px;
 }
 
-.badge {
+:where(.community-container) .badge {
   display: inline-block;
   padding: 3px 8px;
   font-size: 12px;
@@ -257,19 +248,19 @@ html, body {
   color: #425466;
 }
 
-.badge--green {
+:where(.community-container) .badge--green {
   background: #eaf7f0;
   border-color: #cfe9db;
   color: #0f5132;
 }
 
-.badge--blue {
+:where(.community-container) .badge--blue {
   background: #eaf2ff;
   border-color: #cfe3ff;
   color: #235ea6;
 }
 
-.post-meta {
+:where(.community-container) .post-meta {
   display: flex;
   gap: 14px;
   font-size: 13px;
@@ -278,17 +269,14 @@ html, body {
   border-top: 1px solid #eef2f6;
 }
 
-.post-meta i {
-  margin-right: 6px;
-  opacity: .9;
-}
+:where(.community-container) .post-meta i { margin-right: 6px; opacity: .9; }
 
-.post-meta span {
+:where(.community-container) .post-meta span {
   display: inline-flex;
   align-items: center;
 }
 
-.detail-link {
+:where(.community-container) .detail-link {
   margin-top: 8px;
   align-self: flex-end;
   font-size: 14px;
@@ -299,34 +287,28 @@ html, body {
   border-radius: 8px;
 }
 
-.detail-link:hover {
-  background: #e8f2ff;
-}
+:where(.community-container) .detail-link:hover { background: #e8f2ff; }
 
 @media (max-width: 1024px) {
-  .card-list {
+  :where(.community-container) .card-list {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  .filter-bar {
-    grid-template-columns: 1fr;
-  }
-  .tag-filters {
+  :where(.community-container) .filter-bar { grid-template-columns: 1fr; }
+  :where(.community-container) .tag-filters {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  .tag-group-left,
-  .tag-group-right {
-    justify-content: flex-start;
-  }
-  .card-list {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
+  :where(.community-container) .tag-group-left,
+  :where(.community-container) .tag-group-right { justify-content: flex-start; }
+  :where(.community-container) .card-list { grid-template-columns: 1fr; gap: 16px; }
 }
+/* ===== 스코프 끝 ===== */
+
+/* FAB은 전역 고정 버튼이므로 그대로 둠 */
 .fab-write{
   position: fixed;
   right: 24px;
@@ -335,36 +317,25 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-
   padding: 12px 18px;
   border-radius: 9999px;
-
   background: #2563eb;
   color: #fff;
   font-family: 'Noto Sans KR', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   font-weight: 700;
   font-size: 14px;
   text-decoration: none;
-
   box-shadow: 0 10px 20px rgba(37,99,235,0.25), 0 4px 8px rgba(0,0,0,0.08);
   transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
 }
-
 .fab-write:hover{
   transform: translateY(-2px);
   box-shadow: 0 14px 24px rgba(37,99,235,0.28), 0 6px 12px rgba(0,0,0,0.10);
   opacity: 0.95;
 }
-
 .fab-icon{ line-height: 1; }
 .fab-text{ line-height: 1; }
 
-/* 모바일 터치 영역 확대 */
 @media (max-width: 720px) {
-  .fab-write{
-    right: 16px;
-    bottom: 16px;
-    padding: 14px 18px;
-    font-size: 15px;
-  }
+  .fab-write{ right: 16px; bottom: 16px; padding: 14px 18px; font-size: 15px; }
 }
