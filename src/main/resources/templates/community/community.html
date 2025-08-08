@@ -30,22 +30,26 @@
         </div>
 
         <div class="tag-filters">
-            <button class="active">전체</button>
-            <button>백엔드</button>
-            <button>프론트엔드</button>
-            <button>풀스택</button>
-            <button>DevOps</button>
-            <button>주니어</button>
-            <button>미드레벨</button>
-            <button>시니어</button>
+            <div class="tag-group-left">
+                <button class="active">전체</button>
+                <button>백엔드</button>
+                <button>프론트엔드</button>
+                <button>풀스택</button>
+                <button>DevOps</button>
+            </div>
+            <div class="tag-group-right">
+                <button>주니어</button>
+                <button>미드레벨</button>
+                <button>시니어</button>
+            </div>
         </div>
     </div>
 
-    <!-- 게시글 카드 목록 -->
+        <!-- 게시글 카드 목록 -->
     <div class="card-list">
         <div class="post-card" th:each="post : ${posts}">
             <div class="user-info">
-                <img class="profile-img" src="/img/default-profile.png" alt="기본 프로필">
+                <img th:src="@{/img/profile-default.svg}" alt="프로필" class="profile-img" />
                 <div>
                     <strong th:text="${post.username}">작성자</strong>
                     <span class="user-meta"
