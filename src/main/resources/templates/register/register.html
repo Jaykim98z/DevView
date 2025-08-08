@@ -12,7 +12,9 @@
 <header class="header">
     <div class="header-container">
         <div class="logo">
-            <img src="/img/logo.svg" alt="DevView" class="logo-image">
+            <a href="/">
+                <img src="/img/logo.svg" alt="DevView" class="logo-image">
+            </a>
         </div>
         <a href="/" class="back-link">
             <i class="fas fa-arrow-left"></i>
@@ -58,7 +60,7 @@
                             id="password"
                             name="password"
                             class="form-input"
-                            placeholder="비밀번호를 입력해주세요"
+                            placeholder="비밀번호를 입력해주세요 (8자 이상)"
                             maxlength="20"
                             required
                     >
@@ -66,14 +68,15 @@
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
-                <div class="form-hint">영어+숫자+특수문자 조합 8자리 이상 20자리 이하</div>
-                <div class="password-strength">
-                    <span class="strength-text">약</span>
+                <div class="form-hint">영문, 숫자, 특수문자를 포함하여 8자 이상 입력해주세요</div>
+                <div class="password-strength" id="passwordStrength">
+                    <span class="strength-text">보통</span>
                     <div class="strength-bar">
                         <div class="strength-fill" id="strengthFill"></div>
                     </div>
                 </div>
                 <div class="error-message" id="passwordError"></div>
+                <div class="success-message" id="passwordSuccess"></div>
             </div>
 
             <!-- 비밀번호 확인 필드 -->

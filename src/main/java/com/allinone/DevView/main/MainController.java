@@ -10,7 +10,7 @@ public class MainController {
 
     @GetMapping("/")
     public String index(HttpSession session, Model model) {
-        model.addAttribute("user", session.getAttribute("user"));
+        model.addAttribute("user", session.getAttribute("loginUser"));
         return "main/index"; // src/main/resources/templates/main/index.html
     }
 }

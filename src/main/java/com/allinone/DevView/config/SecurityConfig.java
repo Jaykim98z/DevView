@@ -1,6 +1,9 @@
 package com.allinone.DevView.config;
 
 import com.allinone.DevView.security.OAuth2SuccessHandler;
+import com.allinone.DevView.user.dto.response.UserResponse;
+import com.allinone.DevView.user.entity.User;
+import com.allinone.DevView.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +17,10 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Spring Security 설정
@@ -26,7 +31,11 @@ import java.util.Map;
 public class SecurityConfig {
 
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    // 세션 키 상수 (OAuth2SuccessHandler와 동일)
+    private static final String LOGIN_USER = "loginUser";
 
     /**
      * 비밀번호 암호화에 사용할 인코더 빈 등록
@@ -54,7 +63,7 @@ public class SecurityConfig {
 
                 // 폼 로그인 설정 (일반 로그인)
                 .formLogin(form -> form
-                        .loginPage("/user/login") // 커스텀 로그인 페이지 지정 ⭐
+                        .loginPage("/user/login") // 커스텀 로그인 페이지 지정
                         .loginProcessingUrl("/api/users/login") // 로그인 처리 URL
                         .usernameParameter("email") // 이메일을 username으로 사용
                         .passwordParameter("password")
@@ -92,6 +101,11 @@ public class SecurityConfig {
                         // Swagger 테스트용 임시조치
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/v1/interviews/**").permitAll()
                         // 나머지 요청은 인증 필요
+                        .requestMatchers(
+                                "/swagger*/",     // swagger로 시작하는 모든 경로
+                                "/v3/",          // OpenAPI 3.0 문서
+                                "/webjars/**"      // Swagger UI 리소스
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
 
@@ -108,20 +122,65 @@ public class SecurityConfig {
 
     /**
      * 일반 로그인 성공 핸들러
-     * JSON 응답 반환
+     * JSON 응답 반환 + 세션에 사용자 정보 저장
      */
     @Bean
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
         return (request, response, authentication) -> {
-            response.setStatus(200);
-            response.setContentType("application/json;charset=UTF-8");
+            try {
+                // 1. 인증된 사용자의 이메일 가져오기
+                String email = authentication.getName();
 
-            Map<String, Object> result = new HashMap<>();
-            result.put("success", true);
-            result.put("message", "로그인 성공");
-            result.put("email", authentication.getName());
+                // 2. UserRepository를 통해 사용자 정보 조회 (순환 참조 방지)
+                Optional<User> userOptional = userRepository.findByEmail(email);
 
-            response.getWriter().write(objectMapper.writeValueAsString(result));
+                if (userOptional.isEmpty()) {
+                    // 사용자를 찾을 수 없는 경우 에러 응답
+                    response.setStatus(500);
+                    response.setContentType("application/json;charset=UTF-8");
+
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("success", false);
+                    result.put("message", "사용자 정보를 찾을 수 없습니다.");
+
+                    response.getWriter().write(objectMapper.writeValueAsString(result));
+                    return;
+                }
+
+                User user = userOptional.get();
+                UserResponse userResponse = UserResponse.from(user);
+
+                // 3. 세션에 사용자 정보 저장 (OAuth2와 동일한 키 사용)
+                HttpSession session = request.getSession();
+                session.setAttribute(LOGIN_USER, userResponse);
+
+                // 4. JSON 응답 반환
+                response.setStatus(200);
+                response.setContentType("application/json;charset=UTF-8");
+
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", true);
+                result.put("message", "로그인 성공");
+                result.put("email", email);
+                result.put("username", userResponse.getUsername());
+
+                response.getWriter().write(objectMapper.writeValueAsString(result));
+
+                System.out.println("로컬 로그인 성공 - 세션 저장 완료: userId=" + userResponse.getUserId() + ", email=" + email);
+
+            } catch (Exception e) {
+                // 예외 발생 시 에러 응답
+                response.setStatus(500);
+                response.setContentType("application/json;charset=UTF-8");
+
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", false);
+                result.put("message", "로그인 처리 중 오류가 발생했습니다.");
+
+                response.getWriter().write(objectMapper.writeValueAsString(result));
+
+                System.err.println("로컬 로그인 핸들러 오류: " + e.getMessage());
+            }
         };
     }
 

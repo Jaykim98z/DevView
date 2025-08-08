@@ -114,6 +114,27 @@ public class UserService {
     }
 
     /**
+     * 이메일로 사용자 정보 조회 (Spring Security 로그인 성공 핸들러에서 사용)
+     *
+     * @param email 조회할 이메일
+     * @return UserResponse 사용자 정보
+     * @throws IllegalArgumentException 사용자를 찾을 수 없을 때
+     */
+    @Transactional(readOnly = true)
+    public UserResponse getUserByEmail(String email) {
+        log.debug("이메일로 사용자 정보 조회: email={}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    log.warn("사용자 조회 실패 - 존재하지 않음: email={}", email);
+                    return new IllegalArgumentException("사용자를 찾을 수 없습니다.");
+                });
+
+        log.debug("이메일로 사용자 정보 조회 성공: userId={}, email={}", user.getUserId(), user.getEmail());
+        return UserResponse.from(user);
+    }
+
+    /**
      * 사용자 ID로 사용자 정보 조회
      *
      * @param userId 조회할 사용자 ID
@@ -165,5 +186,4 @@ public class UserService {
         log.debug("사용자명 중복 확인 결과: username={}, available={}", username, available);
         return available;
     }
-
 }
