@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Interview Session - DevView</title>
+    <link rel="stylesheet" th:href="@{/css/interview-session.css}">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="interview-container">
+    <div class="qa-section">
+        <div class="question-header">
+            <h2 id="question-counter">질문 1/5</h2>
+            <div id="timer">시간: 15:00</div>
+        </div>
+
+        <div class="chat-area">
+            <div class="message ai-message">
+                <p id="question-text">Loading question...</p>
+            </div>
+        </div>
+
+        <div class="answer-input-area">
+            <textarea id="answer-textarea" placeholder="답변을 입력해주세요..." rows="5"></textarea>
+            <div class="answer-footer">
+                <span id="char-counter">0/500 글자</span>
+                <button id="submit-answer-btn" class="submit-btn">답변 제출</button>
+            </div>
+        </div>
+    </div>
+
+    <aside class="progress-section">
+        <h3>면접 진행률</h3>
+        <ul id="progress-list" class="progress-list">
+        </ul>
+        <div class="interview-stats">
+            <p>경과 시간: <span id="elapsed-time">0:00</span></p>
+            <p>평균 응답 시간: <span id="avg-response-time">0:00</span></p>
+        </div>
+    </aside>
+</main>
+
+<script th:src="@{/js/interview-session.js}"></script>
+</body>
+</html>
