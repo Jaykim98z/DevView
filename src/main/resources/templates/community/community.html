@@ -49,7 +49,7 @@
     <div class="card-list">
         <div class="post-card" th:each="post : ${posts}">
             <div class="user-info">
-                <img class="profile-img" src="/img/default-profile.png" alt="기본 프로필">
+                <img th:src="@{/img/profile-default.svg}" alt="프로필" class="profile-img" />
                 <div>
                     <strong th:text="${post.username}">작성자</strong>
                     <span class="user-meta"
