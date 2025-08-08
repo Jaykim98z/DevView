@@ -1,4 +1,4 @@
-package com.allinone.DevView.security;
+package com.allinone.DevView.security.service;
 
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
