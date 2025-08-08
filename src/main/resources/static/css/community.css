@@ -327,3 +327,44 @@ html, body {
     gap: 16px;
   }
 }
+.fab-write{
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 12px 18px;
+  border-radius: 9999px;
+
+  background: #2563eb;
+  color: #fff;
+  font-family: 'Noto Sans KR', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+
+  box-shadow: 0 10px 20px rgba(37,99,235,0.25), 0 4px 8px rgba(0,0,0,0.08);
+  transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+
+.fab-write:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(37,99,235,0.28), 0 6px 12px rgba(0,0,0,0.10);
+  opacity: 0.95;
+}
+
+.fab-icon{ line-height: 1; }
+.fab-text{ line-height: 1; }
+
+/* 모바일 터치 영역 확대 */
+@media (max-width: 720px) {
+  .fab-write{
+    right: 16px;
+    bottom: 16px;
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+}
