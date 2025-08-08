@@ -1,4 +1,4 @@
-<header class="header">
+<header th:fragment="header" class="header">
     <div class="header-inner">
         <!--  로고 + 메뉴 -->
         <div class="left-group">
@@ -22,18 +22,49 @@
         </form>
 
         <!--  시작하기 + 로그인/마이페이지 -->
-        <div class="user-menu" th:classappend="${session.user != null} ? ' logged-in' : ' logged-out'">
+        <div class="user-menu" th:classappend="${session.loginUser != null} ? ' logged-in' : ' logged-out'">
             <a class="start-btn" href="/interview/start">
                 <img src="/img/play.svg" alt="시작 아이콘"> 시작하기
             </a>
-            <div th:if="${session.user == null}">
-                <a href="/login">로그인</a>
-                <a href="/mypage"><img src="/img/my.svg"> 마이페이지</a>
+
+            <!-- 로그아웃 상태 (로그인하지 않은 경우) -->
+            <div th:if="${session.loginUser == null}" class="auth-buttons">
+                <a href="/user/login" class="login-link">로그인</a>
+                <a href="/user/register" class="register-link">회원가입</a>
             </div>
-            <div th:if="${session.user != null}">
-                <a href="/logout">로그아웃</a>
-                <a href="/mypage"><img src="/img/my.svg"></a>
+
+            <!-- 로그인 상태 -->
+            <div th:if="${session.loginUser != null}" class="user-info">
+                <span class="username" th:text="'안녕하세요, ' + ${session.loginUser.username} + '님'">안녕하세요, 사용자명님</span>
+                <a href="#" onclick="logout()" class="logout-btn">로그아웃</a>
+                <a href="/mypage" class="mypage-btn">
+                    <img src="/img/my.svg" alt="마이페이지">
+                </a>
             </div>
         </div>
     </div>
+
+    <!-- 로그아웃 처리를 위한 JavaScript -->
+    <script>
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/user/logout';
+
+                // CSRF 보호가 활성화된 경우를 대비
+                const csrfToken = document.querySelector('meta[name="_csrf"]');
+                if (csrfToken) {
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = '_csrf';
+                    csrfInput.value = csrfToken.getAttribute('content');
+                    form.appendChild(csrfInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
 </header>

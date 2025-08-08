@@ -12,12 +12,8 @@ body {
     min-height: 100vh;
 }
 
-/* 헤더 스타일 */
+/* 헤더 스타일 - 메인 헤더와 완전 동일하게 */
 .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 24px;
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     font-family: 'Noto Sans KR', sans-serif;
@@ -26,53 +22,53 @@ body {
     z-index: 100;
 }
 
-/* 로고 스타일 - 기존과 동일 */
+.header-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 80px;
+    box-sizing: border-box;
+}
+
+/* 로고 스타일 - 메인 헤더와 동일 */
 .logo {
     display: flex;
     align-items: center;
-    gap: 8px;
     text-decoration: none;
 }
 
-.logo a {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
+.logo-image {
+    height: 77px;
+    width: 267px;
 }
 
-.logo img {
-    height: 32px;
-}
-
-.logo-text {
-    font-size: 20px;
-    font-weight: 700;
-    color: #2c3e50;
-}
-
-/* 메인으로 버튼 스타일 */
-.back-to-main {
-    display: flex;
-    align-items: center;
-}
-
+/* 메인으로 버튼 스타일 - 메인 헤더의 버튼 스타일과 통일 */
 .back-link {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #34495e;
+    color: #374B5F;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
 }
 
 .back-link:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
     color: #2980b9;
 }
 
 .back-link i {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 /* 메인 컨텐츠 */
@@ -164,8 +160,6 @@ body {
     color: #007bff;
 }
 
-/* 체크박스 스타일 - 제거됨 */
-
 /* 에러 메시지 */
 .error-message {
     font-size: 0.8rem;
@@ -200,8 +194,6 @@ body {
     background-color: #6c757d;
     cursor: not-allowed;
 }
-
-/* 구분선 - 제거됨 */
 
 /* Google 로그인 버튼 */
 .google-login-btn {
@@ -289,10 +281,31 @@ body {
 }
 
 /* 반응형 디자인 */
+@media (max-width: 1200px) {
+    .header-container {
+        padding: 0 16px;
+    }
+}
+
 @media (max-width: 768px) {
+    .header-container {
+        padding: 0 12px;
+        height: 70px;
+    }
+
+    .logo-image {
+        height: 60px;
+        width: 200px;
+    }
+
+    .back-link {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+
     .main-container {
         padding: 1rem;
-        min-height: calc(100vh - 60px);
+        min-height: calc(100vh - 70px);
     }
 
     .login-card {
@@ -307,13 +320,28 @@ body {
         font-size: 1.5rem;
         margin-bottom: 1.5rem;
     }
-
-    .header-container {
-        padding: 0 0.5rem;
-    }
 }
 
 @media (max-width: 480px) {
+    .header-container {
+        height: 60px;
+        padding: 0 8px;
+    }
+
+    .logo-image {
+        height: 50px;
+        width: 160px;
+    }
+
+    .back-link {
+        font-size: 13px;
+        padding: 5px 8px;
+    }
+
+    .main-container {
+        min-height: calc(100vh - 60px);
+    }
+
     .login-card {
         padding: 1rem;
     }

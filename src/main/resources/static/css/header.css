@@ -49,6 +49,7 @@
     text-decoration: none;
     color: #374b5f;
     font-size: 16px;
+    transition: color 0.2s ease;
 }
 
 .nav-menu a:hover {
@@ -71,6 +72,12 @@
     border-radius: 6px;
     font-size: 16px;
     box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #4ab2e3;
 }
 
 .search-btn {
@@ -82,6 +89,11 @@
     border: none;
     padding: 0;
     cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.search-btn:hover {
+    opacity: 0.7;
 }
 
 .search-btn img {
@@ -97,20 +109,9 @@
     gap: 16px;
 }
 
-.user-menu a {
-    color: #374B5F;
-    text-decoration: none;
-    font-size: 16px;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
-    width: 130px;
-}
-
 /* 시작하기 버튼 */
 .start-btn {
-    background-color: #4ab2e3;
+    background-color: #4ab2e3 !important;
     color: #ffffff !important;
     border-radius: 6px;
     font-size: 16px;
@@ -122,21 +123,233 @@
     gap: 6px;
     text-decoration: none;
     box-sizing: border-box;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+}
+
+.start-btn:hover {
+    background-color: #3a9bc1 !important;
 }
 
 .start-btn img {
     height: 14px;
 }
 
-/* 로그인 상태별 스타일 차별화 */
-.user-menu.logged-in a:first-child {
-    font-weight: bold;
-    color: #e74c3c; /* 로그아웃 버튼 빨간색 */
-    padding-left: 10px;
+/* 로그아웃 상태 (비로그인) - 로그인/회원가입 버튼들 */
+.auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.user-menu.logged-out a:first-child:not(.start-btn) {
-    font-weight: bold;
-    color: #4ab2e3;
-    padding-left: 10px;
+.auth-buttons a {
+    color: #374B5F;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.login-link {
+    background-color: transparent;
+    border: 1px solid #4ab2e3;
+    color: #4ab2e3 !important;
+}
+
+.login-link:hover {
+    background-color: #4ab2e3;
+    color: #ffffff !important;
+}
+
+.register-link {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    color: #374B5F !important;
+}
+
+.register-link:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+/* 로그인 상태 - 사용자 정보 */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.username {
+    color: #374B5F;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    white-space: nowrap;
+}
+
+.logout-btn {
+    color: #e74c3c !important;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #e74c3c;
+    background-color: transparent;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background-color: #e74c3c;
+    color: #ffffff !important;
+}
+
+.mypage-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.mypage-btn:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.mypage-btn img {
+    height: 20px;
+    width: 20px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+    .search-box input {
+        width: 220px;
+    }
+
+    .header-inner {
+        padding: 0 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-inner {
+        padding: 0 12px;
+        height: 70px;
+    }
+
+    .left-group {
+        gap: 16px;
+    }
+
+    .logo img {
+        height: 60px;
+        width: 200px;
+    }
+
+    .nav-menu {
+        display: none; /* 모바일에서 네비게이션 숨김 */
+    }
+
+    .search-box {
+        display: none; /* 모바일에서 검색창 숨김 */
+    }
+
+    .user-menu {
+        gap: 8px;
+    }
+
+    .start-btn {
+        font-size: 14px;
+        height: 36px;
+        padding: 0 12px;
+    }
+
+    .auth-buttons a {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+
+    .username {
+        font-size: 13px;
+        padding: 6px 8px;
+    }
+
+    .logout-btn {
+        font-size: 13px;
+        padding: 6px 8px;
+    }
+
+    .mypage-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .mypage-btn img {
+        height: 16px;
+        width: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-inner {
+        height: 60px;
+        padding: 0 8px;
+    }
+
+    .logo img {
+        height: 50px;
+        width: 160px;
+    }
+
+    .user-menu {
+        gap: 6px;
+    }
+
+    .start-btn {
+        font-size: 13px;
+        height: 32px;
+        padding: 0 10px;
+    }
+
+    .auth-buttons {
+        gap: 6px;
+    }
+
+    .auth-buttons a {
+        font-size: 13px;
+        padding: 5px 8px;
+    }
+
+    .username {
+        font-size: 12px;
+        padding: 5px 6px;
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .logout-btn {
+        font-size: 12px;
+        padding: 5px 6px;
+    }
+
+    .mypage-btn {
+        width: 32px;
+        height: 32px;
+    }
 }
