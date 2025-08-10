@@ -7,30 +7,30 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class ScoreGraphDto {
+public class CareerChartDto {
 
-    private final List<String> labels; // 날짜 예: ["07월 01일", "07월 15일"]
-    private final List<Integer> scores; // 점수 예: [75, 80, 85]
+    private final List<String> labels; // 직무 이름 예: ["백엔드", "프론트", "AI"]
+    private final List<Integer> data;  // 해당 직무 선호도/횟수 예: [40, 30, 30]
 
-    public ScoreGraphDto(List<String> labels, List<Integer> scores) {
+    public CareerChartDto(List<String> labels, List<Integer> data) {
         this.labels = labels;
-        this.scores = scores;
+        this.data = data;
     }
 
-    /*** Thymeleaf에서 사용될 JSON 문자열로 반환*/
+    /*** Thymeleaf에서 사용될 JSON 문자열로 반환 */
     public String getLabelsJson() {
         return toJson(labels);
     }
 
-    public String getScoresJson() {
-        return toJson(scores);
+    public String getDataJson() {
+        return toJson(data);
     }
 
     private String toJson(Object obj) {
         try {
             return new ObjectMapper().writeValueAsString(obj);
         } catch (JsonProcessingException e) {
-            return "[]"; // fallback
+            return "[]";
         }
     }
 }

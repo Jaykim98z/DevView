@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service("gemini")
 @RequiredArgsConstructor
 public class GeminiApiService implements ExternalAiApiService {
@@ -18,15 +22,19 @@ public class GeminiApiService implements ExternalAiApiService {
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
     @Override
-    public String getQuestionFromAi(String jobPosition, String careerLevel) {
+    public List<String> getQuestionFromAi(String jobPosition, String careerLevel) {
         String prompt = String.format(
                 "You are an interviewer for a %s position targeting a %s developer. " +
-                        "Please ask one single, clear, and essential technical question relevant to this role. " +
-                        "Do not add any introductory or closing remarks, just the question itself.",
+                        "Please generate exactly 5 distinct, essential technical questions for this role. " +
+                        "Each question must be on a new line. Do not number them or add any other text.",
                 jobPosition, careerLevel
         );
 
-        return generateContent(prompt);
+        String rawResponse = generateContent(prompt);
+
+        return Arrays.stream(rawResponse.split("\n"))
+                .filter(line -> !line.trim().isEmpty())
+                .collect(Collectors.toList());
     }
 
     public String generateContent(String prompt) {

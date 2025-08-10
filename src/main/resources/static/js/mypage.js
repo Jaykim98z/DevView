@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // 1. 면접 점수 line chart
+    // 🔹 1. 점수 변화 차트 (Line)
     const scoreCtx = document.getElementById("scoreChart");
     if (scoreCtx) {
         const labels = JSON.parse(scoreCtx.dataset.labels || '[]');
@@ -12,12 +12,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     label: '면접 점수',
                     data: scores,
+                    borderColor: 'rgb(75, 192, 192)',
                     borderWidth: 2,
                     fill: false,
                     tension: 0.2
                 }]
             },
             options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -28,25 +33,34 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // 2. 관심 직무 doughnut chart
+    // 🔹 2. 관심 직무 차트 (Doughnut)캔버스에 그려져서 js에서 지정필요
     const careerCtx = document.getElementById("careerChart");
     if (careerCtx) {
+        const labels = JSON.parse(careerCtx.dataset.labels || '[]');
+        const data = JSON.parse(careerCtx.dataset.data || '[]');
+
         new Chart(careerCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Frontend', 'Backend', 'AI', 'Data', 'DevOps'],
+                labels: labels,
                 datasets: [{
-                    label: '직무 분포',
-                    data: [25, 30, 20, 15, 10],
+                    label: '관심 직무',
+                    data: data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(153, 102, 255, 0.6)',
+                        'rgba(255, 159, 64, 0.6)'
+                    ],
                     borderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'bottom'
-                    },
+                    legend: { position: 'bottom' },
                     title: {
                         display: true,
                         text: '나의 관심 직무 통계'

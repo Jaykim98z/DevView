@@ -15,12 +15,7 @@ public class InterviewResponse {
     public static InterviewResponse fromEntity(Interview interview) {
         return InterviewResponse.builder()
                 .interviewId(interview.getId())
-                // String → Enum 변환 (대문자 일치 필요)
-                .interviewType(
-                        interview.getInterviewType() != null
-                                ? InterviewType.valueOf(interview.getInterviewType().toUpperCase())
-                                : null
-                )
+                .interviewType(interview.getInterviewType())
                 .jobPosition(interview.getJobPosition())
                 .build();
     }

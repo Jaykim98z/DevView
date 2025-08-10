@@ -2,7 +2,6 @@ package com.allinone.DevView.interview.controller;
 
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
-import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
@@ -11,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/interviews")
@@ -26,21 +27,29 @@ public class InterviewController {
     }
 
     @PostMapping("/{interviewId}/questions")
-    public ResponseEntity<QuestionResponse> askQuestion(@PathVariable Long interviewId) {
-        QuestionResponse response = interviewService.askAndSaveQuestion(interviewId);
+    public ResponseEntity<List<QuestionResponse>> askQuestions(@PathVariable Long interviewId) {
+        List<QuestionResponse> response = interviewService.askAndSaveQuestions(interviewId);
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/answers")
-    public ResponseEntity<AnswerResponse> submitAnswer(@RequestBody SubmitAnswerRequest request) {
-        AnswerResponse response = interviewService.submitAnswer(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<Void> submitAnswers(@RequestBody SubmitAnswerRequest request) {
+        interviewService.submitAnswers(request);
+
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{interviewId}/end")
     public ResponseEntity<InterviewResultResponse> endInterview(@PathVariable Long interviewId) {
         InterviewResultResponse response = interviewService.endInterview(interviewId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{interviewId}/results")
+    public ResponseEntity<InterviewResultResponse> getInterviewResult(@PathVariable Long interviewId) {
+        InterviewResultResponse response = interviewService.getInterviewResult(interviewId);
 
         return ResponseEntity.ok(response);
     }

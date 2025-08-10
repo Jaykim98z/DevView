@@ -14,7 +14,7 @@ public class MypageResponseDto {
     private final String email;
     private final String job;
     private final String careerLevel;
-    private final String profileImageUrl;
+    private String profileImageUrl;
 
     // 📌 계정 정보
     private final Long memberId;
@@ -28,4 +28,5 @@ public class MypageResponseDto {
     // 📋 상세 리스트
     private final List<InterviewDto> interviews;
     private final List<ScrapDto> scraps;
+
 }

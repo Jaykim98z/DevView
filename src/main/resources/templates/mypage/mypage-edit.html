@@ -2,6 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>프로필 수정</title>
+    <meta charset="UTF-8">
     <link rel="stylesheet" th:href="@{/css/mypage.css}">
     <script th:src="@{/js/mypage-edit.js}" defer></script>
 </head>
@@ -14,28 +15,22 @@
 
     <h1>프로필 수정</h1>
 
-    <!-- 프로필 이미지 업로드 영역 -->
+    <!-- 🔹 프로필 이미지 업로드 영역 -->
     <div class="form-box">
         <h3>프로필 이미지</h3>
         <div class="upload-section">
             <div class="image-preview">
-                <img th:if="${user.profileImageUrl != null}"
-                     th:src="@{${user.profileImageUrl}}"
-                     alt="프로필 이미지"
-                     class="profile-img-preview">
-
-                <img th:unless="${user.profileImageUrl != null}"
-                     th:src="@{/img/avatar_ai.png}"
-                     alt="기본 이미지"
-                     class="profile-img-preview">
+                <img th:src="${user.profileImageUrl != null} ? ${user.profileImageUrl} : '/img/진욱.svg'" alt="프로필 이미지" class="profile-img-preview" id="imagePreview" />
 
                 <form th:action="@{/mypage/profile/image/delete}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="submit" class="btn-delete">이미지 삭제</button>
                 </form>
             </div>
 
 
             <form th:action="@{/mypage/profile/image}" method="post" enctype="multipart/form-data">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="upload-box" id="dropArea">
                     <p>이미지를 드래그하거나 클릭하여 업로드<br>(JPG, JPEG, PNG만 가능)</p>
                     <input type="file" id="imageInput" name="imageFile" accept="image/*" hidden>
@@ -45,8 +40,9 @@
         </div>
     </div>
 
-    <!-- 사용자 정보 수정 영역 -->
+    <!-- 🔹 사용자 정보 수정 영역 -->
     <form th:action="@{/mypage/edit}" method="post" class="form-box">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
         <h3>개인 정보</h3>
 
         <div class="form-group">

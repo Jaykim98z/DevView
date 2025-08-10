@@ -1,11 +1,24 @@
 package com.allinone.DevView.common.util;
 
-import java.security.Principal;
+import com.allinone.DevView.security.CustomUserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 public class SecurityUtils {
 
-    public static Long getUserId(Principal principal) {
-        // principal.getName()이 사용자 ID를 포함한다고 가정
-        return Long.parseLong(principal.getName());
+    public static Long getUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("인증된 사용자가 없습니다.");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getUserId(); // CustomUserDetails에서 userId를 가져옴
+        }
+
+        throw new IllegalStateException("인증 객체가 CustomUserDetails가 아닙니다.");
     }
 }

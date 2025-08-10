@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class ErrorResponse {
 
     private final boolean success = false;
+    private final int status;
     private String message;
     private String errorCode;
     private LocalDateTime timestamp;
