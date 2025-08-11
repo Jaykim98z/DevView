@@ -3,11 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- CSRF Token Meta Tags -->
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-
     <title th:text="${pageTitle} + ' - DevView'">회원가입 - DevView</title>
     <link rel="stylesheet" href="/css/register.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -34,9 +29,6 @@
         <h1 class="register-title">회원가입</h1>
 
         <form id="registerForm" class="register-form">
-            <!-- CSRF 토큰을 폼에 포함 (일반 폼 제출용) -->
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
             <!-- 이메일 필드 -->
             <div class="form-group">
                 <label for="email" class="form-label">이메일</label>

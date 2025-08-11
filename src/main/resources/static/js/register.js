@@ -29,22 +29,8 @@ class RegisterForm {
     }
 
     init() {
-        this.initCsrfToken();
         this.bindEvents();
         this.setupPasswordToggles();
-    }
-
-    initCsrfToken() {
-        // CSRF 토큰 정보 저장
-        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
-        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
-
-        this.csrfToken = csrfTokenMeta ? csrfTokenMeta.content : null;
-        this.csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.content : null;
-
-        if (!this.csrfToken || !this.csrfHeader) {
-            console.warn('CSRF 토큰이 페이지에 없습니다. CSRF 보호가 비활성화되어 있을 수 있습니다.');
-        }
     }
 
     bindEvents() {
@@ -190,26 +176,7 @@ class RegisterForm {
         this.buttons.usernameCheck.textContent = '확인 중...';
 
         try {
-            const headers = {};
-
-            // CSRF 토큰이 있으면 헤더에 추가
-            if (this.csrfToken && this.csrfHeader) {
-                headers[this.csrfHeader] = this.csrfToken;
-            }
-
-            const response = await fetch(`/api/users/check-username?username=${encodeURIComponent(username)}`, {
-                method: 'GET',
-                headers: headers,
-                credentials: 'same-origin'
-            });
-
-            if (response.status === 403) {
-                console.error('CSRF 토큰 오류');
-                alert('보안 토큰이 만료되었습니다. 페이지를 새로고침 해주세요.');
-                location.reload();
-                return;
-            }
-
+            const response = await fetch(`/api/users/check-username?username=${encodeURIComponent(username)}`);
             const isAvailable = await response.json();
 
             if (isAvailable) {
@@ -247,26 +214,7 @@ class RegisterForm {
         this.buttons.emailCheck.textContent = '확인 중...';
 
         try {
-            const headers = {};
-
-            // CSRF 토큰이 있으면 헤더에 추가
-            if (this.csrfToken && this.csrfHeader) {
-                headers[this.csrfHeader] = this.csrfToken;
-            }
-
-            const response = await fetch(`/api/users/check-email?email=${encodeURIComponent(email)}`, {
-                method: 'GET',
-                headers: headers,
-                credentials: 'same-origin'
-            });
-
-            if (response.status === 403) {
-                console.error('CSRF 토큰 오류');
-                alert('보안 토큰이 만료되었습니다. 페이지를 새로고침 해주세요.');
-                location.reload();
-                return;
-            }
-
+            const response = await fetch(`/api/users/check-email?email=${encodeURIComponent(email)}`);
             const isAvailable = await response.json();
 
             if (isAvailable) {
@@ -314,30 +262,18 @@ class RegisterForm {
         this.showLoading();
 
         try {
-            const headers = {
-                'Content-Type': 'application/json',
-            };
-
-            // CSRF 토큰이 있으면 헤더에 추가
-            if (this.csrfToken && this.csrfHeader) {
-                headers[this.csrfHeader] = this.csrfToken;
-            }
-
             const response = await fetch('/api/users/register', {
                 method: 'POST',
-                headers: headers,
-                body: JSON.stringify(formData),
-                credentials: 'same-origin'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
             });
 
             if (response.ok) {
                 const userData = await response.json();
                 alert('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.');
                 window.location.href = '/user/login';
-            } else if (response.status === 403) {
-                console.error('CSRF 토큰 오류');
-                alert('보안 토큰이 만료되었습니다. 페이지를 새로고침 해주세요.');
-                location.reload();
             } else {
                 const errorData = await response.json();
                 alert(errorData.message || '회원가입 중 오류가 발생했습니다.');
@@ -402,9 +338,9 @@ class RegisterForm {
 
         // 텍스트 업데이트
         const textMap = {
-            weak: '약함',
+            weak: '약',
             medium: '보통',
-            strong: '강함'
+            strong: '강'
         };
 
         strengthText.textContent = textMap[strength.level];
@@ -440,17 +376,11 @@ class RegisterForm {
     }
 
     showLoading() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.classList.add('show');
-        }
+        document.getElementById('loadingOverlay').classList.add('show');
     }
 
     hideLoading() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-            overlay.classList.remove('show');
-        }
+        document.getElementById('loadingOverlay').classList.remove('show');
     }
 }
 

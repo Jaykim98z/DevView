@@ -3,11 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- CSRF Token Meta Tags -->
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-
     <title th:text="${pageTitle} + ' - DevView'">로그인 - DevView</title>
     <link rel="stylesheet" href="/css/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -34,9 +29,6 @@
         <h1 class="login-title">로그인</h1>
 
         <form id="loginForm" class="login-form">
-            <!-- CSRF 토큰을 폼에 포함 (일반 폼 제출용) -->
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
             <!-- 아이디(이메일) 필드 -->
             <div class="form-group">
                 <label for="email" class="form-label">아이디</label>
@@ -87,17 +79,19 @@
         <!-- 회원가입 링크 -->
         <div class="register-link">
             회원이 아니신가요?
-            <a href="/user/register">회원가입</a>
+            <a href="/user/register" class="link">회원가입</a>
         </div>
     </div>
 </main>
 
-<!-- 로딩 오버레이 -->
-<div id="loadingOverlay" class="loading-overlay">
-    <div class="spinner"></div>
+<!-- 로딩 스피너 -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>로그인 중...</p>
+    </div>
 </div>
 
-<!-- JavaScript 파일 -->
 <script src="/js/login.js"></script>
 </body>
 </html>
