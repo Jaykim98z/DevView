@@ -1,7 +1,7 @@
-package com.allinone.DevView.security;
+package com.allinone.DevView.security.handler;
 
 import com.allinone.DevView.user.dto.response.UserResponse;
-import com.allinone.DevView.user.service.OAuth2UserService;
+import com.allinone.DevView.security.service.OAuth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
