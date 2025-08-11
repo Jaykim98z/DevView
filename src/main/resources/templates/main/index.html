@@ -2,10 +2,6 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <!-- CSRF Token Meta Tags -->
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-
     <title>DevView AI 면접</title>
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/header.css">
@@ -14,7 +10,7 @@
 <body>
 
 <!-- Header Fragment -->
-<div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="fragments/header :: header"></div>
 
 <main class="main-section">
     <section class="hero">
@@ -43,55 +39,80 @@
 
     <section class="intro">
         <h2><strong>프로젝트 소개</strong></h2>
-        <p>DevView는 AI 기술을 활용한 혁신적인 면접 준비 플랫폼입니다.
-            실제 면접과 유사한 환경에서 AI 면접관과 실시간으로 대화하며 면접을 연습할 수 있습니다.</p>
+        <p>DevView는 AI 기술을 활용한 혁신적인 면접 준비 플랫폼입니다. 실제 면접 환경을 시뮬레이션하여 개발자들이 자신감을 갖게 하며 면접에 잘 대비할 수 있도록 도와줍니다.</p>
+        <p>개인화된 피드백과 AI 분석을 통해 효율적인 면접 준비를 할 수 있도록 지원합니다.</p>
     </section>
 
     <section class="features">
-        <h2><strong>주요 기능</strong></h2>
+        <h2><strong>핵심 기능</strong></h2>
         <div class="feature-grid">
             <div class="feature-card">
-                <img src="/img/interview_icon.svg" alt="AI 면접" class="feature-icon">
-                <h3>AI 실시간 면접</h3>
-                <p>실제 면접관처럼 질문하고 피드백을 제공하는 AI와 함께 면접을 연습하세요.</p>
+                <img src="/img/icon1.svg" alt="AI 실전 피드백 아이콘">
+                <h3>실전 피드백</h3>
+                <p>AI가 실시간으로 답변을 분석하고 개선점을 제안합니다.</p>
             </div>
             <div class="feature-card">
-                <img src="/img/feedback_icon.svg" alt="즉각적인 피드백" class="feature-icon">
-                <h3>즉각적인 피드백</h3>
-                <p>답변에 대한 실시간 분석과 개선점을 제공받아 면접 스킬을 향상시키세요.</p>
+                <img src="/img/icon2.svg" alt="AI 분석 아이콘">
+                <h3>AI 분석</h3>
+                <p>고도화된 AI 분석을 통해 면접 성과를 객관적으로 평가합니다.</p>
             </div>
             <div class="feature-card">
-                <img src="/img/custom_icon.svg" alt="맞춤형 질문" class="feature-icon">
-                <h3>맞춤형 질문</h3>
-                <p>직무와 경력에 맞는 맞춤형 질문으로 효과적인 면접 준비를 하세요.</p>
+                <img src="/img/icon3.svg" alt="리포트 저장 아이콘">
+                <h3>리포트 저장</h3>
+                <p>면접 결과와 피드백을 체계적으로 관리하고 추적합니다.</p>
             </div>
         </div>
     </section>
 
-    <section class="how-it-works">
-        <h2><strong>이용 방법</strong></h2>
-        <div class="steps">
+    <section class="guide">
+        <h2><strong>이용 가이드</strong></h2>
+        <div class="guide-steps">
             <div class="step">
-                <div class="step-number">1</div>
-                <h3>면접 설정</h3>
-                <p>직무와 경력 등 면접 정보를 입력합니다.</p>
+                <span class="step-number">1</span>
+                <img src="/img/icon4.svg" alt="회원가입 아이콘">
+                <p><strong>회원가입</strong></p>
+                <p>간단한 회원가입으로 서비스를 시작하세요</p>
             </div>
             <div class="step">
-                <div class="step-number">2</div>
-                <h3>AI 면접 진행</h3>
-                <p>AI 면접관과 실시간으로 대화하며 면접을 진행합니다.</p>
+                <span class="step-number">2</span>
+                <img src="/img/icon5.svg" alt="면접 진행 아이콘">
+                <p><strong>면접 진행</strong></p>
+                <p>AI와 함께 실전 면접을 연습해보세요</p>
             </div>
             <div class="step">
-                <div class="step-number">3</div>
-                <h3>피드백 확인</h3>
-                <p>상세한 피드백을 받고 개선점을 파악합니다.</p>
+                <span class="step-number">3</span>
+                <img src="/img/icon6.svg" alt="피드백 확인 아이콘">
+                <p><strong>피드백 확인</strong></p>
+                <p>상세한 분석 리포트를 확인하고 개선하세요</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="reviews">
+        <h2><strong>사용자 후기</strong></h2>
+        <div class="review-grid">
+            <div class="review">
+                <img src="/img/예은.svg" alt="김예은 프로필 이미지">
+                <p><strong>김예은</strong> ⭐⭐⭐⭐⭐</p>
+                <p>"실제 면접과 유사한 환경이라 큰 도움<br>이 되었어요. 덕분에 면접에 합격했습니다!"</p>
+            </div>
+            <div class="review">
+                <img src="/img/나.svg" alt="조권호 프로필 이미지">
+                <p><strong>조권호</strong> ⭐⭐⭐⭐⭐</p>
+                <p>"면접 준비가 막막했는데 체계적으로 연습할 수 있어<br>서 좋았어요. UI도 깔끔하고 사용하기 편해요."</p>
+            </div>
+            <div class="review">
+                <img src="/img/진욱.svg" alt="김진욱 프로필 이미지">
+                <p><strong>김진욱</strong> ⭐⭐⭐⭐☆</p>
+                <p>"AI 분석이 생각보다 정확해서 놀랐어요. 약점을 정<br>확히 짚어주니 개선하기 쉬웠습니다."</p>
             </div>
         </div>
     </section>
 </main>
 
 <!-- Footer Fragment -->
-<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="fragments/footer :: footer"></div>
 
+<script src="/js/main.js"></script>
 </body>
 </html>
