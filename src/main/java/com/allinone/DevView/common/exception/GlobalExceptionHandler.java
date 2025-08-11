@@ -41,6 +41,24 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 커스텀 비즈니스 로직 예외
+     * (ErrorCode enum 기반)
+     */
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        log.warn("커스텀 예외 발생: {}", errorCode.getMessage());
+
+        ErrorResponse errorResponse = ErrorResponse.of(
+                errorCode.getStatus(),
+                errorCode.getMessage(),
+                errorCode.getCode()
+        );
+
+        return new ResponseEntity<>(errorResponse, errorCode.getStatus());
+    }
+
+    /**
      * 사용자 조회 실패 예외
      */
     @ExceptionHandler(UserNotFoundException.class)
