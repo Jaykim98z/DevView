@@ -14,6 +14,28 @@
         <p>Configure your AI interview settings to match your needs.</p>
 
         <form id="interview-form">
+            <h2>경력 수준</h2>
+            <div class="options-group" id="career-group">
+                <button type="button" class="option-btn" data-value="JUNIOR">Junior</button>
+                <button type="button" class="option-btn active" data-value="MID_LEVEL">Mid-Level</button>
+                <button type="button" class="option-btn" data-value="SENIOR">Senior</button>
+            </div>
+
+            <h2>개발 직군</h2>
+            <div class="options-group" id="position-group">
+                <button type="button" class="option-btn" data-value="BACKEND">Backend</button>
+                <button type="button" class="option-btn active" data-value="FRONTEND">Frontend</button>
+                <button type="button" class="option-btn" data-value="FULLSTACK">Fullstack</button>
+                <button type="button" class="option-btn" data-value="DEVOPS">DevOps</button>
+                <button type="button" class="option-btn" data-value="DATA_SCIENCE">Data Science</button>
+            </div>
+
+            <h2>인터뷰 타입</h2>
+            <div class="options-group" id="type-group">
+                <button type="button" class="option-btn active" data-value="PRACTICE">연습</button>
+                <button type="button" class="option-btn" data-value="REAL">실전</button>
+            </div>
+
             <button type="submit" class="start-btn">인터뷰 시작하기 →</button>
         </form>
     </div>

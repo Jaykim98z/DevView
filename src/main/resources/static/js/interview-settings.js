@@ -1,22 +1,34 @@
 document.addEventListener('DOMContentLoaded', function() {
     const interviewForm = document.getElementById('interview-form');
+    const optionGroups = document.querySelectorAll('.options-group');
+
+    optionGroups.forEach(group => {
+            group.addEventListener('click', function(event) {
+                if (event.target.classList.contains('option-btn')) {
+                    const buttonsInGroup = group.querySelectorAll('.option-btn');
+                    buttonsInGroup.forEach(btn => btn.classList.remove('active'));
+
+                    event.target.classList.add('active');
+                }
+            });
+        });
 
     if (interviewForm) {
         interviewForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            // Show a loading indicator if you have one
-            // document.getElementById('loadingSpinner').style.display = 'block';
+            const careerLevel = document.querySelector('button[data-value*="LEVEL"].active')?.dataset.value || 'JUNIOR';
+            const jobPosition = document.querySelector('button[data-value*="END"].active, button[data-value*="STACK"].active')?.dataset.value || 'BACKEND';
+            const interviewType = document.querySelector('#type-group .option-btn.active').dataset.value;
 
             const startRequest = {
                 userId: 1, // TODO: Replace with actual logged-in user ID
-                interviewType: "PRACTICE", // TODO: Get from user selection
-                jobPosition: "Backend Developer", // TODO: Get from user selection
-                careerLevel: "JUNIOR" // TODO: Get from user selection
+                interviewType: interviewType,
+                jobPosition: jobPosition,
+                careerLevel: careerLevel
             };
 
             try {
-                // Start Interview API Call
                 const startResponse = await fetch('/api/v1/interviews/start', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -27,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const interviewData = await startResponse.json();
                 const interviewId = interviewData.interviewId;
 
-                // Fetch Questions API Call
                 const questionsResponse = await fetch(`/api/v1/interviews/${interviewId}/questions`, {
                     method: 'POST'
                 });
@@ -35,11 +46,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!questionsResponse.ok) throw new Error('Failed to fetch questions.');
                 const questions = await questionsResponse.json();
 
-                // Save data to localStorage to pass to the next page
                 localStorage.setItem('interviewId', interviewId);
                 localStorage.setItem('questions', JSON.stringify(questions));
 
-                // Redirect to the interview session page
                 window.location.href = '/interview/session';
 
             } catch (error) {

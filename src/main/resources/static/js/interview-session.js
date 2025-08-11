@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let questions = [];
     let currentQuestionIndex = 0;
     let userAnswers = [];
+    let totalTime = 15 * 60;
+    let intervalId;
 
     // DOM Elements
     const questionCounterEl = document.getElementById('question-counter');
@@ -11,6 +13,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const answerTextareaEl = document.getElementById('answer-textarea');
     const submitAnswerBtnEl = document.getElementById('submit-answer-btn');
     const progressListEl = document.getElementById('progress-list');
+    const timerEl = document.getElementById('timer');
+    const charCounterEl = document.getElementById('char-counter');
+
+    function startTimer() {
+        intervalId = setInterval(() => {
+            const minutes = Math.floor(totalTime / 60);
+            const seconds = totalTime % 60;
+
+            timerEl.textContent = `시간: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            if (totalTime <= 0) {
+                clearInterval(intervalId);
+                // Optional: Auto-submit or end interview when time runs out
+            }
+            totalTime--;
+        }, 1000);
+    }
+
+    answerTextareaEl.addEventListener('input', () => {
+        const textLength = answerTextareaEl.value.length;
+        charCounterEl.textContent = `${textLength}/500 글자`;
+    });
 
     // --- Initialization ---
     function initializeInterview() {
@@ -37,6 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Display the first question
         displayCurrentQuestion();
+
+        // Start the main interview timer
+        startTimer();
     }
 
     // --- UI Update Functions ---
