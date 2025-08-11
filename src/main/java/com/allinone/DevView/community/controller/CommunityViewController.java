@@ -1,8 +1,8 @@
 package com.allinone.DevView.community.controller;
 
+import com.allinone.DevView.community.dto.CombinedPostRequest;
 import com.allinone.DevView.community.dto.CommunityPostDetailDto;
 import com.allinone.DevView.community.dto.CommunityPostsDto;
-import com.allinone.DevView.community.dto.CreatePostRequest;
 import com.allinone.DevView.community.service.CommunityService;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class CommunityViewController {
             posts = communityService.getAllPostDtos();
         } catch (Exception e) {
             log.error("Failed to load community posts", e);
-            posts = Collections.emptyList(); // 뷰 안전
+            posts = Collections.emptyList();
         }
         model.addAttribute("posts", posts);
         return "community/community";
@@ -53,43 +54,53 @@ public class CommunityViewController {
     }
 
     @GetMapping("/posts/new")
-    public String newPostForm(Model model){
-        // ✅ CreatePostRequest는 기본 생성자 없음 → 9개 인자 생성자 사용
-        model.addAttribute("form",
-                new CreatePostRequest(
-                        "", "",              // title, content
-                        "PRACTICE",         // interviewType (문자열로 두고 화면에서 변경)
-                        "C",                // grade
-                        null, null,         // techTag, level
-                        null,               // category
-                        null,               // type
-                        null                // score
-                )
-        );
+    public String newPostForm(Model model, Principal principal){
+        if (principal == null) {
+            return "redirect:/user/login?redirect=/community/posts/new";
+        }
+        model.addAttribute("form", CombinedPostRequest.empty());
         return "community/post-new";
     }
 
-    @PostMapping("/posts")
-    public String createPost(
-            @Valid @ModelAttribute("form") CreatePostRequest form,
+    @PostMapping("/posts/interview")
+    @Transactional
+    public String createCombinedByForm(
+            @Valid @ModelAttribute("form") CombinedPostRequest form,
             BindingResult bindingResult,
             Principal principal
     ) {
         if (bindingResult.hasErrors()) {
             return "community/post-new";
         }
-
         if (principal == null) {
             return "redirect:/user/login?redirect=/community/posts/new";
         }
 
         String email = principal.getName();
-
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자 정보를 찾을 수 없습니다."));
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자 정보를 찾을 수 없습니다."));
 
-        communityService.createPost(form, user.getUserId());
+        Long userId = user.getUserId();
 
-        return "redirect:/community";
+        Long interviewPostId = communityService.createInterviewSharePost(
+                form.getInterviewShare(), userId
+        );
+
+        communityService.createPost(
+                form.getFreePost(), userId
+        );
+
+        return "redirect:/community/posts/" + interviewPostId + "/detail";
+    }
+
+    @GetMapping("/posts/interview/new")
+    public String legacyInterviewNewRedirect() {
+        return "redirect:/community/posts/new";
+    }
+
+    @PostMapping("/posts")
+    public String legacyFreePostRedirect() {
+        return "redirect:/community/posts/new";
     }
 }

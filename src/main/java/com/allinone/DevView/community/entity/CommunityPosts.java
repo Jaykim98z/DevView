@@ -75,6 +75,12 @@ public class CommunityPosts {
     @Column(length = 255)
     private String type;
 
+    @Column(name = "interview_result_id")
+    private Long interviewResultId;
+
+    @Column(name = "interview_feedback", columnDefinition = "TEXT")
+    private String interviewFeedback;
+
     @PrePersist
     protected void onCreate() {
         if (this.createdAt == null) {

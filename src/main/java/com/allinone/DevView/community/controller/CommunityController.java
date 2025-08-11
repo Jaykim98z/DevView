@@ -3,12 +3,14 @@ package com.allinone.DevView.community.controller;
 import com.allinone.DevView.community.dto.CommunityPostsDto;
 import com.allinone.DevView.community.dto.PostListDto;
 import com.allinone.DevView.community.dto.CommentsDto;
+import com.allinone.DevView.community.dto.CreateInterviewSharePostRequest;
 import com.allinone.DevView.community.entity.Comments;
 import com.allinone.DevView.community.entity.CommunityPosts;
 import com.allinone.DevView.community.entity.Likes;
 import com.allinone.DevView.community.entity.Scraps;
 import com.allinone.DevView.community.service.CommunityQueryService;
 import com.allinone.DevView.community.service.CommunityService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/community")
@@ -49,10 +52,19 @@ public class CommunityController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 게시글 생성
+    // 게시글 생성 (기존)
     @PostMapping("/posts")
     public CommunityPosts createPost(@RequestBody CommunityPosts post) {
         return communityService.createPost(post);
+    }
+
+    @PostMapping("/posts/interview/{userId}")
+    public ResponseEntity<Map<String, Long>> createInterviewShare(
+            @PathVariable Long userId,
+            @Valid @RequestBody CreateInterviewSharePostRequest req
+    ) {
+        Long postId = communityService.createInterviewSharePost(req, userId);
+        return ResponseEntity.ok(Map.of("postId", postId));
     }
 
     // 게시글 수정
