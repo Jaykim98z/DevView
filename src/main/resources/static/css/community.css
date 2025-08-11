@@ -4,7 +4,6 @@ html, body {
   background: #f6f8fb;
   color: #2d3a4a;
 }
-
 * { box-sizing: border-box; }
 
 :where(.community-container) {
@@ -17,7 +16,6 @@ html, body {
   text-align: center;
   padding: 68px 0 20px;
 }
-
 :where(.community-container) .community-header h1 {
   margin: 0 0 10px;
   font-size: 46px;
@@ -25,13 +23,11 @@ html, body {
   letter-spacing: -0.02em;
   color: #27364a;
 }
-
 :where(.community-container) .community-header p {
   margin: 0;
   font-size: 18px;
   color: #6b7c93;
 }
-
 :where(.community-container) .community-header .post-count {
   margin-top: 8px;
   font-size: 14px;
@@ -40,44 +36,29 @@ html, body {
 
 :where(.community-container) .filter-bar {
   margin-top: 18px;
+  margin-bottom: 28px;
   background: #eff3f6;
   border-radius: 16px;
   padding: 16px 18px;
   display: grid;
-  grid-template-columns: 160px 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "search search search"
+    "sort   categories  levels";
   gap: 14px 16px;
   box-shadow: 0 8px 18px rgba(27, 39, 51, .06);
 }
 
-:where(.community-container) .left-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  grid-column: 1/2;
-}
-
-:where(.community-container) .left-controls::before {
-  content: "정렬:";
-  font-size: 14px;
-  color: #6b7c93;
-}
-
-:where(.community-container) .left-controls select {
-  height: 40px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid #d9e0e8;
-  background: #fff;
-  color: #2d3a4a;
-}
-
 :where(.community-container) .search-box {
-  grid-column: 1 / -1;
+  grid-area: search;
   display: flex;
   align-items: center;
   gap: 10px;
+  justify-self: center;
+  width: 100%;
+  max-width: 720px;
 }
-
 :where(.community-container) .search-box input[type="text"] {
   flex: 1;
   height: 48px;
@@ -87,9 +68,7 @@ html, body {
   padding: 0 18px;
   font-size: 16px;
 }
-
 :where(.community-container) .search-box input::placeholder { color: #9aa7b5; }
-
 :where(.community-container) .search-box button {
   height: 44px;
   width: 44px;
@@ -100,26 +79,49 @@ html, body {
   cursor: pointer;
   transition: transform .05s;
 }
-
 :where(.community-container) .search-box button:active { transform: translateY(1px); }
 
-:where(.community-container) .tag-filters {
-  grid-column: 1 / -1;
+:where(.community-container) .left-controls {
+  grid-area: sort;
+  justify-self: start;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 20px;
+  gap: 10px;
+}
+:where(.community-container) .left-controls::before {
+  content: "정렬:";
+  font-size: 14px;
+  color: #6b7c93;
+}
+:where(.community-container) .left-controls select {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #d9e0e8;
+  background: #fff;
+  color: #2d3a4a;
 }
 
-:where(.community-container) .tag-group-left,
-:where(.community-container) .tag-group-right {
+:where(.community-container) #categoryFilters.tag-group-left {
+  grid-area: categories;
+  justify-self: center;
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-:where(.community-container) .tag-filters button {
+:where(.community-container) #levelFilters.tag-group-right {
+  grid-area: levels;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+:where(.community-container) .tag-group-left button,
+:where(.community-container) .tag-group-right button {
   height: 36px;
   padding: 0 12px;
   border-radius: 10px;
@@ -132,19 +134,13 @@ html, body {
   white-space: nowrap;
   transition: border-color .15s, background .15s;
 }
-
-:where(.community-container) .tag-filters button:hover { border-color: #cfd8e3; }
-
-:where(.community-container) .tag-filters button.active {
+:where(.community-container) .tag-group-left button:hover,
+:where(.community-container) .tag-group-right button:hover { border-color: #cfd8e3; }
+:where(.community-container) .tag-group-left button.active,
+:where(.community-container) .tag-group-right button.active {
   background: #334155;
   color: #fff;
   border-color: #334155;
-}
-
-:where(.community-container) .tag-group-right button:first-child {
-  background: #eaf2ff;
-  color: #2b6cb0;
-  border-color: #d6e6ff;
 }
 
 :where(.community-container) .card-list {
@@ -167,7 +163,6 @@ html, body {
   gap: 10px;
   transition: box-shadow .15s;
 }
-
 :where(.community-container) .post-card:hover {
   box-shadow: 0 10px 22px rgba(27, 39, 51, .09);
 }
@@ -177,7 +172,6 @@ html, body {
   align-items: center;
   gap: 12px;
 }
-
 :where(.community-container) .profile-img {
   width: 36px;
   height: 36px;
@@ -185,9 +179,7 @@ html, body {
   object-fit: cover;
   border: 1px solid #e6edf5;
 }
-
 :where(.community-container) .user-info strong { font-weight: 700; color: #253243; }
-
 :where(.community-container) .user-meta {
   display: inline-block;
   margin-left: 8px;
@@ -198,7 +190,6 @@ html, body {
   border: 1px solid #e6edf5;
   border-radius: 999px;
 }
-
 :where(.community-container) .user-time {
   margin-left: 8px;
   font-size: 12px;
@@ -212,7 +203,6 @@ html, body {
   color: #27364a;
   line-height: 1.25;
 }
-
 :where(.community-container) .post-summary {
   margin: 0;
   font-size: 14px;
@@ -247,13 +237,11 @@ html, body {
   background: #f5f7fa;
   color: #425466;
 }
-
 :where(.community-container) .badge--green {
   background: #eaf7f0;
   border-color: #cfe9db;
   color: #0f5132;
 }
-
 :where(.community-container) .badge--blue {
   background: #eaf2ff;
   border-color: #cfe3ff;
@@ -268,9 +256,7 @@ html, body {
   padding-top: 10px;
   border-top: 1px solid #eef2f6;
 }
-
 :where(.community-container) .post-meta i { margin-right: 6px; opacity: .9; }
-
 :where(.community-container) .post-meta span {
   display: inline-flex;
   align-items: center;
@@ -286,56 +272,34 @@ html, body {
   padding: 4px 8px;
   border-radius: 8px;
 }
-
 :where(.community-container) .detail-link:hover { background: #e8f2ff; }
 
 @media (max-width: 1024px) {
+  :where(.community-container) .filter-bar {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "search"
+      "categories"
+      "sort";
+    row-gap: 12px;
+  }
+  :where(.community-container) .left-controls { justify-self: start; }
+  :where(.community-container) #categoryFilters.tag-group-left { justify-self: center; }
+  :where(.community-container) #levelFilters.tag-group-right {
+    grid-area: categories;
+    display: none;
+  }
+
   :where(.community-container) .card-list {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  :where(.community-container) .filter-bar { grid-template-columns: 1fr; }
-  :where(.community-container) .tag-filters {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
+  :where(.community-container) .card-list {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
-  :where(.community-container) .tag-group-left,
-  :where(.community-container) .tag-group-right { justify-content: flex-start; }
-  :where(.community-container) .card-list { grid-template-columns: 1fr; gap: 16px; }
 }
-/* ===== 스코프 끝 ===== */
 
-/* FAB은 전역 고정 버튼이므로 그대로 둠 */
-.fab-write{
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 1000;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 18px;
-  border-radius: 9999px;
-  background: #2563eb;
-  color: #fff;
-  font-family: 'Noto Sans KR', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  font-weight: 700;
-  font-size: 14px;
-  text-decoration: none;
-  box-shadow: 0 10px 20px rgba(37,99,235,0.25), 0 4px 8px rgba(0,0,0,0.08);
-  transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
-}
-.fab-write:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 14px 24px rgba(37,99,235,0.28), 0 6px 12px rgba(0,0,0,0.10);
-  opacity: 0.95;
-}
-.fab-icon{ line-height: 1; }
-.fab-text{ line-height: 1; }
-
-@media (max-width: 720px) {
-  .fab-write{ right: 16px; bottom: 16px; padding: 14px 18px; font-size: 15px; }
-}
