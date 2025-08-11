@@ -1,52 +1,64 @@
-// 로그인 페이지 JavaScript
-
+/**
+ * 로그인 폼 관리 클래스
+ */
 class LoginForm {
     constructor() {
+        this.initElements();
+        this.attachEventListeners();
+        this.initCsrfToken();
+    }
+
+    initElements() {
+        // 폼 요소들
         this.form = document.getElementById('loginForm');
         this.inputs = {
             email: document.getElementById('email'),
             password: document.getElementById('password')
         };
-
         this.buttons = {
             submit: document.getElementById('loginSubmitBtn'),
-            passwordToggle: document.getElementById('passwordToggle'),
-            googleLogin: document.getElementById('googleLoginBtn')
+            googleLogin: document.getElementById('googleLoginBtn'),
+            passwordToggle: document.getElementById('passwordToggle')
         };
-
-        this.init();
     }
 
-    init() {
-        this.bindEvents();
-        this.setupPasswordToggle();
-        // 로그인 유지 기능 제거됨
-        this.inputs.email.focus(); // 이메일 필드에 포커스
+    initCsrfToken() {
+        // CSRF 토큰 정보 저장
+        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+
+        this.csrfToken = csrfTokenMeta ? csrfTokenMeta.content : null;
+        this.csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.content : null;
+
+        if (!this.csrfToken || !this.csrfHeader) {
+            console.warn('CSRF 토큰이 페이지에 없습니다. CSRF 보호가 비활성화되어 있을 수 있습니다.');
+        }
     }
 
-    bindEvents() {
-        // 폼 제출 이벤트
+    attachEventListeners() {
+        // 폼 제출
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
 
         // 입력 필드 이벤트
         this.inputs.email.addEventListener('input', () => this.handleEmailInput());
         this.inputs.password.addEventListener('input', () => this.handlePasswordInput());
 
-        // Google 로그인 버튼
+        // 버튼 이벤트
         this.buttons.googleLogin.addEventListener('click', () => this.handleGoogleLogin());
-
-        // 엔터 키 로그인
-        this.inputs.password.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.handleSubmit(e);
-            }
-        });
-    }
-
-    setupPasswordToggle() {
-        // 비밀번호 보기/숨기기 토글
         this.buttons.passwordToggle.addEventListener('click', () => {
             this.togglePasswordVisibility(this.inputs.password, this.buttons.passwordToggle);
+        });
+
+        // Enter 키 처리
+        this.inputs.email.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !this.buttons.submit.disabled) {
+                this.form.dispatchEvent(new Event('submit'));
+            }
+        });
+        this.inputs.password.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !this.buttons.submit.disabled) {
+                this.form.dispatchEvent(new Event('submit'));
+            }
         });
     }
 
@@ -109,21 +121,33 @@ class LoginForm {
             return;
         }
 
-        const loginData = {
-            email: email,
-            password: password
-        };
+        // FormData로 전송 (CSRF 토큰 포함)
+        const formData = new URLSearchParams();
+        formData.append('email', email);
+        formData.append('password', password);
+
+        // CSRF 토큰 추가
+        if (this.csrfToken) {
+            formData.append('_csrf', this.csrfToken);
+        }
 
         this.showLoading();
 
         try {
             // Spring Security 폼 로그인 엔드포인트로 전송
+            const headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            };
+
+            // AJAX 요청 헤더에도 CSRF 토큰 추가 (이중 보안)
+            if (this.csrfToken && this.csrfHeader) {
+                headers[this.csrfHeader] = this.csrfToken;
+            }
+
             const response = await fetch('/api/users/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams(loginData),
+                headers: headers,
+                body: formData,
                 credentials: 'same-origin'  // 세션 쿠키 포함
             });
 
@@ -142,6 +166,11 @@ class LoginForm {
                     this.inputs.password.value = '';
                     this.inputs.password.focus();
                 }
+            } else if (response.status === 403) {
+                // CSRF 토큰 문제
+                console.error('CSRF 토큰 오류');
+                alert('보안 토큰이 만료되었습니다. 페이지를 새로고침 해주세요.');
+                location.reload();
             } else {
                 const errorData = await response.json();
                 alert(errorData.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
@@ -197,11 +226,17 @@ class LoginForm {
     }
 
     showLoading() {
-        document.getElementById('loadingOverlay').classList.add('show');
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.classList.add('show');
+        }
     }
 
     hideLoading() {
-        document.getElementById('loadingOverlay').classList.remove('show');
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.classList.remove('show');
+        }
     }
 }
 

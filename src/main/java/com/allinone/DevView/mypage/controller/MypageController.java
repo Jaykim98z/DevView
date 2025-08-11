@@ -37,21 +37,4 @@ public class MypageController {
         return "mypage/mypage";
     }
 
-
-    @GetMapping("/edit")
-    public String showEditForm(Model model) {
-        Long userId = SecurityUtils.getUserId();
-
-        UserProfileUpdateRequest editInfo = mypageService.getBasicUserInfo(userId);
-        model.addAttribute("user", editInfo);
-
-        return "mypage/mypage-edit";
-    }
-
-    @PostMapping("/edit")
-    public String updateProfile(@ModelAttribute UserProfileUpdateRequest request) {
-        Long userId = SecurityUtils.getUserId();
-        mypageService.updateUserProfile(userId, request);
-        return "redirect:/mypage";
-    }
 }

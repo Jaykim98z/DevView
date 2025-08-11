@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /**
  * Spring Security 보안 설정
@@ -40,13 +41,25 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 기본 보안 설정
-                .csrf(csrf -> csrf.disable())
+                // CSRF 보호 설정 - 단계적 활성화
+                .csrf(csrf -> csrf
+                        // 쿠키 기반 CSRF 토큰 저장소 사용 (JavaScript에서 접근 가능)
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        // 아래 경로들은 CSRF 보호 제외 (단계적 적용)
+                        .ignoringRequestMatchers(
+                                // API 엔드포인트 - 임시 제외 (추후 적용 예정)
+                                "/api/v1/interviews/**"   // AI 인터뷰 API
+                                // 회원가입 중복체크는 CSRF 토큰 없이도 가능하도록 (UX 개선)
+                                // "/api/users/check-email",   // 이메일 중복 체크
+                                // "/api/users/check-username" // 사용자명 중복 체크
+                        )
+                )
                 .httpBasic(basic -> basic.disable())
 
                 // 세션 관리
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionFixation().changeSessionId()  // 로그인 시 세션 ID만 변경 (속성은 유지)
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
                 )
@@ -98,7 +111,7 @@ public class SecurityConfig {
                         .logoutUrl("/user/logout")
                         .logoutSuccessUrl("/")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
+                        .deleteCookies("JSESSIONID", "XSRF-TOKEN")  // CSRF 토큰 쿠키도 삭제
                 );
 
         return http.build();
