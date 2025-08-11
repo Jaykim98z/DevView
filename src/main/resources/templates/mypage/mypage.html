@@ -1,10 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>마이페이지</title>
+    <link rel="stylesheet" th:href="@{/css/mypage.css}">
+    <script th:src="@{/js/lib/chart.min.js}"></script>
+    <script th:src="@{/js/mypage.js}"></script>
 </head>
 <body>
+
+<div th:replace="fragments/header :: header"></div>
+
+<div class="container">
+    <h1>마이페이지</h1>
+
+    <!-- 🔹 프로필 영역 -->
+    <div class="profile-box">
+        <div class="left">
+            <div class="profile-image">
+                <img th:if="${user.profileImageUrl != null}" th:src="@{${user.profileImageUrl}}" alt="프로필" />
+                <img th:if="${user.profileImageUrl == null}" src="/img/진욱.svg" alt="기본 이미지" />
+            </div>
+            <div class="info">
+                <h2 th:text="${user.name}">김진욱</h2>
+                <p><span th:text="${user.job}">백엔드</span></p>
+                <p><span th:text="${user.careerLevel}">주니어</span></p>
+            </div>
+            <div class="stats">
+                <div><strong th:text="${user.totalInterviews}">3</strong><br>면접 횟수</div>
+                <div><strong th:text="${user.avgScore}">75</strong><br>평균 점수</div>
+                <div><strong th:text="${user.grade}">B+</strong><br>최종 등급</div>
+            </div>
+            <div class="actions">
+                <form th:action="@{/mypage/edit}" method="get">
+                    <button type="submit" class="btn">
+                        <img src="/img/edit.svg" class="icon" alt="프로필 수정" />
+                        프로필 수정
+                    </button>
+                </form>
+                <form th:action="@{/mypage/delete}" method="post"
+                      onsubmit="return confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')">
+                    <button type="submit" class="btn danger">
+                        <img src="/img/bye.svg" class="icon" alt="회원 탈퇴" />
+                        회원 탈퇴
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 🔹 계정 정보 -->
+        <div class="right">
+            <h3>계정 설정</h3>
+            <p><span th:text="${user.email}">jmhook@example.com</span></p>
+            <p>비밀번호: <a th:href="@{/mypage/edit}" class="text-link">변경하기</a></p>
+            <p>가입일: <span th:text="${user.joinedAt}">2025.08.01</span></p>
+        </div>
+    </div>
+
+    <!-- 🔹 점수 그래프 -->
+    <div class="score-graph">
+        <h3>📈 점수 변화 그래프</h3>
+        <canvas id="scoreChart"
+                th:attr="data-labels=${scoreGraph.labelsJson}, data-scores=${scoreGraph.scoresJson}"></canvas>
+    </div>
+    <!-- 🔹 관심 직무 분포 -->
+    <div class="career-chart-section">
+        <h3>🎯 관심 직무 분포</h3>
+        <canvas id="careerChart"
+                th:attr="data-labels=${careerChart.labelsJson}, data-data=${careerChart.dataJson}">
+        </canvas>
+    </div>
+    <!-- 🔹 면접 이력 -->
+    <div class="interview-history">
+        <h3>📋 나의 면접 목록</h3>
+        <ul>
+            <li th:each="interview : ${user.interviews}">
+                <div class="interview-item">
+                    <span class="date" th:text="${interview.interviewDate}">2025.07.15</span>
+                    <span class="type" th:text="${interview.interviewType}">백엔드</span>
+                    <span class="score" th:text="${interview.score + '점'}">82점</span>
+                    <span class="grade" th:text="${interview.grade}">B+</span>
+                    <p th:text="${interview.feedback}">좋은 답변이었습니다.</p>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 🔹 스크랩 콘텐츠 -->
+    <div class="scrap-section">
+        <h3>📚 스크랩 콘텐츠</h3>
+        <ul>
+            <li th:each="scrap : ${user.scraps}">
+                <a th:href="${scrap.link}" target="_blank">
+                    <h4 th:text="${scrap.title}">Spring 핵심정리</h4>
+                    <div class="meta">
+                        <span>❤️ <span th:text="${scrap.likes}">12</span></span>
+                        <span>💬 <span th:text="${scrap.comments}">3</span></span>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
 
 </body>
 </html>
