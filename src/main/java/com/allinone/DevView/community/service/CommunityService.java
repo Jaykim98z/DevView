@@ -1,5 +1,6 @@
 package com.allinone.DevView.community.service;
 
+import com.allinone.DevView.community.dto.CreatePostRequest;
 import com.allinone.DevView.community.dto.CommunityPostDetailDto;
 import com.allinone.DevView.community.dto.CommunityPostsDto;
 import com.allinone.DevView.community.entity.Comments;
@@ -11,12 +12,16 @@ import com.allinone.DevView.community.repository.CommentsRepository;
 import com.allinone.DevView.community.repository.CommunityPostsRepository;
 import com.allinone.DevView.community.repository.LikesRepository;
 import com.allinone.DevView.community.repository.ScrapsRepository;
+import com.allinone.DevView.common.enums.Grade;
 import com.allinone.DevView.common.enums.InterviewType;
+import com.allinone.DevView.user.entity.User;
+import com.allinone.DevView.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +34,7 @@ public class CommunityService {
     private final CommentsRepository commentsRepository;
     private final LikesRepository likesRepository;
     private final ScrapsRepository scrapsRepository;
+    private final UserRepository userRepository;
 
     public List<CommunityPosts> getAllPostsWithUserData() {
         return postsRepository.findAllWithUser();
@@ -53,6 +59,42 @@ public class CommunityService {
         existingPost.setTitle(updatedPost.getTitle());
         existingPost.setContent(updatedPost.getContent());
         return postsRepository.save(existingPost);
+    }
+
+    // CommunityService.java
+    @Transactional
+    public Long createPost(CreatePostRequest req, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
+
+        String content = req.content();
+        String summary = (content != null && content.length() > 1000)
+                ? content.substring(0, 1000)
+                : content;
+
+        CommunityPosts post = new CommunityPosts();
+        post.setTitle(req.title());
+        post.setContent(content);
+        post.setSummary(summary);
+
+        post.setInterviewType(req.interviewType());
+        post.setGrade(Grade.valueOf(req.grade().toUpperCase()));
+
+        post.setTechTag(req.techTag());
+        post.setLevel(req.level());
+        post.setCategory(req.category());
+        post.setType(req.type());
+        post.setScore(req.score() != null ? req.score() : 0);
+
+        post.setLikeCount(0);
+        post.setScrapCount(0);
+        post.setViewCount(0);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUser(user);
+        post.setWriterName(user.getUsername());
+
+        CommunityPosts saved = postsRepository.save(post);
+        return saved.getPostId();
     }
 
     @Transactional
@@ -153,6 +195,8 @@ public class CommunityService {
                 default       -> "기타";
             };
 
+            String gradeStr = (post.getGrade() != null ? post.getGrade().name() : null);
+
             return new CommunityPostsDto(
                     post.getPostId(),
                     userId,
@@ -165,7 +209,7 @@ public class CommunityService {
                     interviewType,
                     interviewTypeLabel,
                     post.getScore(),
-                    post.getGrade(),
+                    gradeStr,
                     post.getViewCount(),
                     post.getLikeCount(),
                     post.getScrapCount(),
