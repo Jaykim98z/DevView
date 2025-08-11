@@ -37,7 +37,7 @@ public class InterviewService {
     @Transactional
     public InterviewResponse startInterview(StartInterviewRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("User not found")); // 커스텀 예외 적용하기
 
         // DTO를 Entity로 변환하는 로직이 필요합니다.
         // 여기서는 설명을 위해 간단히 생성합니다.
@@ -55,7 +55,7 @@ public class InterviewService {
 
     public List<QuestionResponse> askAndSaveQuestions(Long interviewId) {
         Interview interview = interviewRepository.findById(interviewId)
-                .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Interview not found")); // 커스텀 예외 적용하기
 
         List<String> questionTexts = gemini.getQuestionFromAi(
                 interview.getJobPosition(),
@@ -118,7 +118,7 @@ public class InterviewService {
     @Transactional
     public InterviewResultResponse endInterview(Long interviewId) {
         Interview interview = interviewRepository.findByIdWithQuestions(interviewId)
-                .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
+                .orElseThrow(() -> new InterviewNotFoundException("Interview not found for ID: " + interviewId));
 
         // Fetch questions and answers from the database
         // NOTE: This is a simple fetch. In a real-world scenario with many Q&As,
@@ -151,10 +151,17 @@ public class InterviewService {
         log.info("Generated Prompt for Gemini:\n{}", prompt);
 
         String aiResponse = gemini.generateContent(prompt);
-
         int score = parseScore(aiResponse);
         String feedback = parseFeedback(aiResponse);
         Grade grade = calculateGrade(score);
+        String recommendations = "No recommendations available.";
+        if (alan instanceof AlanApiService) {
+            try {
+                recommendations = ((AlanApiService) alan).getRecommendations(interview.getJobPosition());
+            } catch (Exception e) {
+                log.error("Failed to get recommendations from Alan API", e);
+            }
+        }
 
         interview.endInterviewSession();
 
@@ -163,6 +170,7 @@ public class InterviewService {
                 .totalScore(score)
                 .grade(grade)
                 .feedback(feedback)
+                .recommendedResource(recommendations)
                 .build();
 
         InterviewResult savedResult = interviewResultRepository.save(result);

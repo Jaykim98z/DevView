@@ -13,6 +13,7 @@ public class InterviewResultResponse {
     private int totalScore;
     private Grade grade;
     private String feedback;
+    private String recommendedResource;
 
     public static InterviewResultResponse fromEntity(InterviewResult result) {
         return InterviewResultResponse.builder()
@@ -21,6 +22,7 @@ public class InterviewResultResponse {
                 .totalScore(result.getTotalScore())
                 .grade(result.getGrade())
                 .feedback(result.getFeedback())
+                .recommendedResource(result.getRecommendedResource())
                 .build();
     }
 }
