@@ -1,12 +1,19 @@
 package com.allinone.DevView.community.controller;
 
 import com.allinone.DevView.community.dto.CommunityPostsDto;
+import com.allinone.DevView.community.dto.PostListDto;
+import com.allinone.DevView.community.dto.CommentsDto;
 import com.allinone.DevView.community.entity.Comments;
 import com.allinone.DevView.community.entity.CommunityPosts;
 import com.allinone.DevView.community.entity.Likes;
 import com.allinone.DevView.community.entity.Scraps;
+import com.allinone.DevView.community.service.CommunityQueryService;
 import com.allinone.DevView.community.service.CommunityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,10 +24,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommunityController {
 
+    private final CommunityQueryService communityQueryService;
     private final CommunityService communityService;
 
     // 게시글 목록 조회 (댓글 수 포함된 DTO)
     @GetMapping("/posts")
+    public ResponseEntity<Page<PostListDto>> listPosts(
+            @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(communityQueryService.getPosts(pageable));
+    }
+
+    @GetMapping("/posts/legacy")
     public ResponseEntity<List<CommunityPostsDto>> getAllPostDtos() {
         return ResponseEntity.ok(communityService.getAllPostDtos());
     }
@@ -54,8 +70,12 @@ public class CommunityController {
 
     // 댓글 목록 조회
     @GetMapping("/posts/{postId}/comments")
-    public List<Comments> getComments(@PathVariable Long postId) {
-        return communityService.getCommentsByPostId(postId);
+    public ResponseEntity<Page<CommentsDto>> getComments(
+            @PathVariable Long postId,
+            @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        return ResponseEntity.ok(communityQueryService.getComments(postId, pageable));
     }
 
     // 댓글 작성
