@@ -1,55 +1,62 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>커뮤니티 - AI 면접 시뮬레이터</title>
-    <link rel="stylesheet" href="/css/community.css">
+
+    <link rel="stylesheet" href="/css/community.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="/css/header.css" />
 </head>
 <body>
 
-<div class="community-container">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="community-container">
     <header class="community-header">
         <h1>커뮤니티</h1>
         <p>다른 개발자들의 면접 결과를 확인해보세요</p>
         <p class="post-count" th:text="'총 ' + ${posts.size()} + '개의 면접 결과'">총 0개의 면접 결과</p>
     </header>
 
-    <!-- 검색/필터 바 -->
     <div class="filter-bar">
         <div class="left-controls">
-            <select name="sort">
+            <select name="sort" aria-label="정렬">
                 <option value="recent">최신순</option>
                 <option value="likes">좋아요순</option>
             </select>
         </div>
 
-        <div class="search-box">
+        <form class="search-box" th:action="@{/community}" method="get">
             <input type="text" name="keyword" placeholder="면접 결과 검색..." />
-            <button type="submit"><i class="fa fa-search"></i></button>
-        </div>
+            <button type="submit" aria-label="검색"><i class="fa fa-search"></i></button>
+        </form>
 
         <div class="tag-filters">
-            <button class="active">전체</button>
-            <button>백엔드</button>
-            <button>프론트엔드</button>
-            <button>풀스택</button>
-            <button>DevOps</button>
-            <button>주니어</button>
-            <button>미드레벨</button>
-            <button>시니어</button>
+            <div class="tag-group-left">
+                <button type="button" class="active">전체</button>
+                <button type="button">백엔드</button>
+                <button type="button">프론트엔드</button>
+                <button type="button">풀스택</button>
+                <button type="button">DevOps</button>
+            </div>
+            <div class="tag-group-right">
+                <button type="button">주니어</button>
+                <button type="button">미드레벨</button>
+                <button type="button">시니어</button>
+            </div>
         </div>
     </div>
 
-    <!-- 게시글 카드 목록 -->
     <div class="card-list">
         <div class="post-card" th:each="post : ${posts}">
             <div class="user-info">
-                <img class="profile-img" src="/img/default-profile.png" alt="기본 프로필">
+                <img th:src="@{/img/profile-default.svg}" alt="프로필" class="profile-img" />
                 <div>
                     <strong th:text="${post.username}">작성자</strong>
-                    <span class="user-meta"
-                          th:text="${post.techTag + ' · ' + post.levelTag}">직무 · 경력</span>
+                    <span class="user-meta" th:text="${post.techTag + ' · ' + post.levelTag}">직무 · 경력</span>
                 </div>
             </div>
 
@@ -67,7 +74,11 @@
             <a class="detail-link" th:href="@{/community/posts/{id}/detail(id=${post.id})}">자세히 보기</a>
         </div>
     </div>
-</div>
+</main>
 
+<a class="fab-write" th:href="@{/community/posts/new}" aria-label="글쓰기">
+    <span class="fab-icon" aria-hidden="true">✏️</span>
+    <span class="fab-text">글쓰기</span>
+</a>
 </body>
 </html>

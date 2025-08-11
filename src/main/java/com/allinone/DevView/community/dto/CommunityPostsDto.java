@@ -15,7 +15,7 @@ public class CommunityPostsDto {
     private Long userId;
 
     private String username;
-    // private String profileImage;
+    private String profileImage;
 
     private String techTag;
     private String levelTag;
@@ -28,7 +28,7 @@ public class CommunityPostsDto {
     private String interviewTypeLabel;
 
     private int score;
-    private Grade grade;
+    private String grade;
 
     private int viewCount;
     private int likeCount;
@@ -54,7 +54,7 @@ public class CommunityPostsDto {
             InterviewType interviewType,
             String interviewTypeLabel,
             int score,
-            Grade grade,
+            String grade,
             int viewCount,
             int likeCount,
             int scrapCount,
@@ -82,5 +82,8 @@ public class CommunityPostsDto {
         this.bookmarked = bookmarked;
         this.scrapId = scrapId;
         this.createdAt = createdAt;
+    }
+
+    public CommunityPostsDto(Long postId, Long userId, String username, String techTag, String levelTag, String title, String summary, String content, InterviewType interviewType, String interviewTypeLabel, int score, Grade grade, int viewCount, int likeCount, int scrapCount, boolean liked, boolean bookmarked, Object scrapId, LocalDateTime createdAt) {
     }
 }

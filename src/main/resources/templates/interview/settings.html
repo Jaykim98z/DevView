@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Interview Settings - DevView</title>
+    <link rel="stylesheet" th:href="@{/css/interview-settings.css}">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main>
+    <div class="settings-container">
+        <h1>인터뷰 사전 설정</h1>
+        <p>Configure your AI interview settings to match your needs.</p>
+
+        <form id="interview-form">
+            <button type="submit" class="start-btn">인터뷰 시작하기 →</button>
+        </form>
+    </div>
+</main>
+
+<script th:src="@{/js/interview-settings.js}"></script>
+</body>
+</html>

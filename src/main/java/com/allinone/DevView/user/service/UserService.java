@@ -1,5 +1,6 @@
 package com.allinone.DevView.user.service;
 
+import com.allinone.DevView.common.exception.UserNotFoundException;
 import com.allinone.DevView.user.dto.request.LoginRequest;
 import com.allinone.DevView.user.dto.request.RegisterRequest;
 import com.allinone.DevView.user.dto.response.UserResponse;
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * 사용자 관련 비즈니스 로직
+ * 사용자 관련 비즈니스 로직 서비스
+ * 명확한 예외 처리와 일관된 응답을 제공
  */
 @Service
 @RequiredArgsConstructor
@@ -25,145 +27,114 @@ public class UserService {
 
     /**
      * 회원가입 처리
-     *
-     * @param request 회원가입 요청 데이터
-     * @return UserResponse 생성된 사용자 정보
-     * @throws IllegalArgumentException 검증 실패 시
      */
     public UserResponse register(RegisterRequest request) {
-        log.info("회원가입 시도: email={}, username={}", request.getEmail(), request.getUsername());
+        log.info("회원가입 처리 시작: email={}", request.getEmail());
 
-        // 1. 비밀번호 일치 확인
-        if (!request.isPasswordMatched()) {
-            log.warn("회원가입 실패 - 비밀번호 불일치: email={}", request.getEmail());
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
+        validateRegisterRequest(request);
 
-        // 2. 이메일 중복 확인
-        if (userRepository.existsByEmail(request.getEmail())) {
-            log.warn("회원가입 실패 - 이메일 중복: email={}", request.getEmail());
-            throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
-        }
-
-        // 3. 사용자명 중복 확인
-        if (userRepository.existsByUsername(request.getUsername())) {
-            log.warn("회원가입 실패 - 사용자명 중복: username={}", request.getUsername());
-            throw new IllegalArgumentException("이미 사용중인 사용자명입니다.");
-        }
-
-        // 4. 비밀번호 암호화
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
-        log.debug("비밀번호 암호화 완료: email={}", request.getEmail());
-
-        // 5. User 엔티티 생성
-        User user = User.createLocalUser(
-                request.getUsername(),
-                request.getEmail(),
-                encodedPassword
-        );
-
-        // 6. 데이터베이스에 저장
+        User user = createLocalUser(request);
         User savedUser = userRepository.save(user);
-        log.info("회원가입 완료: userId={}, email={}, username={}",
-                savedUser.getUserId(), savedUser.getEmail(), savedUser.getUsername());
 
-        // 7. UserResponse로 변환해서 반환
+        log.info("회원가입 완료: userId={}, email={}", savedUser.getUserId(), savedUser.getEmail());
         return UserResponse.from(savedUser);
     }
 
     /**
-     * 로그인 처리
-     * 주의: Spring Security 폼 로그인을 사용하는 경우 이 메서드는 직접 호출되지 않음
-     *
-     * @param request 로그인 요청 데이터
-     * @return UserResponse 로그인한 사용자 정보
-     * @throws IllegalArgumentException 로그인 실패 시
+     * 로그인 처리 (Spring Security가 아닌 직접 호출용)
      */
     public UserResponse login(LoginRequest request) {
-        log.info("로그인 시도: email={}", request.getEmail());
+        log.info("로그인 처리 시작: email={}", request.getEmail());
 
-        // 1. 이메일로 사용자 찾기
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> {
-                    log.warn("로그인 실패 - 사용자 없음: email={}", request.getEmail());
-                    return new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
-                });
+        User user = findUserByEmail(request.getEmail());
+        validateLoginCredentials(user, request.getPassword());
 
-        // 2. OAuth2 사용자인지 확인 (패스워드가 null인 경우)
-        if (user.getPassword() == null) {
-            log.warn("로그인 실패 - OAuth2 사용자: email={}, provider={}",
-                    request.getEmail(), user.getProvider());
-            throw new IllegalArgumentException("소셜 로그인을 이용해주세요.");
-        }
-
-        // 3. 로컬 사용자인지 확인
-        if (!user.isLocalUser()) {
-            log.warn("로그인 실패 - 소셜 사용자: email={}, provider={}",
-                    request.getEmail(), user.getProvider());
-            throw new IllegalArgumentException("소셜 로그인 사용자입니다. 해당 방식으로 로그인해주세요.");
-        }
-
-        // 4. 비밀번호 일치 확인
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            log.warn("로그인 실패 - 비밀번호 불일치: email={}", request.getEmail());
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
-        }
-
-        log.info("로그인 성공: userId={}, email={}", user.getUserId(), user.getEmail());
+        log.info("로그인 성공: userId={}", user.getUserId());
         return UserResponse.from(user);
     }
 
     /**
-     * 사용자 ID로 사용자 정보 조회
-     *
-     * @param userId 조회할 사용자 ID
-     * @return UserResponse 사용자 정보
-     * @throws IllegalArgumentException 사용자를 찾을 수 없을 때
+     * 사용자 ID로 조회
      */
     @Transactional(readOnly = true)
     public UserResponse getUserById(Long userId) {
-        log.debug("사용자 정보 조회: userId={}", userId);
+        log.debug("사용자 조회: userId={}", userId);
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> {
-                    log.warn("사용자 조회 실패 - 존재하지 않음: userId={}", userId);
-                    return new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-                });
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
-        log.debug("사용자 정보 조회 성공: userId={}, email={}", user.getUserId(), user.getEmail());
         return UserResponse.from(user);
     }
 
     /**
-     * 이메일 중복 확인
-     *
-     * @param email 확인할 이메일
-     * @return boolean true=사용가능, false=사용불가
+     * 이메일로 사용자 조회 (Spring Security 핸들러용)
      */
     @Transactional(readOnly = true)
-    public boolean isEmailAvailable(String email) {
-        log.debug("이메일 중복 확인: email={}", email);
+    public UserResponse getUserByEmail(String email) {
+        log.debug("이메일로 사용자 조회: email={}", email);
 
-        boolean available = !userRepository.existsByEmail(email);
-
-        log.debug("이메일 중복 확인 결과: email={}, available={}", email, available);
-        return available;
+        User user = findUserByEmail(email);
+        return UserResponse.from(user);
     }
 
     /**
-     * 사용자명 중복 확인
-     *
-     * @param username 확인할 사용자명
-     * @return boolean true=사용가능, false=사용불가
+     * 이메일 사용 가능 여부 확인
+     */
+    @Transactional(readOnly = true)
+    public boolean isEmailAvailable(String email) {
+        return !userRepository.existsByEmail(email);
+    }
+
+    /**
+     * 사용자명 사용 가능 여부 확인
      */
     @Transactional(readOnly = true)
     public boolean isUsernameAvailable(String username) {
-        log.debug("사용자명 중복 확인: username={}", username);
-
-        boolean available = !userRepository.existsByUsername(username);
-
-        log.debug("사용자명 중복 확인 결과: username={}, available={}", username, available);
-        return available;
+        return !userRepository.existsByUsername(username);
     }
 
+    // === Private Helper Methods ===
+
+    private void validateRegisterRequest(RegisterRequest request) {
+        if (!request.isPasswordMatched()) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
+        }
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("이미 사용중인 사용자명입니다.");
+        }
+    }
+
+    private User createLocalUser(RegisterRequest request) {
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        return User.createLocalUser(
+                request.getUsername(),
+                request.getEmail(),
+                encodedPassword
+        );
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다: " + email));
+    }
+
+    private void validateLoginCredentials(User user, String rawPassword) {
+        if (user.getPassword() == null) {
+            throw new IllegalArgumentException("소셜 로그인을 이용해주세요.");
+        }
+
+        if (!user.isLocalUser()) {
+            throw new IllegalArgumentException("소셜 로그인 사용자입니다. 해당 방식으로 로그인해주세요.");
+        }
+
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+        }
+    }
 }
