@@ -75,22 +75,6 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 인터뷰 조회 실패 예외
-     */
-    @ExceptionHandler(InterviewNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleInterviewNotFoundException(InterviewNotFoundException e) {
-        log.warn("인터뷰 조회 실패: {}", e.getMessage());
-
-        ErrorResponse errorResponse = ErrorResponse.of(
-                HttpStatus.NOT_FOUND,
-                e.getMessage(),
-                "INTERVIEW_NOT_FOUND"
-        );
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-    }
-
-    /**
      * 요청 데이터 검증 실패 (@Valid, @Validated)
      */
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
