@@ -1,11 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // State variables to manage the interview
+    // State variables
     let interviewId = null;
     let questions = [];
     let currentQuestionIndex = 0;
     let userAnswers = [];
-    let totalTime = 15 * 60;
-    let intervalId;
+    let timerInterval;
 
     // DOM Elements
     const questionCounterEl = document.getElementById('question-counter');
@@ -16,70 +15,40 @@ document.addEventListener('DOMContentLoaded', function() {
     const timerEl = document.getElementById('timer');
     const charCounterEl = document.getElementById('char-counter');
 
-    function startTimer() {
-        intervalId = setInterval(() => {
-            const minutes = Math.floor(totalTime / 60);
-            const seconds = totalTime % 60;
-
-            timerEl.textContent = `시간: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-            if (totalTime <= 0) {
-                clearInterval(intervalId);
-                // Optional: Auto-submit or end interview when time runs out
-            }
-            totalTime--;
-        }, 1000);
-    }
-
-    answerTextareaEl.addEventListener('input', () => {
-        const textLength = answerTextareaEl.value.length;
-        charCounterEl.textContent = `${textLength}/500 글자`;
-    });
-
-    // --- Initialization ---
     function initializeInterview() {
-        // Retrieve data from the previous page
         interviewId = localStorage.getItem('interviewId');
         const storedQuestions = localStorage.getItem('questions');
 
         if (!interviewId || !storedQuestions) {
-            alert('Interview data not found. Returning to settings.');
+            alert('Interview data not found.');
             window.location.href = '/interview/settings';
             return;
         }
 
         questions = JSON.parse(storedQuestions);
-
-        if (questions.length === 0) {
-            alert('No questions found for this interview.');
-            window.location.href = '/interview/settings';
-            return;
-        }
-
-        // Setup the progress tracker
         setupProgressTracker();
-
-        // Display the first question
         displayCurrentQuestion();
-
-        // Start the main interview timer
-        startTimer();
+        startTimer(15 * 60);
     }
 
-    // --- UI Update Functions ---
     function displayCurrentQuestion() {
-        const currentQuestion = questions[currentQuestionIndex];
-        questionCounterEl.textContent = `질문 ${currentQuestionIndex + 1}/${questions.length}`;
-        questionTextEl.textContent = currentQuestion.text;
+        const totalQuestions = questions.length;
+        if (currentQuestionIndex >= totalQuestions) return;
 
-        // Update progress tracker UI
+        const currentQuestion = questions[currentQuestionIndex];
+        questionCounterEl.textContent = `질문 ${currentQuestionIndex + 1}/${totalQuestions}`;
+        questionTextEl.textContent = currentQuestion.text;
+        answerTextareaEl.value = '';
+        updateCharCounter();
         updateProgressTrackerUI();
 
-        // Clear the textarea for the new question
-        answerTextareaEl.value = '';
+        if (currentQuestionIndex === totalQuestions - 1) {
+            submitAnswerBtnEl.textContent = '면접 완료하기';
+        }
     }
 
     function setupProgressTracker() {
+        progressListEl.innerHTML = '';
         questions.forEach((q, index) => {
             const li = document.createElement('li');
             li.id = `progress-item-${index}`;
@@ -89,44 +58,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateProgressTrackerUI() {
-        // Mark previous questions as completed
-        for (let i = 0; i < currentQuestionIndex; i++) {
-            document.getElementById(`progress-item-${i}`).className = 'completed';
+        for (let i = 0; i < questions.length; i++) {
+            const item = document.getElementById(`progress-item-${i}`);
+            if (i < currentQuestionIndex) {
+                item.className = 'completed';
+            } else if (i === currentQuestionIndex) {
+                item.className = 'current';
+            } else {
+                item.className = '';
+            }
         }
-        // Mark the current question as active
-        document.getElementById(`progress-item-${currentQuestionIndex}`).className = 'current';
     }
 
-    // --- Start the interview ---
-    initializeInterview();
+    function updateCharCounter() {
+        const textLength = answerTextareaEl.value.length;
+        charCounterEl.textContent = `${textLength}/500 글자`;
+    }
 
-    // --- Event Listener for the Submit Button ---
-    submitAnswerBtnEl.addEventListener('click', async function() {
-        // 1. Store the current answer
-        const currentAnswer = {
-            questionId: questions[currentQuestionIndex].questionId,
-            answerText: answerTextareaEl.value
-        };
-        userAnswers.push(currentAnswer);
+    function startTimer(durationInSeconds) {
+        let remainingTime = durationInSeconds;
+        clearInterval(timerInterval);
 
-        // 2. Move to the next question
-        currentQuestionIndex++;
+        timerInterval = setInterval(() => {
+            if (remainingTime < 0) {
+                clearInterval(timerInterval);
+                endInterview();
+                return;
+            }
 
-        // 3. Check if the interview is over
-        if (currentQuestionIndex < questions.length) {
-            // If there are more questions, display the next one
-            displayCurrentQuestion();
-        } else {
-            // If all questions are answered, end the interview
-            await endInterview();
-        }
-    });
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
 
-    // --- New function to handle ending the interview ---
+            timerEl.textContent = `시간: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+            remainingTime--;
+        }, 1000);
+    }
+
     async function endInterview() {
-        // Change button to show it's submitting
         submitAnswerBtnEl.textContent = 'Submitting...';
         submitAnswerBtnEl.disabled = true;
+        clearInterval(timerInterval);
 
         const submitRequest = {
             interviewId: interviewId,
@@ -134,7 +106,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         try {
-            // Call the batch answer submission API
             const submitResponse = await fetch('/api/v1/interviews/answers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -143,15 +114,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (!submitResponse.ok) throw new Error('Failed to submit answers.');
 
-            // Call the end interview API to generate results
             const endResponse = await fetch(`/api/v1/interviews/${interviewId}/end`, {
                 method: 'POST'
             });
 
             if (!endResponse.ok) throw new Error('Failed to end interview.');
 
-            // Redirect to the result page
-            window.location.href = `/interview/result/${interviewId}`; // We'll create this page next
+            localStorage.removeItem('interviewId');
+            localStorage.removeItem('questions');
+
+            window.location.href = `/interview/result/${interviewId}`;
 
         } catch (error) {
             console.error('Error ending interview:', error);
@@ -160,4 +132,23 @@ document.addEventListener('DOMContentLoaded', function() {
             submitAnswerBtnEl.disabled = false;
         }
     }
+
+    answerTextareaEl.addEventListener('input', updateCharCounter);
+
+    submitAnswerBtnEl.addEventListener('click', async function() {
+        userAnswers.push({
+            questionId: questions[currentQuestionIndex].questionId,
+            answerText: answerTextareaEl.value
+        });
+
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < questions.length) {
+            displayCurrentQuestion();
+        } else {
+            await endInterview();
+        }
+    });
+
+    initializeInterview();
 });

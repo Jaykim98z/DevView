@@ -10,23 +10,46 @@
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="result-container">
-    <h1>면접이 완료되었습니다!</h1>
-    <p>수고하셨습니다. 면접 결과를 확인해보세요.</p>
+    <div class="result-header">
+        <h1>면접이 완료되었습니다!</h1>
+        <p>수고하셨습니다. 면접 결과를 확인해보세요.</p>
+    </div>
 
     <div class="result-card">
-        <div class="score-section">
-            <h2><span id="total-score">--</span> / 100</h2>
+        <div class="score-summary">
+            <h2><span id="total-score">--</span>/100</h2>
             <div id="grade" class="grade-badge">Grade --</div>
         </div>
-        <div class="feedback-section">
-            <h3>상세 피드백</h3>
-            <p id="feedback-text">Loading feedback...</p>
+
+        <div class="skill-scores">
+            <div class="skill-item">
+                <div class="label"><span>기술적 지식</span><span id="skill-tech-score">0%</span></div>
+                <div class="progress-bar"><div class="progress" id="skill-tech-progress"></div></div>
+            </div>
+            <div class="skill-item">
+                <div class="label"><span>문제 해결 능력</span><span id="skill-problem-score">0%</span></div>
+                <div class="progress-bar"><div class="progress" id="skill-problem-progress"></div></div>
+            </div>
+            <div class="skill-item">
+                <div class="label"><span>의사소통 능력</span><span id="skill-comm-score">0%</span></div>
+                <div class="progress-bar"><div class="progress" id="skill-comm-progress"></div></div>
+            </div>
+            <div class="skill-item">
+                <div class="label"><span>태도 & 열정</span><span id="skill-attitude-score">0%</span></div>
+                <div class="progress-bar"><div class="progress" id="skill-attitude-progress"></div></div>
+            </div>
         </div>
+
+        <h3 class="section-title">상세 피드백</h3>
+        <div id="feedback-text" class="feedback-details">Loading...</div>
+
+        <h3 class="section-title">종합 평가</h3>
+        <div id="summary-text" class="summary-details">Loading...</div>
     </div>
 
     <div class="recommendations-card">
-        <h3>추천 학습 자료</h3>
-        <div id="recommendations-text">Loading recommendations...</div>
+        <h3 class="section-title">추천 학습 자료</h3>
+        <div id="recommendations-text" class="recommendations-details">Loading...</div>
     </div>
 
     <div class="action-buttons">

@@ -4,11 +4,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     optionGroups.forEach(group => {
             group.addEventListener('click', function(event) {
-                if (event.target.classList.contains('option-btn')) {
+                const clickedButton = event.target.closest('.option-btn');
+                if (clickedButton) {
                     const buttonsInGroup = group.querySelectorAll('.option-btn');
                     buttonsInGroup.forEach(btn => btn.classList.remove('active'));
-
-                    event.target.classList.add('active');
+                    clickedButton.classList.add('active');
                 }
             });
         });
@@ -17,12 +17,18 @@ document.addEventListener('DOMContentLoaded', function() {
         interviewForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            const careerLevel = document.querySelector('button[data-value*="LEVEL"].active')?.dataset.value || 'JUNIOR';
-            const jobPosition = document.querySelector('button[data-value*="END"].active, button[data-value*="STACK"].active')?.dataset.value || 'BACKEND';
-            const interviewType = document.querySelector('#type-group .option-btn.active').dataset.value;
+            const currentUserId = document.getElementById('current-user-id').value;
+            if (!currentUserId) {
+                alert("Could not find user ID. Please make sure you are logged in.");
+                return;
+            }
+
+            const careerLevel = document.querySelector('#career-group .active').dataset.value;
+            const jobPosition = document.querySelector('#position-group .active').dataset.value;
+            const interviewType = document.querySelector('#type-group .active').dataset.value;
 
             const startRequest = {
-                userId: 1, // TODO: Replace with actual logged-in user ID
+                userId: currentUserId,
                 interviewType: interviewType,
                 jobPosition: jobPosition,
                 careerLevel: careerLevel
