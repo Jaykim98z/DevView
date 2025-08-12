@@ -1,3 +1,8 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 /* ========================= [랭킹 페이지 전용 스타일] ========================= */
 /* 헤더와 충돌하지 않도록 .ranking-page 클래스로 범위 제한 */
 
@@ -5,14 +10,13 @@
     font-family: "Noto Sans KR", sans-serif;
     background-color: #f8f9fa;
     color: #333;
-    line-height: 1.6;
 }
 
 .ranking-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    margin-top: 80px; /* 헤더 높이만큼 여백 */
+    margin-top: 20px; /* 헤더 높이만큼 여백 */
 }
 
 /* ========================= [페이지 헤더] ========================= */
