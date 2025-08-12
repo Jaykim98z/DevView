@@ -3,6 +3,7 @@ package com.allinone.DevView.interview.service;
 import com.allinone.DevView.common.exception.InterviewNotFoundException;
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
+import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
@@ -11,12 +12,19 @@ import com.allinone.DevView.interview.repository.InterviewAnswerRepository;
 import com.allinone.DevView.interview.repository.InterviewQuestionRepository;
 import com.allinone.DevView.interview.repository.InterviewRepository;
 import com.allinone.DevView.interview.repository.InterviewResultRepository;
+import com.allinone.DevView.ranking.service.RankingService;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +41,11 @@ public class InterviewService {
     private final ExternalAiApiService gemini;
     private final ExternalAiApiService alan;
     private final InterviewResultRepository interviewResultRepository;
+    // 🆕 랭킹 서비스 연동 (순환 의존성 해결을 위해 @Lazy 사용)
+    @Lazy
+    @Autowired
+    private RankingService rankingService;
+
 
     @Transactional
     public InterviewResponse startInterview(StartInterviewRequest request) {
@@ -174,6 +187,18 @@ public class InterviewService {
                 .build();
 
         InterviewResult savedResult = interviewResultRepository.save(result);
+
+        // 면접 완료 후 랭킹 업데이트
+        try {
+            Long userId = interview.getUser().getUserId();
+            rankingService.updateUserRanking(userId);
+            log.info("면접 완료 후 랭킹 업데이트 성공: userId={}, interviewId={}, newScore={}",
+                    userId, interviewId, score);
+        } catch (Exception e) {
+            // 랭킹 업데이트 실패해도 면접 결과는 정상 반환 (독립적 처리)
+            log.error("면접 완료 후 랭킹 업데이트 실패: interviewId={}, error={}",
+                    interviewId, e.getMessage(), e);
+        }
 
         return InterviewResultResponse.fromEntity(savedResult);
     }

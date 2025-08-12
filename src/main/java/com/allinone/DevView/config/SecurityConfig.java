@@ -92,9 +92,11 @@ public class SecurityConfig {
 
                         // 인증 없이 접근 가능한 페이지
                         .requestMatchers("/", "/user/login", "/user/register").permitAll()
+                        .requestMatchers("/rankings").permitAll() // 임시
 
                         // 인증 없이 접근 가능한 API
                         .requestMatchers("/api/users/register", "/api/users/check-email", "/api/users/check-username").permitAll()
+                        .requestMatchers("/api/rankings/**").permitAll() // 임시
 
                         // OAuth2 관련
                         .requestMatchers("/login/oauth2/code/**", "/oauth2/**").permitAll()
