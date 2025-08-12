@@ -10,6 +10,7 @@
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main>
+    <input type="hidden" id="current-user-id" th:value="${#authentication.principal.userId}">
     <div class="settings-container">
         <h1>인터뷰 사전 설정</h1>
         <p>Configure your AI interview settings to match your needs.</p>

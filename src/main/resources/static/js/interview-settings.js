@@ -17,12 +17,13 @@ document.addEventListener('DOMContentLoaded', function() {
         interviewForm.addEventListener('submit', async function(event) {
             event.preventDefault();
 
+            const currentUserId = document.getElementById('current-user-id').value;
             const careerLevel = document.querySelector('button[data-value*="LEVEL"].active')?.dataset.value || 'JUNIOR';
             const jobPosition = document.querySelector('button[data-value*="END"].active, button[data-value*="STACK"].active')?.dataset.value || 'BACKEND';
             const interviewType = document.querySelector('#type-group .option-btn.active').dataset.value;
 
             const startRequest = {
-                userId: 1, // TODO: Replace with actual logged-in user ID
+                userId: currentUserId,
                 interviewType: interviewType,
                 jobPosition: jobPosition,
                 careerLevel: careerLevel
