@@ -1,13 +1,13 @@
 package com.allinone.DevView.mypage.dto;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 public class ScrapDto {
-    private String title;
-    private String link;
-    private int likes;
-    private int comments;
+    private final String title;
+    private final String link;
+    private final int likes;
+    private final int comments;
 }

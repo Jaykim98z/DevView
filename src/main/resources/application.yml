@@ -34,11 +34,11 @@ spring:
 
 # Gemini API 키 설정 (환경변수에서 가져옴)
 gemini:
-  api-key: ${GEMINI_API_KEY}
+  api-key: AIzaSyBk7RE8qVgBoFiB0ywrH_ZM3iEqLDfvyPE
 
 # Alan API 키 설정 (환경변수에서 가져옴)
 alan:
-  client-id: ${ALAN_CLIENT_ID}
+  client-id: 64101ddc-c095-4aac-9c0e-032b339e1450
 
 ---
 
@@ -53,7 +53,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/devview_dev # 개발용 DB 이름
     username: postgres # 개발용 DB 사용자 이름
-    password: ${DEV_DB_PASSWORD} # 환경변수에서 가져옴
+    password: apxmfh18 # 환경변수에서 가져옴
   # JPA 설정
   jpa:
     hibernate:
