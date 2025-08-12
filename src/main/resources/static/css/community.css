@@ -321,3 +321,4 @@ html, body {
     gap: 16px;
   }
 }
+.is-readonly { opacity: 0.6; cursor: default; }

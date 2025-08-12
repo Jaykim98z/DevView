@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,14 +16,11 @@ import java.util.Optional;
 @Repository
 public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, Long> {
 
-    // ==== 기존 유지 ====
-    // 사용자까지 Fetch Join으로 가져옴
     @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user")
     List<CommunityPosts> findAllWithUser();
 
-    // 게시글 하나 상세 조회용
     @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user WHERE p.postId = :postId")
-    Optional<CommunityPosts> findByIdWithUser(Long postId);
+    Optional<CommunityPosts> findByIdWithUser(@Param("postId") Long postId);
 
     List<CommunityPosts> findByCategory(String category);
 
@@ -51,7 +50,7 @@ public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, 
            WHERE p.postId = :postId
              AND p.type = 'INTERVIEW_SHARE'
            """)
-    Optional<CommunityPosts> findInterviewShareByIdWithUser(Long postId);
+    Optional<CommunityPosts> findInterviewShareByIdWithUser(@Param("postId") Long postId);
 
     @Query(
             value = """
@@ -74,4 +73,33 @@ public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, 
     List<CommunityPosts> findByTypeAndContentContainingIgnoreCase(String type, String keyword);
 
     List<CommunityPosts> findTop10ByTypeOrderByScoreDesc(String type);
+
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update CommunityPosts p set p.viewCount = p.viewCount + 1 where p.postId = :postId")
+    int incrementViewCount(@Param("postId") Long postId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update CommunityPosts p set p.likeCount = p.likeCount + 1 where p.postId = :postId")
+    int incrementLikeCount(@Param("postId") Long postId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+           update CommunityPosts p
+           set p.likeCount = case when p.likeCount > 0 then p.likeCount - 1 else 0 end
+           where p.postId = :postId
+           """)
+    int decrementLikeCount(@Param("postId") Long postId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update CommunityPosts p set p.scrapCount = p.scrapCount + 1 where p.postId = :postId")
+    int incrementScrapCount(@Param("postId") Long postId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+       update CommunityPosts p
+       set p.scrapCount = case when p.scrapCount > 0 then p.scrapCount - 1 else 0 end
+       where p.postId = :postId
+       """)
+    int decrementScrapCount(@Param("postId") Long postId);
 }
