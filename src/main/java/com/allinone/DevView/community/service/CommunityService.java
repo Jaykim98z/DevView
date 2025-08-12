@@ -189,10 +189,19 @@ public class CommunityService {
         scrapsRepository.deleteById(scrapId);
     }
 
+    @Transactional
     public CommunityPostDetailDto getPostDetailDto(Long postId) {
+        // 먼저 +1 (clearAutomatically=true로 1차 캐시 갱신)
+        postsRepository.incrementViewCount(postId);
+
         CommunityPosts post = postsRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글 없음: " + postId));
         return CommunityPostDetailDto.from(post);
+    }
+
+    @Transactional
+    public void increaseViewCount(Long postId) {
+        postsRepository.incrementViewCount(postId);
     }
 
     public List<Likes> getLikesByUserId(Long userId) {
