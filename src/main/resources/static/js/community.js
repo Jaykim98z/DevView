@@ -9,16 +9,19 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentLevel = "";
 
   const MAX_SIZE = 50;
-  const cardListEl = document.getElementById("cardList");
+  const cardListEl   = document.getElementById("cardList");
   const paginationEl = document.getElementById("pagination");
-  const postCountEl = document.getElementById("postCount") || document.querySelector(".post-count");
+  const postCountEl  = document.getElementById("postCount") || document.querySelector(".post-count");
 
-  const sortSelect = document.getElementById("sortSelect");
-  const sizeSelect = document.getElementById("sizeSelect");
-  const searchForm = document.getElementById("searchForm");
+  const sortSelect   = document.getElementById("sortSelect");
+  const sizeSelect   = document.getElementById("sizeSelect");
+  const searchForm   = document.getElementById("searchForm");
   const keywordInput = document.getElementById("keywordInput");
   const categoryFilters = document.getElementById("categoryFilters");
-  const levelFilters = document.getElementById("levelFilters");
+  const levelFilters    = document.getElementById("levelFilters");
+
+  const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
+  const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
   if (!IS_DETAIL) loadPosts();
 
@@ -36,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   searchForm?.addEventListener("submit", (e) => {
     e.preventDefault();
-    currentKeyword = keywordInput.value.trim();
+    currentKeyword = keywordInput?.value?.trim() || "";
     currentPage = 0;
     loadPosts();
   });
@@ -63,29 +66,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (IS_DETAIL) {
     document.body.addEventListener("click", async (e) => {
-      const likeBtn = e.target.closest(".btn-like, .like-btn");
-      const scrapBtn = e.target.closest(".btn-scrap, .bookmark-btn");
+      const likeBtn  = e.target.closest("[data-like-btn], .btn-like, .like-btn");
+      const scrapBtn = e.target.closest("[data-scrap-btn], .btn-scrap, .bookmark-btn");
       if (!likeBtn && !scrapBtn) return;
 
-      if (likeBtn) await handleLike(likeBtn);
-      else if (scrapBtn) await handleScrap(scrapBtn);
+      if (likeBtn)  await handleLike(likeBtn);
+      if (scrapBtn) await handleScrap(scrapBtn);
     });
   }
 
   async function loadPosts() {
     if (!cardListEl) return;
+
     const params = new URLSearchParams();
     params.set("page", String(currentPage));
     params.set("size", String(pageSize));
-    if (currentSort) params.append("sort", currentSort);
-
-    // if (currentCategory) params.set("category", currentCategory);
-    // if (currentLevel) params.set("level", currentLevel);
-    // if (currentKeyword) params.set("query", currentKeyword);
+    if (currentSort)    params.append("sort", currentSort);
+    if (currentKeyword) params.set("query", currentKeyword);
+    if (currentCategory) params.set("category", currentCategory);
+    if (currentLevel)    params.set("level", currentLevel);
 
     const url = `/api/community/posts?${params.toString()}`;
+
     try {
-      const res = await fetch(url, { method: "GET" });
+      const res = await fetch(url, { method: "GET", credentials: "same-origin" });
       if (!res.ok) throw new Error(`목록 조회 실패: ${res.status}`);
       const page = await res.json(); // Spring Page
 
@@ -95,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch (err) {
       console.error(err);
       cardListEl.innerHTML = `<p style="padding:16px;">목록을 불러오지 못했습니다.</p>`;
-      paginationEl && (paginationEl.innerHTML = "");
+      if (paginationEl) paginationEl.innerHTML = "";
       updateCount(0);
     }
   }
@@ -107,19 +111,19 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     cardListEl.innerHTML = items.map(p => {
-      const postId = p.postId ?? p.id;
+      const postId     = p.postId ?? p.id;
       const writerName = p.writerName ?? "익명";
-      const levelTag = p.level ?? "";
-      const techTag = p.techTag ?? "";
-      const createdAt = formatDate(p.createdAt);
+      const levelTag   = p.level ?? "";
+      const techTag    = p.techTag ?? "";
+      const createdAt  = formatDate(p.createdAt);
 
       const likeStat = `
         <span class="icon-stat is-readonly" aria-label="좋아요 수">
-          <i class="fa fa-heart"></i> <span class="count">${p.likeCount ?? 0}</span>
+          <i class="fa fa-heart"></i> <span class="count" data-like-count="${postId}">${p.likeCount ?? 0}</span>
         </span>`;
       const scrapStat = `
         <span class="icon-stat is-readonly" aria-label="스크랩 수">
-          <i class="fa fa-bookmark"></i> <span class="count">${p.scrapCount ?? 0}</span>
+          <i class="fa fa-bookmark"></i> <span class="count" data-scrap-count="${postId}">${p.scrapCount ?? 0}</span>
         </span>`;
 
       return `
@@ -154,10 +158,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function renderPagination(page) {
     if (!paginationEl) return;
+
     const totalPages = page.totalPages ?? 0;
-    const number = page.number ?? 0;
-    const first = page.first ?? true;
-    const last = page.last ?? true;
+    const number     = page.number ?? 0;
+    const first      = page.first ?? true;
+    const last       = page.last ?? true;
 
     if (totalPages <= 1) {
       paginationEl.innerHTML = "";
@@ -168,7 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
     buttons.push(`<button class="page-btn" data-page="prev" ${first ? "disabled" : ""}>이전</button>`);
 
     const start = Math.max(0, number - 2);
-    const end = Math.min(totalPages - 1, number + 2);
+    const end   = Math.min(totalPages - 1, number + 2);
     for (let i = start; i <= end; i++) {
       buttons.push(`<button class="page-btn ${i === number ? "active" : ""}" data-page="${i}">${i + 1}</button>`);
     }
@@ -192,53 +197,56 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   async function handleLike(btn) {
-    const postId = btn.dataset.postId;
-    const userId = btn.dataset.userId || window.CURRENT_USER_ID;
-    if (!postId || !userId) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
+    const postId = btn.dataset.postId || document.querySelector("[data-post-id]")?.dataset.postId;
+    if (!postId) return alert("잘못된 요청입니다.");
+
     try {
-      const res = await fetch(`/api/community/posts/${postId}/likes/${userId}`, { method: "POST" });
-      if (!res.ok) throw new Error("좋아요 실패");
+      const data = await postJSON(`/api/community/posts/${postId}/like`);
+      btn.classList.toggle("active", data.active);
+      btn.setAttribute("aria-pressed", String(data.active));
 
-      const countEl = btn.querySelector(".count") || btn.querySelector("span");
-      const next = (parseInt(countEl?.textContent || "0", 10) || 0) + 1;
-      if (countEl) countEl.textContent = String(next);
-
-      btn.classList.add("active");
-      btn.setAttribute("aria-pressed", "true");
-    } catch (e) {
-      console.error(e);
-      alert("좋아요에 실패했습니다.");
+      const countEl =
+        document.querySelector(`[data-like-count="${postId}"]`) ||
+        btn.querySelector(".count") || btn.querySelector("span");
+      if (countEl) countEl.textContent = String(data.count);
+    } catch (err) {
+      if (err.message === "UNAUTHORIZED") alert("로그인이 필요합니다.");
+      else alert("좋아요 처리 중 오류가 발생했습니다.");
     }
   }
 
   async function handleScrap(btn) {
-    const postId = btn.dataset.postId;
-    const userId = btn.dataset.userId || window.CURRENT_USER_ID;
-    if (!postId || !userId) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
+    const postId = btn.dataset.postId || document.querySelector("[data-post-id]")?.dataset.postId;
+    if (!postId) return alert("잘못된 요청입니다.");
+
     try {
-      const res = await fetch(`/api/community/posts/${postId}/scraps`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, postId })
-      });
-      if (!res.ok) throw new Error("스크랩 실패");
+      const data = await postJSON(`/api/community/posts/${postId}/scrap`);
+      btn.classList.toggle("active", data.active);
+      btn.setAttribute("aria-pressed", String(data.active));
 
-      const countEl = btn.querySelector(".count") || btn.querySelector("span");
-      const next = (parseInt(countEl?.textContent || "0", 10) || 0) + 1;
-      if (countEl) countEl.textContent = String(next);
-
-      btn.classList.add("active");
-      btn.setAttribute("aria-pressed", "true");
-    } catch (e) {
-      console.error(e);
-      alert("스크랩에 실패했습니다.");
+      const countEl =
+        document.querySelector(`[data-scrap-count="${postId}"]`) ||
+        btn.querySelector(".count") || btn.querySelector("span");
+      if (countEl) countEl.textContent = String(data.count);
+    } catch (err) {
+      if (err.message === "UNAUTHORIZED") alert("로그인이 필요합니다.");
+      else alert("스크랩 처리 중 오류가 발생했습니다.");
     }
+  }
+
+  async function postJSON(url) {
+    const headers = {};
+    if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers,
+      credentials: "same-origin"
+    });
+
+    if (res.status === 401) throw new Error("UNAUTHORIZED");
+    if (!res.ok) throw new Error("REQUEST_FAILED");
+    return res.json();
   }
 
   function formatDate(dt) {

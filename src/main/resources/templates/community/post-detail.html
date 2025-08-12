@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="/css/post-detail.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
     <script th:inline="javascript">
         /*<![CDATA[*/
         window.CURRENT_USER_ID = /*[[${session.userId}]]*/ null;
@@ -14,7 +17,7 @@
     </script>
 </head>
 <body data-page="detail">
-<div th:replace="fragments/header :: header"></div>
+<div th:replace="~{fragments/header :: header}"></div>
 
 <main class="main-container">
     <div class="post-detail-card" th:data-post-id="${post.id}">

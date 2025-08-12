@@ -13,4 +13,7 @@ public interface ScrapsRepository extends JpaRepository<Scraps, Long> {
     List<Scraps> findByPostId(Long postId);
 
     boolean existsByUserIdAndPostId(Long userId, Long postId);
+
+    long countByPostId(Long postId);
+    void deleteByUserIdAndPostId(Long userId, Long postId);
 }
