@@ -36,7 +36,11 @@
             <!-- 로그인 상태 -->
             <div th:if="${session.loginUser != null}" class="user-info">
                 <span class="username" th:text="'안녕하세요, ' + ${session.loginUser.username} + '님'">안녕하세요, 사용자명님</span>
-                <a href="#" onclick="logout()" class="logout-btn">로그아웃</a>
+                <!-- 숨겨진 로그아웃 폼 -->
+                <form id="logoutForm" method="POST" action="/user/logout" style="display: none;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                </form>
+                <a href="#" onclick="logout(); return false;" class="logout-btn">로그아웃</a>
                 <a href="/mypage" class="mypage-btn">
                     <img src="/img/my.svg" alt="마이페이지">
                 </a>
@@ -48,22 +52,7 @@
     <script>
         function logout() {
             if (confirm('로그아웃 하시겠습니까?')) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/user/logout';
-
-                // CSRF 보호가 활성화된 경우를 대비
-                const csrfToken = document.querySelector('meta[name="_csrf"]');
-                if (csrfToken) {
-                    const csrfInput = document.createElement('input');
-                    csrfInput.type = 'hidden';
-                    csrfInput.name = '_csrf';
-                    csrfInput.value = csrfToken.getAttribute('content');
-                    form.appendChild(csrfInput);
-                }
-
-                document.body.appendChild(form);
-                form.submit();
+                document.getElementById('logoutForm').submit();
             }
         }
     </script>
