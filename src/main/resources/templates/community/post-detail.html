@@ -6,17 +6,22 @@
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/post-detail.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        window.CURRENT_USER_ID = /*[[${session.userId}]]*/ null;
+        /*]]>*/
+    </script>
 </head>
-<body>
+<body data-page="detail">
 <div th:replace="fragments/header :: header"></div>
 
 <main class="main-container">
-    <div class="post-detail-card">
+    <div class="post-detail-card" th:data-post-id="${post.id}">
         <header class="post-header">
             <img class="profile-img" th:src="@{/img/profile-default.svg}" alt="프로필" />
             <div class="user-info">
                 <span class="username" th:text="${post.username}">김개발</span>
-                <!-- <span class="user-role" th:text="${post.techTag} + ' • ' + post.levelTag}">백엔드 • 주니어</span> -->
                 <span class="post-date"
                       th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd') : ''}">
           2025-08-08
@@ -27,10 +32,9 @@
         <h2 class="post-title" th:text="${post.title}">Spring Boot 마이크로서비스 아키텍처 설계 면접 후기</h2>
 
         <div class="badges">
-            <!-- DTO에 있는 필드로 교체 -->
             <span class="badge badge-tech" th:text="${post.interviewType}">기술면접</span>
             <span class="score" th:text="${post.score} + ' 점'">88 점</span>
-            <span class="grade" th:text="'• ' + post.grade + ' 등급'">• B 등급</span>
+            <span class="grade" th:text="'• ' + ${post.grade} + ' 등급'">• B 등급</span>
         </div>
 
         <div class="post-content" th:text="${post.summary}">
@@ -38,13 +42,42 @@
         </div>
 
         <footer class="post-footer">
-            <span><i class="fas fa-eye"></i> <span th:text="${post.viewCount}">0</span></span>
-            <span><i class="fas fa-heart"></i> <span th:text="${post.likeCount}">0</span></span>
-            <!-- <span><i class="fas fa-comment"></i> <span th:text="${post.commentCount}">0</span></span> -->
-            <span><i class="fas fa-bookmark"></i> <span th:text="${post.scrapCount}">0</span></span>
+            <div class="metrics" th:data-post-id="${post.id}">
+    <span class="metric">
+      <i class="fas fa-eye"></i>
+      <span class="count" th:text="${post.viewCount}">0</span>
+    </span>
+
+                <button type="button"
+                        class="metric btn-icon btn-like"
+                        th:attr="data-post-id=${post.id},data-user-id=${session.userId}"
+                        aria-label="좋아요" aria-pressed="false">
+                    <i class="fas fa-heart"></i>
+                    <span class="count" th:text="${post.likeCount}">0</span>
+                </button>
+
+                <!-- 댓글은 필요 시
+                <span class="metric">
+                  <i class="fas fa-comment"></i>
+                  <span class="count" th:text="${post.commentCount}">0</span>
+                </span>
+                -->
+
+                <button type="button"
+                        class="metric btn-icon btn-scrap"
+                        th:attr="data-post-id=${post.id},data-user-id=${session.userId}"
+                        aria-label="스크랩" aria-pressed="false">
+                    <i class="fas fa-bookmark"></i>
+                    <span class="count" th:text="${post.scrapCount}">0</span>
+                </button>
+            </div>
+
             <a class="read-more" href="/community">목록으로</a>
         </footer>
+
     </div>
 </main>
+
+<script src="/js/community.js"></script>
 </body>
 </html>
