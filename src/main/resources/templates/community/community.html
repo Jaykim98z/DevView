@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>커뮤니티 - AI 면접 시뮬레이터</title>
 
+    <link rel="stylesheet" href="/css/header.css" />
     <link rel="stylesheet" href="/css/community.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-
-    <link rel="stylesheet" href="/css/header.css" />
+    <script>
+        window.CURRENT_USER_ID = /*[[${session.userId}]]*/ null;
+    </script>
 </head>
 <body>
-
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="community-container">
@@ -22,63 +23,55 @@
     </header>
 
     <div class="filter-bar">
-        <div class="left-controls">
-            <select name="sort" aria-label="정렬">
-                <option value="recent">최신순</option>
-                <option value="likes">좋아요순</option>
-            </select>
-        </div>
-
-        <form class="search-box" th:action="@{/community}" method="get">
-            <input type="text" name="keyword" placeholder="면접 결과 검색..." />
+        <!-- 1) 검색 (상단, 가로 전체) -->
+        <form id="searchForm" class="search-box" action="javascript:void(0);">
+            <input id="keywordInput" type="text" name="keyword" placeholder="면접 결과 검색..." />
             <button type="submit" aria-label="검색"><i class="fa fa-search"></i></button>
         </form>
 
-        <div class="tag-filters">
-            <div class="tag-group-left">
-                <button type="button" class="active">전체</button>
-                <button type="button">백엔드</button>
-                <button type="button">프론트엔드</button>
-                <button type="button">풀스택</button>
-                <button type="button">DevOps</button>
-            </div>
-            <div class="tag-group-right">
-                <button type="button">주니어</button>
-                <button type="button">미드레벨</button>
-                <button type="button">시니어</button>
-            </div>
+        <!-- 2) 같은 줄: 왼(정렬) / 중간(카테고리) / 오른쪽(레벨) -->
+        <div class="left-controls">
+            <select id="sortSelect" name="sort" aria-label="정렬">
+                <option value="createdAt,desc" selected>최신순</option>
+                <option value="likeCount,desc">좋아요순</option>
+                <option value="viewCount,desc">조회수순</option>
+                <option value="scrapCount,desc">스크랩순</option>
+                <option value="score,desc">점수순</option>
+            </select>
+
+            <select id="sizeSelect" aria-label="페이지 크기">
+                <option value="12" selected>12개</option>
+                <option value="20">20개</option>
+                <option value="30">30개</option>
+                <option value="50">50개</option>
+            </select>
+        </div>
+
+        <div class="tag-group-left" id="categoryFilters">
+            <button type="button" data-category="">전체</button>
+            <button type="button" data-category="백엔드">백엔드</button>
+            <button type="button" data-category="프론트엔드">프론트엔드</button>
+            <button type="button" data-category="풀스택">풀스택</button>
+            <button type="button" data-category="DevOps">DevOps</button>
+        </div>
+
+        <div class="tag-group-right" id="levelFilters">
+            <button type="button" data-level="">전체</button>
+            <button type="button" data-level="주니어">주니어</button>
+            <button type="button" data-level="미드레벨">미드레벨</button>
+            <button type="button" data-level="시니어">시니어</button>
         </div>
     </div>
 
-    <div class="card-list">
-        <div class="post-card" th:each="post : ${posts}">
-            <div class="user-info">
-                <img th:src="@{/img/profile-default.svg}" alt="프로필" class="profile-img" />
-                <div>
-                    <strong th:text="${post.username}">작성자</strong>
-                    <span class="user-meta" th:text="${post.techTag + ' · ' + post.levelTag}">직무 · 경력</span>
-                </div>
-            </div>
+    <div class="card-list" id="cardList"></div>
 
-            <h3 class="post-title" th:text="${post.title}">제목입니다</h3>
-            <p class="post-summary" th:text="${post.summary}">내용 요약</p>
-
-            <div class="post-score" th:text="${post.score + '점 · ' + post.grade}">0점 · 미정</div>
-
-            <div class="post-meta">
-                <span><i class="fa fa-heart"></i> <span th:text="${post.likeCount}">0</span></span>
-                <span><i class="fa fa-bookmark"></i> <span th:text="${post.scrapCount}">0</span></span>
-                <span><i class="fa fa-eye"></i> <span th:text="${post.viewCount}">0</span></span>
-            </div>
-
-            <a class="detail-link" th:href="@{/community/posts/{id}/detail(id=${post.id})}">자세히 보기</a>
-        </div>
-    </div>
+    <nav class="pagination" id="pagination" aria-label="페이지 탐색" style="margin: 24px 0; display: flex; gap: 8px; justify-content: center;">
+    </nav>
 </main>
 
-<a class="fab-write" th:href="@{/community/posts/new}" aria-label="글쓰기">
-    <span class="fab-icon" aria-hidden="true">✏️</span>
-    <span class="fab-text">글쓰기</span>
-</a>
+<a href="/community/posts/new" class="write-btn">✏️ 글쓰기</a>
+
+
+<script src="/js/community.js"></script>
 </body>
 </html>
