@@ -1,34 +1,55 @@
 .settings-container {
     max-width: 800px;
     margin: 2rem auto;
-    padding: 2rem;
+    padding: 2.5rem;
     background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.settings-container h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.settings-container p {
+    color: #6c757d;
+    margin-bottom: 2.5rem;
+}
+
+.settings-container h2 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: #495057;
 }
 
 .options-group {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
 
 .option-btn {
-    flex: 1;
     padding: 1rem;
-    border: 1px solid #e0e0e0;
+    border: 2px solid #e9ecef;
     border-radius: 8px;
-    background-color: #f9f9f9;
+    background-color: transparent;
     cursor: pointer;
     text-align: center;
+    font-weight: 500;
     transition: all 0.2s ease-in-out;
+}
+
+.option-btn:hover {
+    background-color: #f8f9fa;
 }
 
 .option-btn.active {
     border-color: #007bff;
     background-color: #e7f3ff;
     color: #007bff;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .start-btn {
@@ -39,6 +60,12 @@
     border-radius: 8px;
     background-color: #343a40;
     color: white;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.start-btn:hover {
+    background-color: #495057;
 }

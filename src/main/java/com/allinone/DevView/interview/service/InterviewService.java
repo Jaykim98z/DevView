@@ -1,6 +1,7 @@
 package com.allinone.DevView.interview.service;
 
-import com.allinone.DevView.common.exception.InterviewNotFoundException;
+import com.allinone.DevView.common.exception.CustomException;
+import com.allinone.DevView.common.exception.ErrorCode;
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
 import com.allinone.DevView.interview.dto.response.AnswerResponse;
@@ -50,7 +51,7 @@ public class InterviewService {
     @Transactional
     public InterviewResponse startInterview(StartInterviewRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found")); // 커스텀 예외 적용하기
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // DTO를 Entity로 변환하는 로직이 필요합니다.
         // 여기서는 설명을 위해 간단히 생성합니다.
@@ -68,7 +69,7 @@ public class InterviewService {
 
     public List<QuestionResponse> askAndSaveQuestions(Long interviewId) {
         Interview interview = interviewRepository.findById(interviewId)
-                .orElseThrow(() -> new IllegalArgumentException("Interview not found")); // 커스텀 예외 적용하기
+                .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
 
         List<String> questionTexts = gemini.getQuestionFromAi(
                 interview.getJobPosition(),
@@ -116,7 +117,7 @@ public class InterviewService {
                 .map(item -> {
                     InterviewQuestion question = questionMap.get(item.getQuestionId());
                     if (question == null) {
-                        throw new IllegalArgumentException("Question not found for ID: " + item.getQuestionId());
+                        throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
                     }
                     return InterviewAnswer.builder()
                             .question(question)
@@ -131,7 +132,7 @@ public class InterviewService {
     @Transactional
     public InterviewResultResponse endInterview(Long interviewId) {
         Interview interview = interviewRepository.findByIdWithQuestions(interviewId)
-                .orElseThrow(() -> new InterviewNotFoundException("Interview not found for ID: " + interviewId));
+                .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
 
         // Fetch questions and answers from the database
         // NOTE: This is a simple fetch. In a real-world scenario with many Q&As,
@@ -140,26 +141,12 @@ public class InterviewService {
         List<InterviewAnswer> answers = interviewAnswerRepository.findByQuestionIn(questions);
 
         // 2. Create a transcript for the AI to analyze.
-        String transcript = questions.stream()
-                .map(q -> {
-                    String answerText = answers.stream()
-                            .filter(a -> a.getQuestion().getId().equals(q.getId()))
-                            .findFirst()
-                            .map(InterviewAnswer::getAnswerText)
-                            .orElse("No answer provided.");
-                    return "Q: " + q.getText() + "\nA: " + answerText;
-                })
-                .collect(Collectors.joining("\n\n"));
+        String transcript = createTranscript(questions, answers);
 
         log.info("Generated Transcript for AI Analysis:\n{}", transcript);
 
         // 3. Create the prompt for Gemini.
-        String prompt = "As an expert interviewer, please evaluate the following interview transcript for a " +
-                interview.getJobPosition() + " role. Provide a total score from 0 to 100 and constructive " +
-                "feedback based on the answers. Format your response as follows:\n\n" +
-                "SCORE: [Your Score]\n" +
-                "FEEDBACK: [Your Feedback]\n\n" +
-                "Here is the transcript:\n" + transcript;
+        String prompt = createAnalysisPrompt(interview, transcript);
 
         log.info("Generated Prompt for Gemini:\n{}", prompt);
 
@@ -167,14 +154,7 @@ public class InterviewService {
         int score = parseScore(aiResponse);
         String feedback = parseFeedback(aiResponse);
         Grade grade = calculateGrade(score);
-        String recommendations = "No recommendations available.";
-        if (alan instanceof AlanApiService) {
-            try {
-                recommendations = ((AlanApiService) alan).getRecommendations(interview.getJobPosition());
-            } catch (Exception e) {
-                log.error("Failed to get recommendations from Alan API", e);
-            }
-        }
+        String recommendations = getRecommendationsFromAlan(interview.getJobPosition());
 
         interview.endInterviewSession();
 
@@ -203,6 +183,47 @@ public class InterviewService {
         return InterviewResultResponse.fromEntity(savedResult);
     }
 
+    @Transactional(readOnly = true)
+    public InterviewResultResponse getInterviewResult(Long interviewId) {
+        InterviewResult result = interviewResultRepository.findByInterviewId(interviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
+
+        return InterviewResultResponse.fromEntity(result);
+    }
+
+    private String createTranscript(List<InterviewQuestion> questions, List<InterviewAnswer> answers) {
+        return questions.stream()
+                .map(q -> {
+                    String answerText = answers.stream()
+                            .filter(a -> a.getQuestion().getId().equals(q.getId()))
+                            .findFirst()
+                            .map(InterviewAnswer::getAnswerText)
+                            .orElse("No answer provided.");
+                    return "Q: " + q.getText() + "\nA: " + answerText;
+                })
+                .collect(Collectors.joining("\n\n"));
+    }
+
+    private String createAnalysisPrompt(Interview interview, String transcript) {
+        return "As an expert interviewer, please evaluate the following interview transcript for a " +
+                interview.getJobPosition() + " role. Provide a total score from 0 to 100 and constructive " +
+                "feedback based on the answers. Format your response as follows:\n\n" +
+                "SCORE: [Your Score]\n" +
+                "FEEDBACK: [Your Feedback]\n\n" +
+                "Here is the transcript:\n" + transcript;
+    }
+
+    private String getRecommendationsFromAlan(String jobPosition) {
+        try {
+            if (alan instanceof AlanApiService) {
+                return ((AlanApiService) alan).getRecommendations(jobPosition);
+            }
+        } catch (Exception e) {
+            log.error("Failed to get recommendations from Alan API", e);
+        }
+        return "No recommendations available.";
+    }
+
     private int parseScore(String response) {
         try {
             return Integer.parseInt(response.split("SCORE:")[1].split("\n")[0].trim());
@@ -227,13 +248,5 @@ public class InterviewService {
         if (score >= 70) return Grade.C;
         if (score >= 60) return Grade.D;
         return Grade.F;
-    }
-
-    @Transactional(readOnly = true)
-    public InterviewResultResponse getInterviewResult(Long interviewId) {
-        InterviewResult result = interviewResultRepository.findByInterviewId(interviewId)
-                .orElseThrow(() -> new InterviewNotFoundException("Interview result not found for interviewId: " + interviewId));
-
-        return InterviewResultResponse.fromEntity(result);
     }
 }

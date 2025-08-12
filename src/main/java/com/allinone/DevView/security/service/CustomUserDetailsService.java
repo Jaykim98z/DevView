@@ -1,5 +1,6 @@
 package com.allinone.DevView.security.service;
 
+import com.allinone.DevView.security.CustomUserDetails;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         log.debug("사용자 인증 정보 생성 완료: userId={}, email={}", user.getUserId(), user.getEmail());
 
-        return new org.springframework.security.core.userdetails.User(
+        return new CustomUserDetails(
+                user.getUserId(),
                 user.getEmail(),
                 user.getPassword(),
                 new ArrayList<>()  // 권한 목록 (현재는 사용하지 않음)
