@@ -7,10 +7,8 @@ public class LikesId implements Serializable {
     private Long userId;
     private Long postId;
 
-    // 기본 생성자
     public LikesId() {}
 
-    // 각 필드에 대한 getter & setter 추가
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 

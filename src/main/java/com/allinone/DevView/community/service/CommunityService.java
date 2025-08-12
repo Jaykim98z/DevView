@@ -1,5 +1,6 @@
 package com.allinone.DevView.community.service;
 
+import com.allinone.DevView.community.dto.CreateInterviewSharePostRequest;
 import com.allinone.DevView.community.dto.CreatePostRequest;
 import com.allinone.DevView.community.dto.CommunityPostDetailDto;
 import com.allinone.DevView.community.dto.CommunityPostsDto;
@@ -29,6 +30,8 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
+
+    private static final String TYPE_INTERVIEW_SHARE = "INTERVIEW_SHARE";
 
     private final CommunityPostsRepository postsRepository;
     private final CommentsRepository commentsRepository;
@@ -61,7 +64,6 @@ public class CommunityService {
         return postsRepository.save(existingPost);
     }
 
-    // CommunityService.java
     @Transactional
     public Long createPost(CreatePostRequest req, Long userId) {
         User user = userRepository.findById(userId)
@@ -92,6 +94,48 @@ public class CommunityService {
         post.setCreatedAt(LocalDateTime.now());
         post.setUser(user);
         post.setWriterName(user.getUsername());
+
+        CommunityPosts saved = postsRepository.save(post);
+        return saved.getPostId();
+    }
+
+    @Transactional
+    public Long createInterviewSharePost(CreateInterviewSharePostRequest req, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
+
+        if (req.getInterviewResultId() != null
+                && postsRepository.existsByInterviewResultId(req.getInterviewResultId())) {
+            throw new IllegalStateException("해당 인터뷰 결과는 이미 공유되었습니다.");
+        }
+
+        String content = req.getContent();
+        String summary = (content != null && content.length() > 1000)
+                ? content.substring(0, 1000)
+                : content;
+
+        CommunityPosts post = new CommunityPosts();
+        post.setUser(user);
+        post.setWriterName(user.getUsername());
+
+        post.setType(TYPE_INTERVIEW_SHARE);
+
+        post.setInterviewType("GENERAL");
+
+        post.setTitle(req.getTitle());
+        post.setContent(content);
+        post.setSummary(summary);
+
+        post.setGrade(req.getGrade());
+        post.setScore(req.getScore());
+        post.setInterviewFeedback(req.getInterviewFeedback());
+
+        post.setInterviewResultId(req.getInterviewResultId());
+
+        post.setLikeCount(0);
+        post.setScrapCount(0);
+        post.setViewCount(0);
+        post.setCreatedAt(LocalDateTime.now());
 
         CommunityPosts saved = postsRepository.save(post);
         return saved.getPostId();
@@ -145,10 +189,19 @@ public class CommunityService {
         scrapsRepository.deleteById(scrapId);
     }
 
+    @Transactional
     public CommunityPostDetailDto getPostDetailDto(Long postId) {
+        // 먼저 +1 (clearAutomatically=true로 1차 캐시 갱신)
+        postsRepository.incrementViewCount(postId);
+
         CommunityPosts post = postsRepository.findByIdWithUser(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글 없음: " + postId));
         return CommunityPostDetailDto.from(post);
+    }
+
+    @Transactional
+    public void increaseViewCount(Long postId) {
+        postsRepository.incrementViewCount(postId);
     }
 
     public List<Likes> getLikesByUserId(Long userId) {
@@ -169,7 +222,7 @@ public class CommunityService {
         return posts.stream().map(post -> {
             var user = post.getUser();
 
-            Long userId = (user != null) ? user.getUserId() : null;
+            Long uId = (user != null) ? user.getUserId() : null;
             String username = (user != null) ? user.getUsername() : "탈퇴한 사용자";
 
             if (user == null) {
@@ -199,7 +252,7 @@ public class CommunityService {
 
             return new CommunityPostsDto(
                     post.getPostId(),
-                    userId,
+                    uId,
                     username,
                     post.getTechTag(),
                     post.getLevelTag(),
@@ -213,9 +266,9 @@ public class CommunityService {
                     post.getViewCount(),
                     post.getLikeCount(),
                     post.getScrapCount(),
-                    false,  // liked
-                    false,  // bookmarked
-                    null,   // scrapId
+                    false,
+                    false,
+                    null,
                     post.getCreatedAt()
             );
         }).toList();
