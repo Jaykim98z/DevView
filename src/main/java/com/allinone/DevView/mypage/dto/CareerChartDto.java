@@ -17,7 +17,6 @@ public class CareerChartDto {
         this.data = data;
     }
 
-    /*** Thymeleaf에서 사용될 JSON 문자열로 반환 */
     public String getLabelsJson() {
         return toJson(labels);
     }

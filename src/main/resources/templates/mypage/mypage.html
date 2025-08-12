@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <title>마이페이지</title>
@@ -10,7 +10,7 @@
 </head>
 <body>
 <!-- 헤더 -->
-<div th:replace="fragments/header :: header"></div>
+<th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <div class="mypage-container">
 
@@ -19,7 +19,6 @@
     <h2 class="greeting" th:text="'안녕하세요, ' + ${user.name} + '님!'">안녕하세요, 사용자님!</h2>
 
     <div class="profile-layout">
-        <!-- 왼쪽 컬럼 -->
         <div class="left-column">
             <!-- 프로필 카드 -->
             <div class="profile-card">
@@ -35,7 +34,7 @@
                 <div class="stats">
                     <div><strong th:text="${user.totalInterviews}">0</strong><span>면접 횟수</span></div>
                     <div><strong th:text="${user.avgScore}">0</strong><span>평균 점수</span></div>
-                    <div><strong th:text="${user.grade}">-</strong><span>최종 등급</span></div>
+                    <div><strong th:text="${user.grade != null ? user.grade : 'F'}">F</strong><span>최종 등급</span></div>
                 </div>
 
                 <!-- 액션 버튼 -->
@@ -64,11 +63,10 @@
                 </div>
                 <p class="kv"><span class="k">이메일</span><span class="v" th:text="${user.email}">example@example.com</span></p>
                 <p class="kv"><span class="k">비밀번호</span><span class="v"><a th:href="@{/mypage/edit}" class="text-link">변경하기</a></span></p>
-                <p class="kv"><span class="k">가입일</span><span class="v" th:text="${user.joinedAt}">YYYY.MM.DD</span></p>
+                <p class="kv"><span class="k">가입일</span><span class="v" th:text="${user.joinedAt != null ? #temporals.format(user.joinedAt, 'yyyy.MM.dd') : '-'}">YYYY.MM.DD</span></p>
             </div>
         </div>
 
-        <!-- 오른쪽 컬럼 -->
         <div class="right-column">
             <!-- 점수 변화 그래프 -->
             <div class="graph-card">
@@ -92,7 +90,7 @@
                         <div class="interview-item">
                             <div class="row">
                                 <div class="chips">
-                                    <span class="chip chip-date" th:text="${interview.interviewDate}">YYYY.MM.DD</span>
+                                    <span class="chip chip-date" th:text="${interview.interviewDate != null ? #temporals.format(interview.interviewDate, 'yyyy-MM-dd') : ''}">YYYY-MM-DD</span>
                                     <span class="chip chip-type" th:text="${interview.interviewType}">직무</span>
                                 </div>
                                 <div class="score-wrap">
