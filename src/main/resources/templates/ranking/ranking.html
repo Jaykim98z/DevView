@@ -1,10 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개발자 랭킹 - DevView</title>
+    <link rel="stylesheet" th:href="@{/css/header.css}">  <!-- 헤더 CSS 추가 -->
+    <link rel="stylesheet" th:href="@{/css/ranking.css}">
 </head>
-<body>
+<body class="ranking-page">
+<!-- 헤더 Fragment 포함 -->
+<div th:replace="~{fragments/header :: header}"></div>
 
+<div class="ranking-container">
+    <!-- 페이지 헤더 -->
+    <div class="page-header">
+        <h1>
+            <span class="trophy-icon">🏆</span>
+            개발자 랭킹
+        </h1>
+        <p>면접 실력을 겨루는 개발자들의 랭킹을 확인해보세요</p>
+    </div>
+
+    <!-- 오류 메시지 -->
+    <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
+
+    <!-- 상위 3명 시상대 -->
+    <div class="top3-section" th:if="${top3Rankings != null and !top3Rankings.isEmpty()}">
+        <div class="top3-title">
+            <h2>🏆 TOP 3</h2>
+            <p>최고의 면접 실력을 자랑하는 개발자들</p>
+        </div>
+
+        <div class="podium">
+            <div th:each="ranking, iterStat : ${top3Rankings}"
+                 th:class="'rank-card rank-' + (${iterStat.index} + 1)">
+
+                <div class="profile-container">
+                    <!-- 1위 왕관 -->
+                    <div th:if="${iterStat.index == 0}" class="crown">👑</div>
+
+                    <!-- 2, 3위 메달 -->
+                    <div th:if="${iterStat.index == 1}" class="medal">🥈</div>
+                    <div th:if="${iterStat.index == 2}" class="medal">🥉</div>
+
+                    <img th:src="${ranking.profileImageUrl}"
+                         th:alt="${ranking.username} + ' 프로필'"
+                         class="profile-image"
+                         onerror="this.src='/img/profile-default.svg'">
+                </div>
+
+                <div class="rank-info">
+                    <div class="username" th:text="${ranking.username}">유저1</div>
+                    <div class="score" th:text="${#numbers.formatDecimal(ranking.rankingScore, 0, 0)} + '점'">98점</div>
+                    <div class="interviews" th:text="${ranking.totalInterviews} + '회'">15회</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 전체 랭킹 테이블 -->
+    <div class="ranking-section">
+        <h2>전체 랭킹</h2>
+
+        <!-- 랭킹 테이블 -->
+        <table class="ranking-table" th:if="${top20Rankings != null and !top20Rankings.isEmpty()}">
+            <thead>
+            <tr>
+                <th>순위</th>
+                <th>사용자</th>
+                <th>점수</th>
+                <th>면접 횟수</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="ranking, iterStat : ${top20Rankings}"
+                th:class="${ranking.userId == currentUserId} ? 'my-rank' : ''"
+                th:data-user-id="${ranking.userId}">
+
+                <td class="rank-number"
+                    th:class="${iterStat.index < 3} ? 'top3' : ''"
+                    th:text="${iterStat.index + 1}">1</td>
+
+                <td class="user-info">
+                    <img th:src="${ranking.profileImageUrl}"
+                         th:alt="${ranking.username} + ' 프로필'"
+                         class="table-profile-img"
+                         onerror="this.src='/img/profile-default.svg'">
+                    <span class="user-name" th:text="${ranking.username}">유저1</span>
+                </td>
+
+                <td class="score-cell"
+                    th:text="${#numbers.formatDecimal(ranking.rankingScore, 0, 0)} + '점'">98점</td>
+
+                <td class="interviews-cell"
+                    th:text="${ranking.totalInterviews} + '회'">15회</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 데이터 없음 메시지 -->
+        <div th:if="${top20Rankings == null or top20Rankings.isEmpty()}" class="status-message">
+            <p>🚀 아직 랭킹 데이터가 없습니다.</p>
+            <p>첫 번째 면접을 시작해보세요!</p>
+            <br>
+            <a th:href="@{/interview/settings}" class="btn btn-primary"
+               style="display: inline-block; padding: 12px 24px; background: #3498db; color: white; text-decoration: none; border-radius: 8px; font-weight: 500;">
+                면접 시작하기
+            </a>
+        </div>
+    </div>
+
+    <!-- 통계 정보 (선택사항) -->
+    <div class="stats-section" th:if="${totalUsers != null and totalUsers > 0}"
+         style="text-align: center; margin-top: 30px; color: #7f8c8d;">
+        <p>총 <strong th:text="${totalUsers}">0</strong>명의 개발자가 랭킹에 참여하고 있습니다</p>
+    </div>
+</div>
+
+<!-- JavaScript 파일 포함 -->
+<script th:src="@{/js/ranking.js}"></script>
 </body>
 </html>

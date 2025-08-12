@@ -141,3 +141,45 @@ html, body {
   .post-title { font-size: 20px; }
   .post-detail-card { padding: 16px; border-radius: 12px; }
 }
+/* 메트릭 바 */
+.post-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.metrics {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: #6b7c93;
+  font-size: 14px;
+}
+
+.metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-icon {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+.btn-icon:hover i {
+  filter: brightness(0.85);
+}
+
+.btn-like.active i { color: #e74c3c; }     /* 빨간 하트 */
+.btn-scrap.active i { color: #4a90e2; }    /* 파란 북마크 */
+
+.metric .count { display: inline-block; min-width: 10px; }
+
+.btn-icon, .btn-icon:focus { outline: none; box-shadow: none; }
