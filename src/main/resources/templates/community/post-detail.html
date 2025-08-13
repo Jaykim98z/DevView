@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8" />
     <title th:text="${post.title} + ' - 게시글 상세보기'">게시글 상세보기</title>
+
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/post-detail.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -11,76 +14,91 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <script th:inline="javascript">
-        /*<![CDATA[*/
-        window.CURRENT_USER_ID = /*[[${session.userId}]]*/ null;
-        /*]]>*/
+        window.IS_AUTH  = [[${#authorization.expression('isAuthenticated()')}]];
+        window.POST_ID  = [[${post.id}]];
+        window.CURRENT_USERNAME = [[${#authentication} != null ? ${#authentication.name} : null]];
     </script>
 </head>
+
 <body data-page="detail">
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="main-container">
-    <div class="post-detail-card" th:data-post-id="${post.id}">
+    <div class="post-detail-card" th:attr="data-post-id=${post.id}">
+
         <header class="post-header">
             <img class="profile-img" th:src="@{/img/profile-default.svg}" alt="프로필" />
             <div class="user-info">
-                <span class="username" th:text="${post.username}">김개발</span>
+                <span class="username" th:text="${post.username}">testuser</span>
                 <span class="post-date"
                       th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd') : ''}">
-          2025-08-08
-        </span>
+            2025-08-08
+          </span>
             </div>
         </header>
 
-        <h2 class="post-title" th:text="${post.title}">Spring Boot 마이크로서비스 아키텍처 설계 면접 후기</h2>
+        <h2 class="post-title" th:text="${post.title}">게시글 제목</h2>
 
         <div class="badges">
-            <span class="badge badge-tech" th:text="${post.interviewType}">기술면접</span>
-            <span class="score" th:text="${post.score} + ' 점'">88 점</span>
-            <span class="grade" th:text="'• ' + ${post.grade} + ' 등급'">• B 등급</span>
+            <span class="badge badge-tech" th:text="${post.interviewType}">PRACTICE</span>
+            <span class="score" th:text="${post.score} + ' 점'">0 점</span>
+            <span class="grade" th:text="'• ' + ${post.grade} + ' 등급'">• C 등급</span>
         </div>
 
         <div class="post-content" th:text="${post.summary}">
-            면접에서 MSA 패턴과 API Gateway 설계에 대한 질문이 많이 나왔습니다...
+            게시글 요약/내용
         </div>
 
-        <footer class="post-footer">
-            <div class="metrics" th:data-post-id="${post.id}">
-    <span class="metric">
-      <i class="fas fa-eye"></i>
-      <span class="count" th:text="${post.viewCount}">0</span>
-    </span>
+        <div class="post-footer">
+            <div class="metrics">
+                <div class="metric">
+                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                    <span id="view-count" class="count" th:text="${post.viewCount}">0</span>
+                </div>
 
-                <button type="button"
-                        class="metric btn-icon btn-like"
-                        th:attr="data-post-id=${post.id},data-user-id=${session.userId}"
-                        aria-label="좋아요" aria-pressed="false">
-                    <i class="fas fa-heart"></i>
+                <button type="button" class="btn-icon btn-like"
+                        data-post-id="[[${post.id}]]"
+                        th:data-url="@{/api/community/posts/{id}/like(id=${post.id})}">
+                    <i class="fa-solid fa-heart" aria-hidden="true"></i>
                     <span class="count" th:text="${post.likeCount}">0</span>
                 </button>
 
-                <!-- 댓글은 필요 시
-                <span class="metric">
-                  <i class="fas fa-comment"></i>
-                  <span class="count" th:text="${post.commentCount}">0</span>
-                </span>
-                -->
-
-                <button type="button"
-                        class="metric btn-icon btn-scrap"
-                        th:attr="data-post-id=${post.id},data-user-id=${session.userId}"
-                        aria-label="스크랩" aria-pressed="false">
-                    <i class="fas fa-bookmark"></i>
+                <button type="button" class="btn-icon btn-scrap"
+                        data-post-id="[[${post.id}]]"
+                        th:data-url="@{/api/community/posts/{id}/scrap(id=${post.id})}">
+                    <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
                     <span class="count" th:text="${post.scrapCount}">0</span>
                 </button>
             </div>
+            <hr class="meta-divider" />
+        </div>
 
-            <a class="read-more" href="/community">목록으로</a>
-        </footer>
+        <section class="comments-section">
+            <div class="comments">
+                <div class="comments__title">
+                    <span>댓글</span>
+                    <span class="comments__badge"
+                          th:text="${comments} != null ? ${#lists.size(comments)} + '개' : '0개'">0개</span>
+                </div>
+
+                <form class="comment-form" onsubmit="return false;">
+                    <textarea id="comment-input" name="content" placeholder="댓글을 입력하세요..." required></textarea>
+                    <button id="comment-submit" type="button" class="btn-submit"
+                            th:disabled="${#authorization.expression('!isAuthenticated()')}">등록</button>
+                </form>
+
+                <ul id="comment-list" class="comment-list"></ul>
+                <button id="comment-load-more" type="button" style="display:none">더보기</button>
+            </div>
+        </section>
+
+        <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+            <a class="read-more" th:href="@{/community}">목록으로 가기</a>
+        </div>
 
     </div>
 </main>
 
-<script src="/js/community.js"></script>
+<script th:src="@{/js/post-detail-comments.js}" defer></script>
 </body>
 </html>

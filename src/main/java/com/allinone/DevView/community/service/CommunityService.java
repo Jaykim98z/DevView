@@ -200,8 +200,9 @@ public class CommunityService {
     }
 
     @Transactional
-    public void increaseViewCount(Long postId) {
+    public long increaseViewCount(Long postId) {
         postsRepository.incrementViewCount(postId);
+        return 0;
     }
 
     public List<Likes> getLikesByUserId(Long userId) {
