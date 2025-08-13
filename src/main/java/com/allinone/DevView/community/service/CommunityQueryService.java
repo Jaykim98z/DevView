@@ -41,7 +41,7 @@ public class CommunityQueryService {
     /* 특정 게시글의 댓글 목록 */
     public Page<CommentsDto> getComments(Long postId, Pageable pageable) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, COMMENT_SORT_WHITELIST);
-        return commentsRepository.findByPostId(postId, safe)
+        return commentsRepository.findByPostIdAndDeletedFalse(postId, safe)
                 .map(this::toCommentDto);
     }
 
