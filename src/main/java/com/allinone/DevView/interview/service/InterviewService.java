@@ -2,6 +2,7 @@ package com.allinone.DevView.interview.service;
 
 import com.allinone.DevView.common.exception.CustomException;
 import com.allinone.DevView.common.exception.ErrorCode;
+import com.allinone.DevView.interview.dto.alan.AlanRecommendationDto;
 import com.allinone.DevView.interview.dto.gemini.GeminiAnalysisResponseDto;
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
@@ -132,22 +133,8 @@ public class InterviewService {
         Interview interview = interviewRepository.findByIdWithQuestions(interviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
 
-        // Fetch questions and answers from the database
-        // NOTE: This is a simple fetch. In a real-world scenario with many Q&As,
-        // you would use a more optimized query.
-        List<InterviewQuestion> questions = interview.getQuestions();
-        List<InterviewAnswer> answers = interviewAnswerRepository.findByQuestionIn(questions);
-
-        // 2. Create a transcript for the AI to analyze.
-        String transcript = createTranscript(questions, answers);
-
-        log.info("Generated Transcript for AI Analysis:\n{}", transcript);
-
-        // 3. Create the prompt for Gemini.
+        String transcript = createTranscript(interview.getQuestions(), interviewAnswerRepository.findByQuestionIn(interview.getQuestions()));
         String prompt = createAnalysisPrompt(interview, transcript);
-
-        log.info("Generated Prompt for Gemini:\n{}", prompt);
-
         String aiResponseJson = gemini.generateContent(prompt);
         String cleanedJson = aiResponseJson.trim()
                 .replace("```json", "")
@@ -156,7 +143,33 @@ public class InterviewService {
 
         try {
             GeminiAnalysisResponseDto analysis = objectMapper.readValue(cleanedJson, GeminiAnalysisResponseDto.class);
-            String recommendations = getRecommendationsFromAlan(interview.getJobPosition());
+
+            String recommendationsHtml = "No specific recommendations available.";
+            if (alan instanceof AlanApiService && analysis.keywords() != null && !analysis.keywords().isEmpty()) {
+                StringBuilder htmlBuilder = new StringBuilder("<ul>");
+                analysis.keywords().forEach(keyword -> {
+                    try {
+                        String alanJson = ((AlanApiService) alan).getRecommendations(keyword);
+                        String cleanedAlanJson = alanJson.trim().replace("```json", "").replace("```", "").trim();
+
+                        AlanRecommendationDto alanResponse = objectMapper.readValue(cleanedAlanJson, AlanRecommendationDto.class);
+                        if (alanResponse != null && alanResponse.recommendations() != null) {
+                            alanResponse.recommendations().forEach(item -> {
+                                String safeTitle = item.title().replace("<", "&lt;").replace(">", "&gt;");
+                                htmlBuilder.append("<li><a href=\"")
+                                        .append(item.url())
+                                        .append("\" target=\"_blank\" rel=\"noopener noreferrer\">")
+                                        .append(safeTitle)
+                                        .append("</a></li>");
+                            });
+                        }
+                    } catch (Exception e) {
+                        log.warn("Failed to process recommendation for keyword '{}': {}", keyword, e.getMessage());
+                    }
+                });
+                htmlBuilder.append("</ul>");
+                recommendationsHtml = htmlBuilder.toString();
+            }
 
             interview.endInterviewSession();
 
@@ -165,7 +178,7 @@ public class InterviewService {
                     .totalScore(analysis.totalScore())
                     .grade(calculateGrade(analysis.totalScore()))
                     .feedback(cleanedJson)
-                    .recommendedResource(recommendations)
+                    .recommendedResource(recommendationsHtml)
                     .build();
 
             InterviewResult savedResult = interviewResultRepository.save(result);
@@ -212,10 +225,10 @@ public class InterviewService {
 
     private String createAnalysisPrompt(Interview interview, String transcript) {
         return "As an expert interviewer, please evaluate the following interview transcript for a " +
-                interview.getJobPosition() + " role. Provide a total score, constructive feedback, a summary, " +
-                "and four category scores. Your response MUST be a single, valid JSON object with no extra text. " +
-                "The JSON object must have these exact keys: 'totalScore' (0-100), 'feedback' (string), 'summary' (string), " +
-                "'techScore' (0-100), 'problemScore' (0-100), 'commScore' (0-100), 'attitudeScore' (0-100).\n\n" +
+                interview.getJobPosition() + " role. Your response MUST be a single, valid JSON object with no extra text. " +
+                "The JSON object must have these exact keys: 'totalScore' (0-100), 'feedback' (string in KR), 'summary' (string in KR), " +
+                "'techScore' (0-100), 'problemScore' (0-100), 'commScore' (0-100), 'attitudeScore' (0-100), " +
+                "and 'keywords' (an array of 3-5 relevant technical string KR keywords from the transcript).\n\n" +
                 "Here is the transcript:\n" + transcript;
     }
 

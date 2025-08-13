@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         gradeEl.textContent = `Grade ${result.grade}`;
         feedbackEl.textContent = analysis.feedback;
         summaryEl.textContent = analysis.summary;
-        recommendationsEl.textContent = result.recommendedResource;
+        recommendationsEl.innerHTML = result.recommendedResource;
 
         setProgress(skillTechProgress, skillTechScore, analysis.techScore);
         setProgress(skillProblemProgress, skillProblemScore, analysis.problemScore);
