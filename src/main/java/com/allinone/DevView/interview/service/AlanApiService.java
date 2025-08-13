@@ -32,10 +32,9 @@ public class AlanApiService implements ExternalAiApiService {
      * @return 검색된 추천 자료 내용 (content 필드)
      */
     public String getRecommendations(String keyword) {
-        String prompt = String.format(
-                "Please provide a list of helpful resources (like blog posts, official docs, or tutorials) for learning about '%s'.",
-                keyword
-        );
+        String prompt = "Please provide a list of helpful learning resources for '" + keyword + "'. " +
+                "Your response MUST be a single, valid JSON object with one key: 'recommendations'. " +
+                "The value should be an array of objects, where each object has two keys: 'title' (string) and 'url' (string).";
 
         return generateContent(prompt);
     }
