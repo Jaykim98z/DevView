@@ -2,9 +2,9 @@ package com.allinone.DevView.interview.service;
 
 import com.allinone.DevView.common.exception.CustomException;
 import com.allinone.DevView.common.exception.ErrorCode;
+import com.allinone.DevView.interview.dto.gemini.GeminiAnalysisResponseDto;
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
-import com.allinone.DevView.interview.dto.response.AnswerResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResponse;
 import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
 import com.allinone.DevView.interview.dto.response.QuestionResponse;
@@ -16,16 +16,13 @@ import com.allinone.DevView.interview.repository.InterviewResultRepository;
 import com.allinone.DevView.ranking.service.RankingService;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +39,7 @@ public class InterviewService {
     private final ExternalAiApiService gemini;
     private final ExternalAiApiService alan;
     private final InterviewResultRepository interviewResultRepository;
+    private final ObjectMapper objectMapper;
     // 🆕 랭킹 서비스 연동 (순환 의존성 해결을 위해 @Lazy 사용)
     @Lazy
     @Autowired
@@ -150,37 +148,45 @@ public class InterviewService {
 
         log.info("Generated Prompt for Gemini:\n{}", prompt);
 
-        String aiResponse = gemini.generateContent(prompt);
-        int score = parseScore(aiResponse);
-        String feedback = parseFeedback(aiResponse);
-        Grade grade = calculateGrade(score);
-        String recommendations = getRecommendationsFromAlan(interview.getJobPosition());
+        String aiResponseJson = gemini.generateContent(prompt);
+        String cleanedJson = aiResponseJson.trim()
+                .replace("```json", "")
+                .replace("```", "")
+                .trim();
 
-        interview.endInterviewSession();
-
-        InterviewResult result = InterviewResult.builder()
-                .interview(interview)
-                .totalScore(score)
-                .grade(grade)
-                .feedback(feedback)
-                .recommendedResource(recommendations)
-                .build();
-
-        InterviewResult savedResult = interviewResultRepository.save(result);
-
-        // 면접 완료 후 랭킹 업데이트
         try {
-            Long userId = interview.getUser().getUserId();
-            rankingService.updateUserRanking(userId);
-            log.info("면접 완료 후 랭킹 업데이트 성공: userId={}, interviewId={}, newScore={}",
-                    userId, interviewId, score);
-        } catch (Exception e) {
-            // 랭킹 업데이트 실패해도 면접 결과는 정상 반환 (독립적 처리)
-            log.error("면접 완료 후 랭킹 업데이트 실패: interviewId={}, error={}",
-                    interviewId, e.getMessage(), e);
-        }
+            GeminiAnalysisResponseDto analysis = objectMapper.readValue(cleanedJson, GeminiAnalysisResponseDto.class);
+            String recommendations = getRecommendationsFromAlan(interview.getJobPosition());
 
-        return InterviewResultResponse.fromEntity(savedResult);
+            interview.endInterviewSession();
+
+            InterviewResult result = InterviewResult.builder()
+                    .interview(interview)
+                    .totalScore(analysis.totalScore())
+                    .grade(calculateGrade(analysis.totalScore()))
+                    .feedback(analysis.feedback())
+                    .recommendedResource(recommendations)
+                    .build();
+
+            InterviewResult savedResult = interviewResultRepository.save(result);
+
+            // 면접 완료 후 랭킹 업데이트
+            try {
+                Long userId = interview.getUser().getUserId();
+                rankingService.updateUserRanking(userId);
+                log.info("면접 완료 후 랭킹 업데이트 성공: userId={}, interviewId={}, newScore={}",
+                        userId, interviewId, analysis.totalScore());
+            } catch (Exception e) {
+                // 랭킹 업데이트 실패해도 면접 결과는 정상 반환 (독립적 처리)
+                log.error("면접 완료 후 랭킹 업데이트 실패: interviewId={}, error={}",
+                        interviewId, e.getMessage(), e);
+            }
+
+            return InterviewResultResponse.fromEntity(savedResult);
+        } catch (Exception e) {
+            log.error("Failed to parse JSON response from AI. Raw Response: {}", aiResponseJson, e);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -206,10 +212,10 @@ public class InterviewService {
 
     private String createAnalysisPrompt(Interview interview, String transcript) {
         return "As an expert interviewer, please evaluate the following interview transcript for a " +
-                interview.getJobPosition() + " role. Provide a total score from 0 to 100 and constructive " +
-                "feedback based on the answers. Format your response as follows:\n\n" +
-                "SCORE: [Your Score]\n" +
-                "FEEDBACK: [Your Feedback]\n\n" +
+                interview.getJobPosition() + " role. Provide a total score, constructive feedback, a summary, " +
+                "and four category scores. Your response MUST be a single, valid JSON object with no extra text. " +
+                "The JSON object must have these exact keys: 'totalScore' (0-100), 'feedback' (string), 'summary' (string), " +
+                "'techScore' (0-100), 'problemScore' (0-100), 'commScore' (0-100), 'attitudeScore' (0-100).\n\n" +
                 "Here is the transcript:\n" + transcript;
     }
 
@@ -222,24 +228,6 @@ public class InterviewService {
             log.error("Failed to get recommendations from Alan API", e);
         }
         return "No recommendations available.";
-    }
-
-    private int parseScore(String response) {
-        try {
-            return Integer.parseInt(response.split("SCORE:")[1].split("\n")[0].trim());
-        } catch (Exception e) {
-            log.error("Failed to parse score from AI response: {}", response, e);
-            return 0;
-        }
-    }
-
-    private String parseFeedback(String response) {
-        try {
-            return response.split("FEEDBACK:")[1].trim();
-        } catch (Exception e) {
-            log.error("Failed to parse feedback from AI response: {}", response, e);
-            return "Feedback analysis failed.";
-        }
     }
 
     private Grade calculateGrade(int score) {
