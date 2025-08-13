@@ -3,50 +3,67 @@
 <head>
     <title>프로필 수정</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" th:href="@{/css/mypage.css}">
-    <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <link rel="stylesheet" th:href="@{/css/mypage-edit.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
     <script th:src="@{/js/mypage-edit.js}" defer></script>
 </head>
 <body>
 
-<div th:replace="fragments/header :: header"></div>
+<th:block th:replace="~{fragments/header :: header}"></th:block>
 
-<div class="container">
+<div class="mypage-container">
     <nav class="breadcrumb">
-        <a th:href="@{/mypage}">마이페이지</a> &gt; <span>프로필 수정</span>
+        <a th:href="@{/mypage}"> 마이페이지 </a> &gt; <span> 프로필 수정 </span>
     </nav>
 
-    <h1>프로필 수정</h1>
+    <h1 class="page-title">프로필 수정</h1>
 
-    <!-- 🔹 프로필 이미지 업로드 영역 -->
-    <div class="form-box">
-        <h3>프로필 이미지</h3>
+    <!-- 프로필 이미지 업로드 -->
+    <section class="form-box" aria-labelledby="profileImageTitle">
+        <h3 id="profileImageTitle" class="section-title">
+            <img class="icon" th:src="@{/img/imgedit.svg}" alt="">
+            프로필 이미지
+        </h3>
+
         <div class="upload-section">
+            <!-- 미리보기 + 삭제 -->
             <div class="image-preview">
-                <img th:if="${user.profileImageUrl != null}" th:src="@{${user.profileImageUrl}}" alt="프로필" />
-                <img th:if="${user.profileImageUrl == null}" src="/img/진욱.svg" alt="기본 이미지" />
+                <img id="imagePreview" class="profile-img-preview"
+                     th:src="${uploadedImageUrl != null ? uploadedImageUrl : #strings.defaultString(user.profileImageUrl, '/img/진욱.svg')}"
+                     alt="프로필 이미지">
 
-                <form th:action="@{/mypage/profile/image/delete}" method="post">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button type="submit" class="btn-delete">이미지 삭제</button>
+                <!-- (B) 삭제 폼에 현재 경로 hidden 추가 -->
+                <form th:action="@{/mypage/profile/image/delete}" method="post" id="deleteImageForm">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="imageUrl"
+                           th:value="${#strings.defaultString(uploadedImageUrl, user.profileImageUrl)}">
+                    <button type="submit" class="btn-delete" id="btnDeleteImage">이미지 삭제</button>
                 </form>
             </div>
 
-            <form th:action="@{/mypage/profile/image}" method="post" enctype="multipart/form-data">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <div class="upload-box" id="dropArea">
-                    <p>이미지를 드래그하거나 클릭하여 업로드<br>(JPG, JPEG, PNG만 가능)</p>
-                    <input type="file" id="imageInput" name="imageFile" accept="image/*" hidden>
+            <!-- 드래그&드랍/클릭 업로드 -->
+            <form th:action="@{/mypage/profile/image}" method="post" enctype="multipart/form-data" id="imageUploadForm">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <div class="upload-box" id="dropArea" tabindex="0" aria-label="이미지 업로드 박스">
+                    <img class="upload-icon" th:src="@{/img/upload.svg}" alt="">
+                    <p class="upload-guide">
+                        이미지를 드래그하거나 클릭하여 업로드<br>
+                        <small>(JPG/JPEG/PNG · 최대 5MB)</small>
+                    </p>
+                    <input type="file" id="imageInput" name="imageFile" accept="image/png,image/jpeg" hidden>
                     <button type="button" id="uploadTrigger" class="btn-upload">이미지 업로드</button>
                 </div>
             </form>
         </div>
-    </div>
+    </section>
 
-    <!-- 🔹 사용자 정보 수정 영역 -->
-    <form th:action="@{/mypage/edit}" method="post" class="form-box">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-        <h3>개인 정보</h3>
+    <!-- 사용자 정보 수정 -->
+    <form th:action="@{/mypage/edit}" method="post" class="form-box" id="profileForm" aria-labelledby="personalInfoTitle">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <h3 id="personalInfoTitle" class="section-title">
+            <img class="icon" th:src="@{/img/profileimg.svg}" alt="개인 정보">
+            개인 정보
+        </h3>
 
         <div class="form-group">
             <label for="name">이름</label>
@@ -56,29 +73,31 @@
         <div class="form-group">
             <label for="job">직군</label>
             <select id="job" name="job" required>
-                <option disabled selected>직군을 선택하세요</option>
-                <option th:value="백엔드" th:selected="${user.job == '백엔드'}">백엔드</option>
-                <option th:value="프론트엔드" th:selected="${user.job == '프론트엔드'}">프론트엔드</option>
-                <option th:value="AI" th:selected="${user.job == 'AI'}">AI</option>
-                <option th:value="DevOps" th:selected="${user.job == 'DevOps'}">DevOps</option>
-                <option th:value="기획" th:selected="${user.job == '기획'}">기획</option>
+                <option value="" disabled th:selected="${user.job == null}">직군을 선택하세요 </option>
+                <option th:value="'Backend'"   th:selected="${user.job == 'Backend'}">Backend</option>
+                <option th:value="'Frontend'"  th:selected="${user.job == 'Frontend'}">Frontend</option>
+                <option th:value="'Fullstack'" th:selected="${user.job == 'Fullstack'}">Fullstack</option>
+                <option th:value="'DevOps'"    th:selected="${user.job == 'DevOps'}">DevOps</option>
+                <option th:value="'Data,AI'"   th:selected="${user.job == 'Data/AI'}">Data/AI</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="careerLevel">경력 수준</label>
+            <label for="careerLevel">경력 수준 </label>
             <select id="careerLevel" name="careerLevel" required>
-                <option disabled selected>경력 수준을 선택하세요</option>
-                <option th:value="주니어" th:selected="${user.careerLevel == '주니어'}">주니어</option>
-                <option th:value="미들" th:selected="${user.careerLevel == '미들'}">미들</option>
-                <option th:value="시니어" th:selected="${user.careerLevel == '시니어'}">시니어</option>
-                <option th:value="리드" th:selected="${user.careerLevel == '리드'}">리드</option>
+                <option value="" disabled th:selected="${user.careerLevel == null}">경력 수준을 선택하세요 </option>
+                <option th:value="'Junior'"    th:selected="${user.careerLevel == 'Junior'}">Junior</option>
+                <option th:value="'Mid-Level'" th:selected="${user.careerLevel == 'Mid-Level'}">Mid-Level</option>
+                <option th:value="'Senior'"    th:selected="${user.careerLevel == 'Senior'}">Senior</option>
             </select>
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="save-btn">변경사항 저장</button>
-            <a th:href="@{/mypage}" class="cancel-btn">취소</a>
+            <button type="submit" class="save-btn">
+                <img class="icon" th:src="@{/img/save.svg}" alt=""> 변경사항 저장
+            </button>
+            <a th:href="@{/mypage}" class="cancel-btn"> 취소
+            </a>
         </div>
     </form>
 </div>

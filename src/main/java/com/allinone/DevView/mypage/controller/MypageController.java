@@ -30,7 +30,6 @@ public class MypageController {
         }
 
         Long userId = loginUser.getUserId();
-
         try {
             MypageResponseDto userInfo = mypageService.getMypageData(userId);
             model.addAttribute("user", userInfo);
@@ -51,5 +50,16 @@ public class MypageController {
         } catch (UserNotFoundException e) {
             return "redirect:/user/login";
         }
+    }
+
+    /*** 마이페이지 수정 폼 뷰 (화면 라우팅 유지) */
+    @GetMapping("/edit")
+    public String editPage(Model model, HttpSession session) {
+        UserResponse loginUser = (UserResponse) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            return "redirect:/user/login";
+        }
+        model.addAttribute("user", mypageService.getBasicUserInfo(loginUser.getUserId()));
+        return "mypage/mypage-edit";
     }
 }

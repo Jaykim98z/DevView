@@ -1,14 +1,19 @@
 package com.allinone.DevView.mypage.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserProfileUpdateRequest {
+    @NotBlank
+    private String name;
+    private String job;
+    private String careerLevel;
 
-    private String name;         // 사용자 이름
-    private String job;          // 직군 (예: 백엔드, 프론트엔드)
-    private String careerLevel;  // 경력레벨 (예: 주니어, 시니어)
-    private String profileImageUrl;
+    // 필요하면 email도 허용 가능(매퍼 주석 참고)
+    // private String email;
 }
