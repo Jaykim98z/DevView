@@ -6,6 +6,7 @@ import com.allinone.DevView.interview.entity.InterviewResult;
 import com.allinone.DevView.interview.repository.InterviewRepository;
 import com.allinone.DevView.interview.repository.InterviewResultRepository;
 import com.allinone.DevView.mypage.dto.CareerChartDto;
+import com.allinone.DevView.mypage.dto.InterviewDto;
 import com.allinone.DevView.mypage.dto.MypageResponseDto;
 import com.allinone.DevView.mypage.dto.ScoreGraphDto;
 import com.allinone.DevView.mypage.dto.UserProfileUpdateRequest;
@@ -18,9 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,48 +31,66 @@ public class MypageService {
 
     private final UserRepository userRepository;
     private final MypageMapper mypageMapper;
-
     private final InterviewRepository interviewRepository;
     private final InterviewResultRepository interviewResultRepository;
-
-    // 이미지 저장/삭제 전담 서비스
     private final ProfileImageService profileImageService;
 
-    /** 마이페이지 메인 데이터 */
+    /** 마이페이지 메인 데이터 (면접 요약/목록 포함) */
     public MypageResponseDto getMypageData(Long userId) {
         User user = getUserOrThrow(userId);
-        return buildBasicResponse(user);
-    }
 
-    /** 점수 그래프 데이터 */
-    public ScoreGraphDto getScoreGraphData(Long userId) {
-        List<Interview> interviews = interviewRepository.findAllByUserId(userId)
-                .stream()
-                .sorted(Comparator.comparing(Interview::getCreatedAt))
+        // ✅ 사용자별 인터뷰 결과만 조회
+        List<InterviewResult> results = interviewResultRepository.findByUserId(userId);
+
+        // 최신순: endedAt 우선, 없으면 createdAt
+        results.sort(Comparator.comparing((InterviewResult r) -> {
+            Interview i = r.getInterview();
+            return i.getEndedAt() != null ? i.getEndedAt() : i.getCreatedAt();
+        }).reversed());
+
+        // 목록 DTO
+        List<InterviewDto> interviews = results.stream()
+                .map(InterviewDto::fromEntity)
                 .toList();
 
-        Set<Long> interviewIds = interviews.stream()
-                .map(Interview::getId)
-                .collect(Collectors.toSet());
+        int totalInterviews = results.size();
+        int avgScore = (int) Math.round(results.stream().mapToInt(InterviewResult::getTotalScore).average().orElse(0));
+        String latestGrade = results.isEmpty() ? null : results.get(0).getGrade().name();
 
-        Map<Long, InterviewResult> resultByInterviewId = interviewResultRepository.findAll().stream()
-                .filter(r -> r.getInterview() != null && interviewIds.contains(r.getInterview().getId()))
-                .collect(Collectors.toMap(r -> r.getInterview().getId(), Function.identity(), (a, b) -> a));
+        return MypageResponseDto.from(user, totalInterviews, avgScore, latestGrade, interviews, Collections.emptyList());
+    }
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM월 dd일");
+    /** 점수 그래프 데이터 (최근 8개, 과거→현재) */
+    public ScoreGraphDto getScoreGraphData(Long userId) {
+        // ✅ 사용자별 인터뷰 결과만 조회
+        List<InterviewResult> results = interviewResultRepository.findByUserId(userId);
+
+        // 과거→현재: endedAt 우선, 없으면 createdAt
+        results.sort(Comparator.comparing((InterviewResult r) -> {
+            Interview i = r.getInterview();
+            return i.getEndedAt() != null ? i.getEndedAt() : i.getCreatedAt();
+        }));
+
+        // 최근 8개
+        int size = results.size();
+        int from = Math.max(0, size - 8);
+        List<InterviewResult> last = results.subList(from, size);
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM월 dd일");
         List<String> labels = new ArrayList<>();
         List<Integer> scores = new ArrayList<>();
 
-        for (Interview interview : interviews) {
-            labels.add(interview.getCreatedAt().format(formatter));
-            InterviewResult result = resultByInterviewId.get(interview.getId());
-            scores.add(result != null ? result.getTotalScore() : 0);
+        for (InterviewResult r : last) {
+            Interview i = r.getInterview();
+            LocalDateTime when = (i.getEndedAt() != null ? i.getEndedAt() : i.getCreatedAt());
+            labels.add(when.format(fmt));
+            scores.add(r.getTotalScore());
         }
 
         return new ScoreGraphDto(labels, scores);
     }
 
-    /** 직무 차트 데이터 */
+    /** 직무 차트 데이터 (기존 유지) */
     public CareerChartDto getCareerChartData(Long userId) {
         Map<String, Long> jobCounts = interviewRepository.findAllByUserId(userId).stream()
                 .collect(Collectors.groupingBy(Interview::getJobPosition, Collectors.counting()));
@@ -80,18 +99,17 @@ public class MypageService {
         return new CareerChartDto(labels, data);
     }
 
-    /** 기본 프로필 조회 */
+    /** 기본 프로필 조회 (기존 유지) */
     public MypageResponseDto getBasicUserInfo(Long userId) {
         User user = getUserOrThrow(userId);
         return buildBasicResponse(user);
     }
 
-    /** 프로필 정보/이미지 저장 (프론트 FormData와 1:1 매칭) */
+    /** 프로필 정보/이미지 저장 (기존 유지) */
     @Transactional
     public MypageResponseDto updateProfile(Long userId, UserProfileUpdateRequest profileReq, MultipartFile profileImage) {
         User user = getUserOrThrow(userId);
 
-        // 프로필 없으면 생성 + 양방향 매핑
         UserProfile userProfile = Optional.ofNullable(user.getUserProfile())
                 .orElseGet(() -> {
                     UserProfile np = UserProfile.builder().user(user).build();
@@ -99,22 +117,18 @@ public class MypageService {
                     return np;
                 });
 
-        // 텍스트 필드 반영
         mypageMapper.applyProfileUpdates(user, userProfile, profileReq);
-        // 이미지 파일이 있으면 실제 저장 후 URL 반영
+
         if (profileImage != null && !profileImage.isEmpty()) {
             String savedUrl = profileImageService.uploadProfileImage(userId, profileImage);
             userProfile.setProfileImageUrl(savedUrl);
         }
 
-        // 저장 (CascadeType.ALL → 프로필도 함께 저장)
         userRepository.save(user);
-
-        // 반영된 데이터 반환
         return buildBasicResponse(user);
     }
 
-    /** 프로필 이미지 삭제 */
+    /** 프로필 이미지 삭제 (기존 유지) */
     @Transactional
     public MypageResponseDto deleteProfileImage(Long userId) {
         User user = getUserOrThrow(userId);

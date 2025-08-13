@@ -1,79 +1,41 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const fileInput     = document.getElementById("imageInput");
-    const previewImage  = document.getElementById("imagePreview");
-    const deleteBtn     = document.querySelector(".btn-delete");
-    const uploadTrigger = document.getElementById("uploadTrigger");
-    const dropArea      = document.getElementById("dropArea");
-    const submitBtn     = document.getElementById("btnSubmitImage");
-    const uploadForm    = document.getElementById("imageUploadForm");
+    // ===== DOM refs (HTML과 정확히 매칭) =====
+    const profileForm     = document.getElementById("profileForm");        // 변경사항 저장 폼
+    const imageUploadForm = document.getElementById("imageUploadForm");    // 드래그&드랍 영역(실제 submit 안 함)
+    const deleteImageForm = document.getElementById("deleteImageForm");    // 삭제 폼
 
-    // ✅ HTML 안내 기준: 최대 5MB / JPG·JPEG·PNG
-    const MAX = 5 * 1024 * 1024;
-    const okTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const imageInput   = document.getElementById("imageInput");            // 파일 input
+    const imagePreview = document.getElementById("imagePreview");          // 미리보기 <img>
+    const uploadTrigger = document.getElementById("uploadTrigger");        // 업로드 버튼
+    const dropArea     = document.getElementById("dropArea");              // 드래그&드랍 영역
 
-    // 윈도우 전역: 브라우저가 파일을 바로 여는 기본 동작 방지
-    ["dragover", "drop"].forEach((ev) => {
-        window.addEventListener(ev, (e) => e.preventDefault());
+    // 프로필 입력값
+    const nameInput         = document.getElementById("name");
+    const jobSelect         = document.getElementById("job");
+    const careerLevelSelect = document.getElementById("careerLevel");
+
+    // ===== 상수 =====
+    const MAX = 5 * 1024 * 1024; // 5MB
+    const OK_TYPES = ["image/jpeg", "image/jpg", "image/png"];
+    const REDIRECT_TO = "/mypage"; // 저장 성공 시 이동할 경로
+
+    // 브라우저가 파일 드롭 시 바로 열어버리는 기본 동작 방지
+    ["dragover", "drop"].forEach(evt => {
+        window.addEventListener(evt, e => e.preventDefault());
     });
 
-    function setSubmitEnabled(enabled) {
-        if (!submitBtn) return;
-        submitBtn.disabled = !enabled;
-    }
-
-    function validate(file) {
-        if (!file) return false;
-        if (!okTypes.includes(file.type)) {
-            alert("JPG/JPEG/PNG 형식만 업로드할 수 있습니다.");
-            return false;
-        }
-        if (file.size > MAX) {
-            alert("5MB 이하의 이미지만 업로드 가능합니다.");
-            return false;
-        }
-        return true;
-    }
-
-    function preview(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => { if (previewImage) previewImage.src = e.target.result; };
-        reader.readAsDataURL(file);
-    }
-
-    function assignFileToInput(file) {
-        try {
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            fileInput.files = dt.files;
-        } catch (e) {
-            try { fileInput.files = [file]; } catch (_) { /* noop */ }
-        }
-    }
-
-    function onPick(file) {
-        if (!validate(file)) {
-            if (uploadForm) uploadForm.reset();
-            setSubmitEnabled(false);
-            return;
-        }
-        preview(file);
-        setSubmitEnabled(true);
-    }
-
-    // ====== CSRF/JWT 헤더 빌더 ======
-    function buildHeaders() {
-        const headers = new Headers();
+    // ===== 공통 유틸 =====
+    function buildHeaders(base = {}) {
+        const headers = new Headers(base);
 
         // JWT (있다면)
-        const maybeGetAccessToken = (typeof window !== "undefined")
-            ? window["getAccessToken"]
-            : undefined;
-        if (typeof maybeGetAccessToken === "function") {
-            const token = maybeGetAccessToken();
+        const getAccessToken = (typeof window !== "undefined") ? window["getAccessToken"] : undefined;
+        if (typeof getAccessToken === "function") {
+            const token = getAccessToken();
             if (token) headers.set("Authorization", "Bearer " + token);
         }
 
-        // CSRF (meta 우선)
+        // CSRF: meta 우선, 없으면 hidden input
         const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
         const csrfTokenMeta  = document.querySelector('meta[name="_csrf"]');
         if (csrfHeaderMeta && csrfTokenMeta) {
@@ -85,139 +47,223 @@ document.addEventListener("DOMContentLoaded", function () {
         return headers;
     }
 
-    // ====== 파일 선택 ======
-    if (fileInput) {
-        fileInput.addEventListener("change", function () {
-            const file = fileInput.files && fileInput.files[0];
-            if (file) onPick(file);
-            else setSubmitEnabled(false);
-        });
-    }
+    async function fetchJson(url, options = {}) {
+        const headers = buildHeaders(options.headers || {});
+        let res, text = "", data = null;
 
-    // 클릭 트리거(버튼)
-    if (uploadTrigger && fileInput) {
-        uploadTrigger.addEventListener("click", () => fileInput.click());
-    }
+        try {
+            res = await fetch(url, { ...options, headers, credentials: "same-origin" });
+        } catch (e) {
+            console.error(e);
+            alert("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해 주세요.");
+            return null;
+        }
 
-    // 업로드 박스 클릭/키보드 접근
-    if (dropArea && fileInput) {
-        dropArea.addEventListener("click", (e) => {
-            if (e.target === dropArea) fileInput.click();
-        });
-        dropArea.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                fileInput.click();
+        try {
+            text = await res.text(); // 먼저 텍스트로 받고
+            data = text ? JSON.parse(text) : null; // 가능하면 JSON으로 변환
+        } catch {
+            data = null; // JSON 아님
+        }
+
+        if (!res.ok) {
+            // 상태코드별 가이드
+            let friendly = "";
+            switch (res.status) {
+                case 400: friendly = "입력값을 다시 확인해 주세요 (400)."; break;
+                case 401: friendly = "로그인이 필요합니다 (401)."; break;
+                case 403: friendly = "권한/CSRF 문제가 있습니다 (403). 새로고침 후 다시 시도해 주세요."; break;
+                case 404: friendly = "요청 경로가 없습니다 (404)."; break;
+                case 413: friendly = "파일이 너무 큽니다 (413). 5MB 이하 이미지를 올려주세요."; break;
+                case 415: friendly = "지원하지 않는 콘텐츠 형식입니다 (415)."; break;
+                default:  friendly = `요청 실패 (${res.status}).`;
             }
+            const serverMsg =
+                (data && (data.message || data.error || data.detail)) ||
+                text ||
+                "";
+            console.error("API ERROR", { status: res.status, body: serverMsg });
+            alert(`${friendly}\n\n서버 응답: ${serverMsg.substring(0, 500)}`);
+            return null;
+        }
+        return data ?? {};
+    }
+
+    function toProfilePayload() {
+        return {
+            name: (nameInput?.value ?? "").trim(),
+            job: (jobSelect?.value ?? "").trim(),
+            careerLevel: (careerLevelSelect?.value ?? "").trim()
+            // 확장 필드가 있으면 여기에 추가 (bio, location, skills 등)
+        };
+    }
+
+    // ===== 이미지 유틸 =====
+    function validateImage(file) {
+        if (!file) return false;
+        if (!OK_TYPES.includes(file.type)) {
+            alert("JPG/JPEG/PNG 형식만 업로드할 수 있습니다.");
+            return false;
+        }
+        if (file.size > MAX) {
+            alert("5MB 이하의 이미지만 업로드 가능합니다.");
+            return false;
+        }
+        return true;
+    }
+
+    function preview(file) {
+        if (!file || !imagePreview) return;
+        const reader = new FileReader();
+        reader.onload = e => { imagePreview.src = e.target.result; };
+        reader.readAsDataURL(file);
+    }
+
+    function assignFileToInput(file) {
+        if (!imageInput || !file) return;
+        try {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            imageInput.files = dt.files;
+        } catch { /* fallback 무시 */ }
+    }
+
+    // ===== 파일 선택/드래그앤드랍 UI =====
+    if (uploadTrigger && imageInput) {
+        uploadTrigger.addEventListener("click", () => imageInput.click());
+    }
+
+    if (imageInput) {
+        imageInput.addEventListener("change", () => {
+            const file = imageInput.files?.[0];
+            if (!file) return;
+            if (!validateImage(file)) {
+                imageUploadForm?.reset();
+                return;
+            }
+            preview(file);
         });
     }
 
-    // 드래그&드랍
-    if (dropArea && fileInput) {
-        ["dragenter", "dragover"].forEach((ev) =>
-            dropArea.addEventListener(ev, (e) => {
+    if (dropArea && imageInput) {
+        ["dragenter", "dragover"].forEach(evt =>
+            dropArea.addEventListener(evt, e => {
                 e.preventDefault();
                 dropArea.classList.add("dragover");
             })
         );
-        ["dragleave", "drop"].forEach((ev) =>
-            dropArea.addEventListener(ev, (e) => {
+        ["dragleave", "drop"].forEach(evt =>
+            dropArea.addEventListener(evt, e => {
                 e.preventDefault();
                 dropArea.classList.remove("dragover");
             })
         );
-        dropArea.addEventListener("drop", (e) => {
-            const files = e.dataTransfer && e.dataTransfer.files;
-            if (files && files.length > 0) {
-                const file = files[0];
-                assignFileToInput(file);
-                onPick(file);
+        dropArea.addEventListener("drop", e => {
+            const file = e.dataTransfer?.files?.[0];
+            if (!file) return;
+            if (!validateImage(file)) return;
+            assignFileToInput(file);
+            preview(file);
+        });
+
+        // 키보드 접근성
+        dropArea.addEventListener("keydown", e => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                imageInput?.click();
             }
+        });
+        dropArea.addEventListener("click", e => {
+            if (e.target === dropArea) imageInput?.click();
         });
     }
 
-    // ====== 업로드(저장): PUT /api/mypage/profile ======
-    if (uploadForm && fileInput) {
-        uploadForm.addEventListener("submit", async (e) => {
+    // ===== 변경사항 저장: profileForm submit 가로채서 API 호출 + 성공 시 이동 =====
+    if (profileForm) {
+        profileForm.addEventListener("submit", async e => {
             e.preventDefault();
 
-            if (!fileInput.files || fileInput.files.length === 0) {
-                alert("업로드할 이미지를 선택해주세요.");
-                return;
-            }
+            const profile = toProfilePayload();
+            const hasImage = !!(imageInput && imageInput.files && imageInput.files.length > 0);
 
-            // 중복 제출 방지
-            if (submitBtn && !submitBtn.disabled) {
-                submitBtn.disabled = true;
-                submitBtn.dataset.originalText = submitBtn.textContent;
-                submitBtn.textContent = "업로드 중...";
-            }
+            if (hasImage) {
+                // POST /api/mypage/profile (multipart)
+                const fd = new FormData();
+                fd.append("profile", new Blob([JSON.stringify(profile)], { type: "application/json" }));
+                fd.append("profileImage", imageInput.files[0]);
 
-            // profile JSON (존재하는 입력만 포함)
-            const profile = {
-                name: document.getElementById("name")?.value ?? undefined,
-                job: document.getElementById("job")?.value ?? undefined,
-                careerLevel: document.getElementById("careerLevel")?.value ?? undefined
-            };
-            Object.keys(profile).forEach(k => profile[k] === undefined && delete profile[k]);
+                const headers = buildHeaders(); // Content-Type 자동 세팅 위해 수동 지정 금지
+                let res, data = {};
+                try {
+                    res = await fetch("/api/mypage/profile", {
+                        method: "POST",
+                        headers,
+                        body: fd,
+                        credentials: "same-origin"
+                    });
+                    try { data = await res.json(); } catch { /* ignore */ }
+                } catch (err) {
+                    console.error(err);
+                    alert("네트워크 오류가 발생했습니다.");
+                    return;
+                }
+                if (!res.ok) {
+                    alert((data && data.message) || `업로드 실패 (${res.status})`);
+                    return;
+                }
 
-            const formData = new FormData();
-            formData.append("profile", new Blob([JSON.stringify(profile)], { type: "application/json" }));
-            formData.append("profileImage", fileInput.files[0]);
+                // 성공 시 미리보기 갱신(응답에 URL이 있을 경우)
+                const newUrl = (data && typeof data === "object") ? data["profileImageUrl"] : null;
+                if (newUrl && imagePreview) imagePreview.src = newUrl;
 
-            try {
-                const res = await fetch("/api/mypage/profile", {
+                alert("프로필이 저장되었습니다.");
+                // ✅ 저장 성공 → 마이페이지로 이동
+                window.location.assign(REDIRECT_TO);
+            } else {
+                // PUT /api/mypage/profile (JSON)
+                const data = await fetchJson("/api/mypage/profile", {
                     method: "PUT",
-                    headers: buildHeaders(),
-                    body: formData,
-                    credentials: "same-origin"
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(profile)
                 });
-                if (!res.ok) throw new Error("업로드 실패 " + res.status);
+                if (!data) return; // fetchJson이 이미 alert 처리
 
-                const data = await res.json().catch(() => ({}));
-                const newUrl = data && typeof data === "object" ? data["profileImageUrl"] : null;
-                if (newUrl && previewImage) {
-                    previewImage.src = newUrl;
-                }
-                alert("프로필 이미지가 저장되었습니다.");
-            } catch (err) {
-                console.error(err);
-                alert("저장 중 오류가 발생했습니다.");
-            } finally {
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = submitBtn.dataset.originalText || "업로드";
-                }
+                alert("프로필이 저장되었습니다.");
+                // ✅ 저장 성공 → 마이페이지로 이동
+                window.location.assign(REDIRECT_TO);
             }
         });
     }
 
-    // ====== 삭제: DELETE /api/mypage/profile/image ======
-    if (deleteBtn) {
-        deleteBtn.addEventListener("click", async function (e) {
+    // ===== 이미지 삭제: deleteImageForm submit 가로채서 DELETE 호출 =====
+    if (deleteImageForm) {
+        deleteImageForm.addEventListener("submit", async e => {
             e.preventDefault();
             if (!confirm("이미지를 삭제하시겠습니까?")) return;
 
+            const headers = buildHeaders();
+            let res, data = {};
             try {
-                const res = await fetch("/api/mypage/profile/image", {
+                res = await fetch("/api/mypage/profile/image", {
                     method: "DELETE",
-                    headers: buildHeaders(),
+                    headers,
                     credentials: "same-origin"
                 });
-                if (!res.ok) throw new Error("삭제 실패 " + res.status);
-
-                // 성공: 기본 이미지로 교체 + 파일 입력 초기화
-                if (previewImage) previewImage.src = "/img/진욱.svg";
-                if (fileInput) fileInput.value = "";
-                setSubmitEnabled(false);
-                alert("이미지가 삭제되었습니다.");
+                try { data = await res.json(); } catch { /* ignore */ }
             } catch (err) {
                 console.error(err);
-                alert("삭제 요청 중 오류가 발생했습니다.");
+                alert("네트워크 오류가 발생했습니다.");
+                return;
             }
+            if (!res.ok) {
+                alert((data && data.message) || `삭제 실패 (${res.status})`);
+                return;
+            }
+
+            // 성공: 기본 이미지로 교체 + 파일 입력 초기화
+            if (imagePreview) imagePreview.src = "/img/진욱.svg";
+            if (imageInput) imageInput.value = "";
+            alert("이미지가 삭제되었습니다.");
         });
     }
-
-    // 초기 상태(안전)
-    setSubmitEnabled(false);
 });
