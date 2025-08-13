@@ -164,7 +164,7 @@ public class InterviewService {
                     .interview(interview)
                     .totalScore(analysis.totalScore())
                     .grade(calculateGrade(analysis.totalScore()))
-                    .feedback(analysis.feedback())
+                    .feedback(cleanedJson)
                     .recommendedResource(recommendations)
                     .build();
 
