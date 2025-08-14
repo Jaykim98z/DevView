@@ -1,0 +1,273 @@
+/* 공통 기본 설정 */
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #374B5F;
+}
+
+img {
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+/* Hero 영역 */
+.hero {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 30px;
+    padding: 40px 60px;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+}
+
+.highlight {
+    color: #374B5F;
+    font-weight: bold;
+}
+
+.ai-text {
+    color: #4AB2E3;
+    font-weight: bold;
+}
+
+.hero-text {
+    max-width: 50%;
+    min-width: 300px;
+}
+
+.hero-text h1 {
+    font-size: 36px;
+    margin-bottom: 12px;
+}
+
+.hero-text p {
+    font-size: 18px;
+    margin-bottom: 24px;
+}
+
+.hero-buttons a {
+    margin-right: 12px;
+    padding: 10px 18px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background-color: #4ab2e3;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980B9;
+}
+
+.btn-secondary {
+    background-color: #f2f2f2;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.btn-secondary:hover {
+    background-color: #e6e6e6;
+}
+
+.hero-buttons a img {
+    width: 18px;
+    height: 18px;
+}
+
+.hero-image {
+    display: flex;
+    justify-content: center;
+}
+
+.hero-image img {
+    max-width: 616px;
+    height: 616px;
+}
+
+/* 제목 섹션 공통 스타일 */
+section h2 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+section h2 img {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* 소개 영역 */
+.intro {
+    height: 339.75px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 60px 80px;
+    background-color: #E5E7EB;
+    box-sizing: border-box;
+}
+
+.intro p {
+    max-width: 800px;
+    margin: 10px auto;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* 기능 섹션 */
+.features {
+    background-color: #fff;
+    padding: 60px 80px;
+}
+
+.feature-grid {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 30px;
+}
+
+.feature-card {
+    background-color: white;
+    padding: 24px;
+    border-radius: 12px;
+    width: 405.33px;
+    height: 250px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(10, 10, 10, 0.06);
+    border: 1px solid #ffff;
+}
+
+.feature-card img {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 12px;
+}
+
+/* 가이드 영역 */
+.guide {
+    background-color: #E5E7EB;
+    padding: 60px 80px;
+    text-align: center;
+}
+
+.guide-steps {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 32px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 405.33px;
+    height: 250px;
+}
+
+.step img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+}
+
+.step-number {
+    background-color: #374b5f;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    line-height: 36px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* 사용자 후기 */
+.reviews {
+    background-color: #fff;
+    padding: 60px 80px;
+    text-align: center;
+}
+
+.review-grid {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 24px;
+}
+
+.review {
+    background-color: #ffffff;
+    padding: 18px 24px;
+    border-radius: 12px;
+    width: 405.33px;
+    height: 222px;
+    box-shadow: 0 2px 6px rgba(10, 10, 10, 0.06);
+    text-align: center;
+}
+
+.review img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 12px;
+}
+
+/* 가이드 설명 추가 스타일 */
+.step p:first-of-type {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.step p:last-of-type {
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* 반응형 레이아웃 */
+@media (max-width: 768px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .hero-text {
+        max-width: 100%;
+    }
+
+    .hero-image img {
+        max-width: 280px;
+        margin-top: 20px;
+    }
+
+    .feature-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .guide-steps {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .review-grid {
+        flex-direction: column;
+        align-items: center;
+    }
+}

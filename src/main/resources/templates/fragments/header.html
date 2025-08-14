@@ -1,0 +1,59 @@
+<header th:fragment="header" class="header">
+    <div class="header-inner">
+        <!--  로고 + 메뉴 -->
+        <div class="left-group">
+            <div class="logo">
+                <a href="/">
+                    <img src="/img/logo.svg" alt="DevView 로고">
+                </a>
+            </div>
+            <nav class="nav-menu">
+                <a href="/community">커뮤니티</a>
+                <a href="/ranking">랭킹</a>
+            </nav>
+        </div>
+
+        <!-- 중앙: 검색창 -->
+        <form class="search-box" action="/search" method="get">
+            <input type="text" name="query" placeholder="검색어를 입력하세요..." aria-label="검색어 입력">
+            <button type="submit" class="search-btn">
+                <img src="/img/search.svg" alt="검색">
+            </button>
+        </form>
+
+        <!--  시작하기 + 로그인/마이페이지 -->
+        <div class="user-menu" th:classappend="${session.loginUser != null} ? ' logged-in' : ' logged-out'">
+            <a class="start-btn" href="/interview/settings">
+                <img src="/img/play.svg" alt="시작 아이콘"> 시작하기
+            </a>
+
+            <!-- 로그아웃 상태 (로그인하지 않은 경우) -->
+            <div th:if="${session.loginUser == null}" class="auth-buttons">
+                <a href="/user/login" class="login-link">로그인</a>
+                <a href="/user/register" class="register-link">회원가입</a>
+            </div>
+
+            <!-- 로그인 상태 -->
+            <div th:if="${session.loginUser != null}" class="user-info">
+                <span class="username" th:text="'안녕하세요, ' + ${session.loginUser.username} + '님'">안녕하세요, 사용자명님</span>
+                <!-- 숨겨진 로그아웃 폼 -->
+                <form id="logoutForm" method="POST" action="/user/logout" style="display: none;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                </form>
+                <a href="#" onclick="logout(); return false;" class="logout-btn">로그아웃</a>
+                <a href="/mypage" class="mypage-btn">
+                    <img src="/img/my.svg" alt="마이페이지">
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로그아웃 처리를 위한 JavaScript -->
+    <script>
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                document.getElementById('logoutForm').submit();
+            }
+        }
+    </script>
+</header>

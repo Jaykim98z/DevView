@@ -1,0 +1,307 @@
+/* 공통 리셋(해당 영역 한정) */
+.mypage-container, .mypage-container * , .mypage-container *::before, .mypage-container *::after {
+    box-sizing: border-box;
+}
+
+/* ===== 페이지 컨테이너 ===== */
+.mypage-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Pretendard','Noto Sans KR',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color: #0f172a;
+    line-height: 1.5;
+}
+
+/* ===== 브레드크럼 ===== */
+.mypage-container .breadcrumb {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+}
+.mypage-container .breadcrumb a {
+    color: #64748b;
+    text-decoration: none;
+}
+.mypage-container .breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+/* ===== 페이지 타이틀 ===== */
+.mypage-container .page-title {
+    font-size: 1.6rem;
+    margin: 0 0 18px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+/* ===== 폼 카드(공통) ===== */
+.mypage-container .form-box {
+    background: #ffffff;
+    border: 1px solid #e7eaf0;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+}
+
+/* 섹션 타이틀 + 아이콘 */
+.mypage-container .form-box h3.section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.05rem;
+    margin: 0 0 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+.mypage-container .form-box h3.section-title .icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}
+
+/* =========================================   프로필 이미지 업로드 영역   ========================================= */
+
+/* 레이아웃: 왼쪽 미리보기 + 오른쪽 업로드 박스 */
+.upload-section {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 18px;
+    align-items: center;
+}
+
+/* 미리보기 + 삭제 버튼 */
+.image-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+.profile-img-preview {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #e6e9ef;
+    background: #fff;
+}
+#deleteImageForm .btn-delete,
+.btn-delete {
+    background: transparent;
+    border: none;
+    color: #dc3545;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 8px;
+    line-height: 1;
+}
+.btn-delete:hover {
+    background: rgba(220, 53, 69, 0.08);
+}
+
+/* 드래그&드랍 업로드 박스 */
+#imageUploadForm .upload-box,
+.upload-box {
+    width: 100%;
+    min-height: 160px;
+    border: 2px dashed #c9d1e6;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    text-align: center;
+    color: #475569;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    outline: none;
+    padding: 14px;
+}
+.upload-box:hover {
+    background: #f7f9fc;
+}
+#dropArea.dragover {
+    background: #eef4ff;
+    border-color: #97b4ff;
+}
+
+/* 업로드 아이콘/가이드 텍스트 */
+.upload-icon {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 8px;
+    display: block;
+}
+.upload-guide {
+    margin: 0 0 10px;
+    line-height: 1.45;
+    font-size: 0.92rem;
+    color: #475569;
+}
+
+/* 업로드 트리거 버튼 */
+#uploadTrigger.btn-upload,
+.btn-upload {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #bed2ff;
+    background: #ffffff;
+    color: #4AB2E3;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+.btn-upload:hover {
+    background: #f0f5ff;
+    border-color: #9dbbff;
+}
+
+/* 업로드 적용 버튼 영역 정렬 */
+.mypage-container .form-box form#imageUploadForm .form-actions {
+    justify-content: flex-start;
+}
+
+/* 업로드 적용(저장) 버튼 상태 */
+#btnSubmitImage.save-btn,
+.save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #374B5F;
+    color: #ffffff;
+    border: 1px solid #374B5F;
+    font-weight: 700;
+    transition: background 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+.save-btn .icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+}
+.save-btn:hover:not(:disabled) {
+    background: #2a3646;
+    box-shadow: 0 2px 8px rgba(42, 54, 70, 0.25);
+}
+.save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* =========================================   사용자 정보 폼   ========================================= */
+.form-group {
+    margin-bottom: 14px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #1e293b;
+}
+/* 입력칸 */
+.form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #cfd4dc;
+    font-size: 1rem;
+    color: #0f172a;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    background: #ffffff none;
+}
+
+
+/* 셀렉트: 아래쪽 화살표(오른쪽 끝)*/
+.form-group select {
+    width: 100%;
+    padding: 10px 40px 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #cfd4dc;
+    font-size: 1rem;
+    color: #0f172a;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    appearance: none;
+    -webkit-appearance: none;
+
+    background: #ffffff url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>")
+    no-repeat right 12px center / 14px 14px;
+}
+
+/* 비활성화: 연한 화살표 */
+.mypage-container .form-group select:disabled {
+    background: #ffffff url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a3aed0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>")
+    no-repeat right 12px center / 14px 14px;
+    color: #94a3b8;
+}
+
+/* (옵션) 구형 IE/Edge 레거시 기본 화살표 숨김 */
+.mypage-container .form-group select::-ms-expand { display: none; }
+
+/* 폼 액션(하단 버튼 정렬) */
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    justify-content: flex-end;
+}
+form#profileForm .form-actions {
+    justify-content: center;
+}
+
+/* 취소 버튼 */
+.cancel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #eef2f7;
+    color: #334155;
+    border: 1px solid #e1e6ef;
+    text-decoration: none;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.cancel-btn .icon {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+}
+.cancel-btn:hover {
+    background: #e6ebf3;
+    box-shadow: 0 1px 6px rgba(15, 23, 42, 0.08);
+}
+
+/* =========================================   접근성: 포커스 표시   ========================================= */
+#dropArea:focus {
+    outline: 2px solid #97b4ff;
+    outline-offset: 2px;
+}
+
+/* =========================================   반응형   ========================================= */
+@media (max-width: 640px) {
+    .upload-section {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+}
+@media (max-width: 480px) {
+    form#profileForm .form-actions {
+        flex-direction: column;
+    }
+    .save-btn,
+    .cancel-btn {
+        width: 100%;
+    }
+}

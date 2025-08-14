@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${post.title} + ' - 게시글 상세보기'">게시글 상세보기</title>
+
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/post-detail.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <script th:inline="javascript">
+        window.CURRENT_USER_ID    = [[${#authentication?.principal?.userId}]];
+        window.CURRENT_USERNAME   = /*[['${#authentication?.name}']]*/ null;
+        window.CURRENT_USER_EMAIL = /*[['${#authentication?.principal?.email}']]*/ null;
+        window.POST_ID            = [[${post.id}]];
+    </script>
+
+</head>
+
+<body data-page="detail">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="main-container">
+    <div class="post-detail-card" th:attr="data-post-id=${post.id}">
+
+        <header class="post-header">
+            <img class="profile-img" th:src="@{/img/profile-default.svg}" alt="프로필" />
+            <div class="user-info">
+                <span class="username" th:text="${post.username}">testuser</span>
+                <span class="post-date"
+                      th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd') : ''}">
+            2025-08-08
+          </span>
+            </div>
+        </header>
+
+        <h2 class="post-title" th:text="${post.title}">게시글 제목</h2>
+
+        <div class="badges">
+            <span class="badge badge-tech" th:text="${post.interviewType}">PRACTICE</span>
+            <span class="score" th:text="${post.score} + ' 점'">0 점</span>
+            <span class="grade" th:text="'• ' + ${post.grade} + ' 등급'">• C 등급</span>
+        </div>
+
+        <div class="post-content" th:text="${post.summary}">
+            게시글 요약/내용
+        </div>
+
+        <div class="post-footer">
+            <div class="metrics">
+                <div class="metric">
+                    <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                    <span id="view-count" class="count" th:text="${post.viewCount}">0</span>
+                </div>
+
+                <button type="button" class="btn-icon btn-like"
+                        data-post-id="[[${post.id}]]"
+                        th:data-url="@{/api/community/posts/{id}/like(id=${post.id})}">
+                    <i class="fa-solid fa-heart" aria-hidden="true"></i>
+                    <span class="count" th:text="${post.likeCount}">0</span>
+                </button>
+
+                <button type="button" class="btn-icon btn-scrap"
+                        data-post-id="[[${post.id}]]"
+                        th:data-url="@{/api/community/posts/{id}/scrap(id=${post.id})}">
+                    <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
+                    <span class="count" th:text="${post.scrapCount}">0</span>
+                </button>
+            </div>
+            <hr class="meta-divider" />
+        </div>
+
+        <section class="comments-section">
+            <div class="comments">
+                <div class="comments__title">
+                    <span>댓글</span>
+                    <span class="comments__badge">
+                        <span id="comment-count"
+                              th:text="${comments} != null ? ${#lists.size(comments)} : 0">0</span>개
+                    </span>
+                </div>
+
+
+                <form id="comment-form" class="comment-form" onsubmit="return false;">
+
+                <textarea id="comment-input" name="content" placeholder="댓글을 입력하세요..." required></textarea>
+                    <button id="comment-submit" type="button" class="btn-submit"
+                            th:disabled="${#authorization.expression('!isAuthenticated()')}">등록</button>
+                </form>
+
+                <ul id="comment-list" class="comment-list"></ul>
+                <button id="comment-load-more" type="button" style="display:none">더보기</button>
+            </div>
+        </section>
+
+        <div class="post-detail__nav">
+            <a th:href="@{/community}" id="btn-back-to-list">
+                <i class="fa fa-list-ul" aria-hidden="true"></i>
+                목록
+            </a>
+        </div>
+    </div>
+</main>
+
+<script th:src="@{/js/post-detail-comments.js}" defer></script>
+</body>
+</html>
