@@ -9,8 +9,8 @@ import java.util.List;
 @Getter
 public class ScoreGraphDto {
 
-    private final List<String> labels;
-    private final List<Integer> scores;
+    private final List<String> labels; // 날짜 예: ["07월 01일", "07월 15일"]
+    private final List<Integer> scores; // 점수 예: [75, 80, 85]
 
     public ScoreGraphDto(List<String> labels, List<Integer> scores) {
         this.labels = labels;
@@ -30,7 +30,7 @@ public class ScoreGraphDto {
         try {
             return new ObjectMapper().writeValueAsString(obj);
         } catch (JsonProcessingException e) {
-            return "[]";
+            return "[]"; // fallback
         }
     }
 }
