@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Interview Session - DevView</title>
     <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/loading-spinner.css}">
     <link rel="stylesheet" th:href="@{/css/interview-session.css}">
 </head>
 <body>
@@ -42,6 +43,8 @@
     </aside>
 </main>
 
+<script th:src="@{/js/spinner.js}"></script>
 <script th:src="@{/js/interview-session.js}"></script>
+<div th:replace="~{fragments/loading-spinner :: spinner}"></div>
 </body>
 </html>

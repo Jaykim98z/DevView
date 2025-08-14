@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         return;
     }
 
+    spinner.show();
+
     try {
         const response = await fetch(`/api/v1/interviews/${interviewId}/results`);
         if (!response.ok) {
@@ -52,5 +54,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     } catch (error) {
         console.error('Error fetching results:', error);
         feedbackEl.textContent = 'Failed to load results. Please try again later.';
+    } finally {
+        spinner.hide();
     }
 });

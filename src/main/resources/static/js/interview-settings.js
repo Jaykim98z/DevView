@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 careerLevel: careerLevel
             };
 
+            spinner.show();
+
             try {
                 const startResponse = await fetch('/api/v1/interviews/start', {
                     method: 'POST',
@@ -60,8 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch (error) {
                 console.error('Error:', error);
                 alert('An error occurred. Please try again.');
-                // Hide loading indicator on error
-                // document.getElementById('loadingSpinner').style.display = 'none';
+                spinner.hide();
             }
         });
     }
