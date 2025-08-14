@@ -93,6 +93,30 @@ public class UserService {
         return !userRepository.existsByUsername(username);
     }
 
+    /**
+     * 회원탈퇴 처리 (하드 삭제)
+     * 관련된 모든 데이터를 순서대로 삭제한 후 사용자 삭제
+     */
+    @Transactional
+    public void deleteUser(Long userId) {
+        log.info("회원탈퇴 처리 시작: userId={}", userId);
+
+        // 1. 사용자 존재 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        try {
+            // 2. 관련 데이터 삭제 (User 포함, 모든 삭제를 Native Query로 처리)
+            userRepository.deleteUserRelatedData(userId);
+
+            log.info("회원탈퇴 완료: userId={}, email={}", userId, user.getEmail());
+
+        } catch (Exception e) {
+            log.error("회원탈퇴 처리 중 오류 발생: userId={}", userId, e);
+            throw new RuntimeException("회원탈퇴 처리 실패", e);
+        }
+    }
+
     // === Private Helper Methods ===
 
     private void validateRegisterRequest(RegisterRequest request) {
