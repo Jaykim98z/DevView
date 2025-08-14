@@ -9,13 +9,7 @@ import org.springframework.util.StringUtils;
 @Component
 public class MypageMapper {
 
-    /**
-     * User + UserProfile 엔티티에 프로필 수정 내용 반영
-     *
-     * @param user        수정 대상 사용자
-     * @param userProfile 해당 사용자의 프로필 (null 아님)
-     * @param req         수정 요청 DTO
-     */
+
     public void applyProfileUpdates(User user, UserProfile userProfile, UserProfileUpdateRequest req) {
         if (req == null) {
             return;
@@ -31,12 +25,6 @@ public class MypageMapper {
         }
     }
 
-    /**
-     * 문자열이 비어있지 않으면 setter 호출
-     *
-     * @param value  업데이트할 값
-     * @param setter 적용할 setter 메서드
-     */
     private void updateIfTextPresent(String value, java.util.function.Consumer<String> setter) {
         if (StringUtils.hasText(value)) {
             setter.accept(value);
