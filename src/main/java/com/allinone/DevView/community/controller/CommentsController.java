@@ -37,7 +37,7 @@ public class CommentsController {
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public Long create(
+    public CommentsDto.Res create(
             @PathVariable Long postId,
             @Valid @RequestBody CommentsDto.CreateReq req,
             @AuthenticationPrincipal CustomUserDetails auth
