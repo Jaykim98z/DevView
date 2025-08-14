@@ -1,9 +1,13 @@
+// src/main/java/com/allinone/DevView/mypage/dto/InterviewDto.java
 package com.allinone.DevView.mypage.dto;
 
 import com.allinone.DevView.interview.entity.Grade;
+import com.allinone.DevView.interview.entity.Interview;
 import com.allinone.DevView.interview.entity.InterviewResult;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -17,10 +21,12 @@ public class InterviewDto {
     private final String feedback;
 
     public static InterviewDto fromEntity(InterviewResult result) {
+        Interview i = result.getInterview();
+        LocalDateTime when = (i.getEndedAt() != null ? i.getEndedAt() : i.getCreatedAt());
         return InterviewDto.builder()
-                .interviewId(result.getInterview().getId())
-                .interviewDate(result.getInterview().getCreatedAt().toLocalDate().toString())
-                .interviewType(result.getInterview().getInterviewType().name()) // 👈 .getName() → .name()
+                .interviewId(i.getId())
+                .interviewDate(when.toLocalDate().toString())
+                .interviewType(i.getInterviewType().name())
                 .score(result.getTotalScore())
                 .grade(result.getGrade())
                 .feedback(result.getFeedback())

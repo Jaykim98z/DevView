@@ -3,11 +3,13 @@
 <head>
     <title>프로필 수정</title>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
     <link rel="stylesheet" th:href="@{/css/mypage-edit.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <script th:src="@{/js/mypage-edit.js}" defer></script>
 </head>
-<body>
 
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
@@ -73,24 +75,25 @@
         <div class="form-group">
             <label for="job">직군</label>
             <select id="job" name="job" required>
-                <option value="" disabled th:selected="${user.job == null}">직군을 선택하세요 </option>
-                <option th:value="'Backend'"   th:selected="${user.job == 'Backend'}">Backend</option>
-                <option th:value="'Frontend'"  th:selected="${user.job == 'Frontend'}">Frontend</option>
-                <option th:value="'Fullstack'" th:selected="${user.job == 'Fullstack'}">Fullstack</option>
-                <option th:value="'DevOps'"    th:selected="${user.job == 'DevOps'}">DevOps</option>
-                <option th:value="'Data,AI'"   th:selected="${user.job == 'Data/AI'}">Data/AI</option>
+                <option value="" disabled th:selected="${user.job == null}">직군을 선택하세요</option>
+                <option value="BACKEND"   th:selected="${user.job == 'BACKEND'}">Backend</option>
+                <option value="FRONTEND"  th:selected="${user.job == 'FRONTEND'}">Frontend</option>
+                <option value="FULLSTACK" th:selected="${user.job == 'FULLSTACK'}">Fullstack</option>
+                <option value="DEVOPS"    th:selected="${user.job == 'DEVOPS'}">DevOps</option>
+                <option value="DATA_AI"   th:selected="${user.job == 'DATA_AI'}">Data/AI</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="careerLevel">경력 수준 </label>
+            <label for="careerLevel">경력 수준</label>
             <select id="careerLevel" name="careerLevel" required>
-                <option value="" disabled th:selected="${user.careerLevel == null}">경력 수준을 선택하세요 </option>
-                <option th:value="'Junior'"    th:selected="${user.careerLevel == 'Junior'}">Junior</option>
-                <option th:value="'Mid-Level'" th:selected="${user.careerLevel == 'Mid-Level'}">Mid-Level</option>
-                <option th:value="'Senior'"    th:selected="${user.careerLevel == 'Senior'}">Senior</option>
+                <option value="" disabled th:selected="${user.careerLevel == null}">경력 수준을 선택하세요</option>
+                <option value="JUNIOR" th:selected="${user.careerLevel == 'JUNIOR'}">Junior</option>
+                <option value="MID"    th:selected="${user.careerLevel == 'MID'}">Mid-Level</option>
+                <option value="SENIOR" th:selected="${user.careerLevel == 'SENIOR'}">Senior</option>
             </select>
         </div>
+
 
         <div class="form-actions">
             <button type="submit" class="save-btn">
