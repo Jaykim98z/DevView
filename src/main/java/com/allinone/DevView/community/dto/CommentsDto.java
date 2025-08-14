@@ -58,30 +58,23 @@ public class CommentsDto {
     public static class Res {
         private Long id;
         private Long userId;
-        private String username;
         private String writerName;
         private String content;
         private LocalDateTime createdAt;
-        private boolean mine;
 
-        public Res(Long id, Long userId, String username, String writerName, String content, LocalDateTime createdAt) {
+        public Res(Long id, Long userId, String writerName, String content, LocalDateTime createdAt) {
             this.id = id;
             this.userId = userId;
-            this.username = username;
             this.writerName = writerName;
             this.content = content;
             this.createdAt = createdAt;
         }
 
-        public static Res of(com.allinone.DevView.community.entity.Comments c, String username) {
-            String display = (username != null && !username.isBlank())
-                    ? username
-                    : c.getWriterName();
+        public static Res fromEntity(com.allinone.DevView.community.entity.Comments c, boolean mine) {
             return new Res(
                     c.getId(),
                     c.getUserId(),
-                    username,
-                    display,
+                    c.getWriterName(),
                     c.getContent(),
                     c.getCreatedAt()
             );

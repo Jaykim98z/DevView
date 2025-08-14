@@ -220,32 +220,6 @@ html, body {
   cursor:pointer;
 }
 .comment-action--danger{ color:#c73a3a; border-color:#ffd9d9; background:#fff5f5; }
-.post-detail__nav{
-  display:flex; justify-content:flex-end;
-  margin-top:24px;
-}
-
-#btn-back-to-list{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:10px 16px; border-radius:12px;
-  background:#fff; color:#2d3a4a; text-decoration:none; font-weight:600;
-  border:1px solid #dbe3f0;
-  transition: border-color .2s, box-shadow .2s, transform .1s;
-}
-
-#btn-back-to-list:hover{
-  border-color:#8fa6ff;
-  box-shadow:0 6px 18px rgba(76, 102, 235, .18);
-  transform: translateY(-1px);
-}
-
-#btn-back-to-list:active{
-  transform: translateY(0);
-}
-
-#btn-back-to-list .fa{
-  font-size:14px;
-}
 
 /* 반응형 */
 @media (max-width: 640px){

@@ -14,12 +14,10 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <script th:inline="javascript">
-        window.CURRENT_USER_ID    = [[${#authentication?.principal?.userId}]];
-        window.CURRENT_USERNAME   = /*[['${#authentication?.name}']]*/ null;
-        window.CURRENT_USER_EMAIL = /*[['${#authentication?.principal?.email}']]*/ null;
-        window.POST_ID            = [[${post.id}]];
+        window.IS_AUTH  = [[${#authorization.expression('isAuthenticated()')}]];
+        window.POST_ID  = [[${post.id}]];
+        window.CURRENT_USERNAME = [[${#authentication} != null ? ${#authentication.name} : null]];
     </script>
-
 </head>
 
 <body data-page="detail">
@@ -79,16 +77,12 @@
             <div class="comments">
                 <div class="comments__title">
                     <span>댓글</span>
-                    <span class="comments__badge">
-                        <span id="comment-count"
-                              th:text="${comments} != null ? ${#lists.size(comments)} : 0">0</span>개
-                    </span>
+                    <span class="comments__badge"
+                          th:text="${comments} != null ? ${#lists.size(comments)} + '개' : '0개'">0개</span>
                 </div>
 
-
-                <form id="comment-form" class="comment-form" onsubmit="return false;">
-
-                <textarea id="comment-input" name="content" placeholder="댓글을 입력하세요..." required></textarea>
+                <form class="comment-form" onsubmit="return false;">
+                    <textarea id="comment-input" name="content" placeholder="댓글을 입력하세요..." required></textarea>
                     <button id="comment-submit" type="button" class="btn-submit"
                             th:disabled="${#authorization.expression('!isAuthenticated()')}">등록</button>
                 </form>
@@ -98,12 +92,10 @@
             </div>
         </section>
 
-        <div class="post-detail__nav">
-            <a th:href="@{/community}" id="btn-back-to-list">
-                <i class="fa fa-list-ul" aria-hidden="true"></i>
-                목록
-            </a>
+        <div style="margin-top:16px; display:flex; justify-content:flex-end;">
+            <a class="read-more" th:href="@{/community}">목록으로 가기</a>
         </div>
+
     </div>
 </main>
 

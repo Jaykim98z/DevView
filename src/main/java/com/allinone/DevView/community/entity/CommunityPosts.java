@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 
@@ -16,8 +14,6 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-@SQLDelete(sql = "UPDATE community_posts SET deleted = true WHERE post_id = ?")
-@Where(clause = "deleted = false")
 public class CommunityPosts {
 
     @Id
@@ -84,9 +80,6 @@ public class CommunityPosts {
 
     @Column(name = "interview_feedback", columnDefinition = "TEXT")
     private String interviewFeedback;
-
-    @Column(nullable = false)
-    private boolean deleted = false;
 
     @PrePersist
     protected void onCreate() {

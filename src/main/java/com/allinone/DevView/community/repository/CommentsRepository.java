@@ -1,7 +1,6 @@
 package com.allinone.DevView.community.repository;
 
 import com.allinone.DevView.community.entity.Comments;
-import com.allinone.DevView.community.entity.CommunityPosts;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -11,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface CommentsRepository extends JpaRepository<Comments, Long> {
@@ -36,13 +34,4 @@ public interface CommentsRepository extends JpaRepository<Comments, Long> {
     List<Comments> findByUserId(@Param("userId") Long userId);
 
     Page<Comments> findByPostIdAndDeletedFalse(Long postId, Pageable pageable);
-
-    @Query("SELECT p FROM CommunityPosts p WHERE p.postId = :id AND p.deleted = false")
-    Optional<CommunityPosts> findActiveById(@Param("id") Long id);
-
-    Page<CommunityPosts> findAllByDeletedFalse(Pageable pageable);
-
-    @Query("SELECT p FROM CommunityPosts p WHERE p.postId = :id")
-    Optional<CommunityPosts> findAnyById(@Param("id") Long id);
-
 }
