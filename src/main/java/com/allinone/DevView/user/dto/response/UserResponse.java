@@ -53,4 +53,20 @@ public class UserResponse {
                 .createdAt(user.getCreatedAt())
                 .build();
     }
+
+    /**
+     * 로그인 인증 처리 (예시)
+     */
+    public static UserResponse authenticateUser(String email, String password) {
+        if ("test@example.com".equals(email) && "password".equals(password)) {
+            return UserResponse.builder()
+                    .userId(1L)
+                    .email(email)
+                    .username("Test User")
+                    .provider("LOCAL")
+                    .createdAt(LocalDateTime.now())
+                    .build();
+        }
+        return null;
+    }
 }

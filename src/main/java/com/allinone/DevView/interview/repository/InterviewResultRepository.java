@@ -11,12 +11,13 @@ import java.util.Optional;
 public interface InterviewResultRepository extends JpaRepository<InterviewResult, Long> {
     Optional<InterviewResult> findByInterviewId(Long interviewId);
 
-    /**
-     * 사용자별 모든 면접 결과 조회 (랭킹 계산용)
-     */
-    @Query("SELECT ir FROM InterviewResult ir " +
-            "JOIN FETCH ir.interview i " +
-            "WHERE i.user.userId = :userId " +
-            "ORDER BY i.createdAt DESC")
+    /** 사용자별 모든 면접 결과 조회 (최신 생성일 순) */
+    @Query("""
+        SELECT ir
+        FROM InterviewResult ir
+        JOIN FETCH ir.interview i
+        WHERE i.user.userId = :userId
+        ORDER BY i.createdAt DESC
+    """)
     List<InterviewResult> findByUserId(@Param("userId") Long userId);
 }

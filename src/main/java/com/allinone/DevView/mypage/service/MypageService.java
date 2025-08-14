@@ -1,8 +1,6 @@
 package com.allinone.DevView.mypage.service;
 
-import com.allinone.DevView.community.entity.Scraps;
-import com.allinone.DevView.community.repository.CommunityPostsRepository;
-import com.allinone.DevView.community.repository.ScrapsRepository;
+import com.allinone.DevView.common.exception.UserNotFoundException;
 import com.allinone.DevView.interview.entity.Interview;
 import com.allinone.DevView.interview.entity.InterviewResult;
 import com.allinone.DevView.interview.repository.InterviewRepository;
@@ -11,141 +9,143 @@ import com.allinone.DevView.mypage.dto.CareerChartDto;
 import com.allinone.DevView.mypage.dto.InterviewDto;
 import com.allinone.DevView.mypage.dto.MypageResponseDto;
 import com.allinone.DevView.mypage.dto.ScoreGraphDto;
-import com.allinone.DevView.mypage.dto.ScrapDto;
 import com.allinone.DevView.mypage.dto.UserProfileUpdateRequest;
+import com.allinone.DevView.mypage.entity.UserProfile;
 import com.allinone.DevView.mypage.mapper.MypageMapper;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class MypageService {
 
     private final UserRepository userRepository;
+    private final MypageMapper mypageMapper;
     private final InterviewRepository interviewRepository;
     private final InterviewResultRepository interviewResultRepository;
-    private final ScrapsRepository scrapsRepository;
-    private final CommunityPostsRepository communityPostsRepository;
-    private final MypageMapper mypageMapper;
+    private final ProfileImageService profileImageService;
 
+    /** 마이페이지 메인 데이터 (면접 요약/목록 포함) */
     public MypageResponseDto getMypageData(Long userId) {
-        User user = getUser(userId);
+        User user = getUserOrThrow(userId);
 
-        List<InterviewDto> interviewDtos = interviewRepository.findAllByUserId(userId).stream()
-                .sorted(Comparator.comparing(Interview::getCreatedAt).reversed())
-                .map(interview -> {
-                    InterviewResult result = interviewResultRepository
-                            .findByInterviewId(interview.getId())
-                            .orElse(null);
-                    return mypageMapper.toInterviewDto(interview, result);
-                })
-                .collect(Collectors.toList());
+        // ✅ 사용자별 인터뷰 결과만 조회
+        List<InterviewResult> results = interviewResultRepository.findByUserId(userId);
 
-        List<ScrapDto> scrapDtos = scrapsRepository.findByUserId(userId).stream()
-                .map(this::toScrapDto)
-                .filter(Objects::nonNull)
-                .limit(5)
-                .collect(Collectors.toList());
+        // 최신순: endedAt 우선, 없으면 createdAt
+        results.sort(Comparator.comparing((InterviewResult r) -> {
+            Interview i = r.getInterview();
+            return i.getEndedAt() != null ? i.getEndedAt() : i.getCreatedAt();
+        }).reversed());
 
-        double avgScore = interviewDtos.stream()
-                .mapToInt(InterviewDto::getScore)
-                .average()
-                .orElse(0.0);
-
-        String grade = calculateGrade(avgScore);
-
-        return MypageResponseDto.builder()
-                .name(user.getUsername())
-                .email(user.getEmail())
-                .job("-")                      // User 엔티티에 없음 → 기본값
-                .careerLevel("-")              // User 엔티티에 없음 → 기본값
-                .profileImageUrl(null)         // User 엔티티에 없음 → 기본값
-                .memberId(user.getUserId())
-                .joinedAt(user.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
-                .interviews(interviewDtos)
-                .scraps(scrapDtos)
-                .totalInterviews(interviewDtos.size())
-                .avgScore((int) avgScore)
-                .grade(grade)
-                .build();
-    }
-
-    public ScoreGraphDto getScoreGraphData(Long userId) {
-        List<Interview> interviews = interviewRepository.findAllByUserId(userId).stream()
-                .sorted(Comparator.comparing(Interview::getCreatedAt))
+        // 목록 DTO
+        List<InterviewDto> interviews = results.stream()
+                .map(InterviewDto::fromEntity)
                 .toList();
 
-        List<String> labels = interviews.stream()
-                .map(i -> i.getCreatedAt().format(DateTimeFormatter.ofPattern("MM월 dd일")))
-                .collect(Collectors.toList());
+        int totalInterviews = results.size();
+        int avgScore = (int) Math.round(results.stream().mapToInt(InterviewResult::getTotalScore).average().orElse(0));
+        String latestGrade = results.isEmpty() ? null : results.get(0).getGrade().name();
 
-        List<Integer> scores = interviews.stream()
-                .map(i -> {
-                    InterviewResult result = interviewResultRepository
-                            .findByInterviewId(i.getId())
-                            .orElse(null);
-                    return result != null ? result.getTotalScore() : 0;
-                })
-                .collect(Collectors.toList());
+        return MypageResponseDto.from(user, totalInterviews, avgScore, latestGrade, interviews, Collections.emptyList());
+    }
+
+    /** 점수 그래프 데이터 (최근 8개, 과거→현재) */
+    public ScoreGraphDto getScoreGraphData(Long userId) {
+        // ✅ 사용자별 인터뷰 결과만 조회
+        List<InterviewResult> results = interviewResultRepository.findByUserId(userId);
+
+        // 과거→현재: endedAt 우선, 없으면 createdAt
+        results.sort(Comparator.comparing((InterviewResult r) -> {
+            Interview i = r.getInterview();
+            return i.getEndedAt() != null ? i.getEndedAt() : i.getCreatedAt();
+        }));
+
+        // 최근 8개
+        int size = results.size();
+        int from = Math.max(0, size - 8);
+        List<InterviewResult> last = results.subList(from, size);
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM월 dd일");
+        List<String> labels = new ArrayList<>();
+        List<Integer> scores = new ArrayList<>();
+
+        for (InterviewResult r : last) {
+            Interview i = r.getInterview();
+            LocalDateTime when = (i.getEndedAt() != null ? i.getEndedAt() : i.getCreatedAt());
+            labels.add(when.format(fmt));
+            scores.add(r.getTotalScore());
+        }
 
         return new ScoreGraphDto(labels, scores);
     }
 
+    /** 직무 차트 데이터 (기존 유지) */
     public CareerChartDto getCareerChartData(Long userId) {
-        // TODO: 커뮤니티/유저 도메인에서 실제 데이터 받아오기
-        List<String> labels = List.of("백엔드", "프론트엔드", "AI", "데이터");
-        List<Integer> data = List.of(40, 30, 20, 10); // mock 데이터
-
+        Map<String, Long> jobCounts = interviewRepository.findAllByUserId(userId).stream()
+                .collect(Collectors.groupingBy(Interview::getJobPosition, Collectors.counting()));
+        List<String> labels = new ArrayList<>(jobCounts.keySet());
+        List<Integer> data = jobCounts.values().stream().map(Long::intValue).toList();
         return new CareerChartDto(labels, data);
     }
 
-    public void updateUserProfile(Long userId, UserProfileUpdateRequest request) {
-        // User 엔티티에는 name, job, careerLevel 없음 → 업데이트 생략 or log만
-        User user = getUser(userId);
-        System.out.println("업데이트 요청: name=" + request.getName() +
-                ", job=" + request.getJob() +
-                ", level=" + request.getCareerLevel());
+    /** 기본 프로필 조회 (기존 유지) */
+    public MypageResponseDto getBasicUserInfo(Long userId) {
+        User user = getUserOrThrow(userId);
+        return buildBasicResponse(user);
     }
 
-    public UserProfileUpdateRequest getBasicUserInfo(Long userId) {
-        User user = getUser(userId);
-        UserProfileUpdateRequest dto = new UserProfileUpdateRequest();
-        dto.setName(user.getUsername());
-        dto.setJob("-");
-        dto.setCareerLevel("-");
-        return dto;
+    /** 프로필 정보/이미지 저장 (기존 유지) */
+    @Transactional
+    public MypageResponseDto updateProfile(Long userId, UserProfileUpdateRequest profileReq, MultipartFile profileImage) {
+        User user = getUserOrThrow(userId);
+
+        UserProfile userProfile = Optional.ofNullable(user.getUserProfile())
+                .orElseGet(() -> {
+                    UserProfile np = UserProfile.builder().user(user).build();
+                    user.setUserProfile(np);
+                    return np;
+                });
+
+        mypageMapper.applyProfileUpdates(user, userProfile, profileReq);
+
+        if (profileImage != null && !profileImage.isEmpty()) {
+            String savedUrl = profileImageService.uploadProfileImage(userId, profileImage);
+            userProfile.setProfileImageUrl(savedUrl);
+        }
+
+        userRepository.save(user);
+        return buildBasicResponse(user);
     }
 
-    private User getUser(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. userId=" + userId));
+    /** 프로필 이미지 삭제 (기존 유지) */
+    @Transactional
+    public MypageResponseDto deleteProfileImage(Long userId) {
+        User user = getUserOrThrow(userId);
+        UserProfile profile = user.getUserProfile();
+        if (profile != null && profile.getProfileImageUrl() != null) {
+            profileImageService.deleteProfileImage(userId, profile.getProfileImageUrl());
+            profile.setProfileImageUrl(null);
+        }
+        userRepository.save(user);
+        return buildBasicResponse(user);
     }
 
-    private String calculateGrade(double avgScore) {
-        if (avgScore >= 90) return "A";
-        if (avgScore >= 80) return "B";
-        if (avgScore >= 70) return "C";
-        return "F";
+    private User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
     }
 
-    private ScrapDto toScrapDto(Scraps scrap) {
-        return communityPostsRepository.findById(scrap.getPostId())
-                .map(post -> ScrapDto.builder()
-                        .title(post.getTitle())
-                        .link("/community/posts/" + post.getPostId())
-                        .likes(post.getLikeCount())
-                        .comments(0) // 댓글 수 없음 → 기본값 0
-                        .build())
-                .orElse(null);
+    private MypageResponseDto buildBasicResponse(User user) {
+        return MypageResponseDto.from(user, 0, 0, null, Collections.emptyList(), Collections.emptyList());
     }
 }

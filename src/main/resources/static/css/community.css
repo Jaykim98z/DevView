@@ -322,3 +322,13 @@ html, body {
   }
 }
 .is-readonly { opacity: 0.6; cursor: default; }
+
+.comments-section { margin-top: 24px; }
+.comment-form { display: grid; gap: 8px; }
+.comment-form textarea { width: 100%; min-height: 80px; padding: 8px; }
+.comment-actions { text-align: right; }
+.comment-list { display: grid; gap: 16px; margin-top: 12px; }
+.comment-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
+.comment-item .meta { font-size: 0.9rem; color: #6b7280; display:flex; gap:8px; }
+.comment-item .content { margin-top: 6px; white-space: pre-wrap; }
+.comment-item .actions { margin-top: 8px; display:flex; gap:8px; }

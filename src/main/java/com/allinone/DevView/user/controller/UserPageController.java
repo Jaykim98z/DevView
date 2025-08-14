@@ -21,7 +21,6 @@ import jakarta.servlet.http.HttpSession;
 @Slf4j
 public class UserPageController {
 
-    // UserController에서 사용하는 세션 키와 동일
     private static final String LOGIN_USER = "loginUser";
 
     /**
@@ -31,11 +30,9 @@ public class UserPageController {
     public String loginPage(HttpSession session, Model model) {
         log.info("로그인 페이지 요청");
 
-        // 이미 로그인된 사용자라면 메인 페이지로 리다이렉트
         UserResponse loginUser = getLoginUser(session);
         if (loginUser != null) {
-            log.info("이미 로그인된 사용자 - 메인 페이지로 리다이렉트: userId={}",
-                    loginUser.getUserId());
+            log.info("이미 로그인된 사용자 - 메인 페이지로 리다이렉트: userId={}", loginUser.getUserId());
             return "redirect:/";
         }
 
@@ -51,11 +48,9 @@ public class UserPageController {
     public String registerPage(HttpSession session, Model model) {
         log.info("회원가입 페이지 요청");
 
-        // 이미 로그인된 사용자라면 메인 페이지로 리다이렉트
         UserResponse loginUser = getLoginUser(session);
         if (loginUser != null) {
-            log.info("이미 로그인된 사용자 - 메인 페이지로 리다이렉트: userId={}",
-                    loginUser.getUserId());
+            log.info("이미 로그인된 사용자 - 메인 페이지로 리다이렉트: userId={}", loginUser.getUserId());
             return "redirect:/";
         }
 
@@ -93,5 +88,24 @@ public class UserPageController {
      */
     private UserResponse getLoginUser(HttpSession session) {
         return (UserResponse) session.getAttribute(LOGIN_USER);
+    }
+
+    /**
+     * 로컬 로그인 처리 (POST 방식)
+     */
+    @PostMapping("/login")
+    public String login(HttpSession session, String email, String password) {
+        log.info("로그인 요청: email={}", email);
+
+        UserResponse user = UserResponse.authenticateUser(email, password);
+        if (user != null) {
+            session.setAttribute(LOGIN_USER, user);
+            log.info("로그인 성공: userId={}", user.getUserId());
+
+            return "redirect:/";
+        } else {
+            log.warn("로그인 실패: 잘못된 사용자 정보");
+            return "redirect:/user/login?error=true";
+        }
     }
 }
