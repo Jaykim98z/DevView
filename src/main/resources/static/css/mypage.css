@@ -1,8 +1,9 @@
+/* ==============================   공통 컨테이너 / 리셋   ============================== */
 .mypage-container {
     --card-bg: #fff;
     --muted: #6c757d;
     --soft: #f1f3f5;
-    --shadow: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     --radius: 12px;
 
     max-width: 1180px;
@@ -17,14 +18,10 @@
 /* 인사 문구 */
 .mypage-container h2.greeting {
     font-size: 1.4rem;
-    margin: 0 0 20px 0;
+    margin: 0 0 20px;
 }
 
-/* ======================================
-   레이아웃
-   - 왼쪽: 프로필 카드 + 계정 설정(아래)
-   - 오른쪽: 점수 그래프, 그 아래 면접/스크랩
-   ====================================== */
+/* ==============================   레이아웃   ============================== */
 .mypage-container .profile-layout {
     display: grid;
     grid-template-columns: 280px 1fr;
@@ -50,19 +47,18 @@
     padding: 20px;
 }
 
-/* ===== 프로필 카드 ===== */
+/* ==============================   프로필 카드   ============================== */
 .mypage-container .profile-card {
-    background: #ffffff;
+    background: #fff;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    padding: 0 0 24px 0;
+    padding: 0 0 24px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
 }
 
-/* 프로필 이미지 + 이름/직무 배경 */
 .mypage-container .profile-card .profile-image {
     width: 100%;
     background: #eef6fd;
@@ -71,20 +67,23 @@
     flex-direction: column;
     align-items: center;
 }
+
 .mypage-container .profile-card .profile-image img {
     width: 120px;
     height: 120px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid #fff;
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
     margin-bottom: 10px;
 }
+
 .mypage-container .profile-card .profile-image .name {
     font-size: 1.4rem;
     font-weight: 700;
     margin-bottom: 6px;
 }
+
 .mypage-container .profile-card .profile-image .job-level {
     font-size: 0.95rem;
     font-weight: 500;
@@ -112,7 +111,7 @@
     color: #555;
 }
 
-/* 버튼 */
+/* 액션 */
 .mypage-container .profile-card .actions {
     display: flex;
     flex-direction: column;
@@ -134,19 +133,15 @@
     font-weight: 500;
     color: #333;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, box-shadow 0.15s ease;
 }
-.mypage-container .profile-card .actions .btn:hover {
-    background: #f1f3f5;
-}
+.mypage-container .profile-card .actions .btn:hover { background: #f1f3f5; }
 .mypage-container .profile-card .actions .btn.danger {
     border: none;
     background: transparent;
     color: #dc3545;
 }
-.mypage-container .profile-card .actions .btn.danger:hover {
-    background: rgba(220, 53, 69, 0.1);
-}
+.mypage-container .profile-card .actions .btn.danger:hover { background: rgba(220, 53, 69, 0.1); }
 .mypage-container .profile-card .actions .icon,
 .mypage-container .card-title .icon,
 .mypage-container .section-title .icon {
@@ -155,13 +150,19 @@
     display: inline-block;
 }
 
-/* 계정 설정 카드 */
+/* ==============================   계정 설정 카드   ============================== */
 .mypage-container .card-title,
 .mypage-container .section-title {
     display: flex;
     align-items: center;
     gap: 8px;
     margin-bottom: 14px;
+}
+.mypage-container .card-title h3,
+.mypage-container .section-title h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
 }
 .mypage-container .account-card .kv {
     display: flex;
@@ -171,77 +172,263 @@
 }
 .mypage-container .account-card .k { color: var(--muted); }
 .mypage-container .account-card .v { font-weight: 500; }
-.mypage-container .text-link { color: #007bff; text-decoration: underline; }
+.mypage-container .text-link {
+    color: #007bff;
+    text-decoration: underline;
+}
 
-/* 오른쪽 컬럼 */
+/* ==============================   오른쪽 컬럼   ============================== */
 .mypage-container .right-column {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
-
-/* 그래프 */
+.mypage-container .graph-card { overflow: hidden; }
 .mypage-container .graph-card canvas {
     width: 100% !important;
-    height: 230px !important;
+    height: 260px !important;
     border-radius: 8px;
     display: block;
+    background: #fff;
 }
 
-/* 면접 목록 */
+/* ==============================   공통 버튼   ============================== */
+.mypage-container .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #d0d4d9;
+    background: #fff;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #2b2f33;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.06s ease;
+}
+.mypage-container .btn:hover { background: #f3f5f7; }
+.mypage-container .btn.small { padding: 6px 10px; font-size: 0.85rem; }
+.mypage-container .btn:focus-visible {
+    outline: 2px solid #4AB2E3;
+    outline-offset: 2px;
+}
+
+/* ==============================   면접 목록 (SSR/JS 공통)   ============================== */
+.mypage-container .interview-history ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
 .mypage-container .interview-item {
-    background: #f8f9fb;
+    background: #fff;
     border: 1px solid #eef0f3;
-    border-radius: 10px;
-    padding: 14px;
+    border-radius: 12px;
+    padding: 16px 18px;
     margin-bottom: 12px;
+    position: relative;
 }
 .mypage-container .interview-item .row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
 }
-.mypage-container .chips { display: flex; gap: 8px; flex-wrap: wrap; }
-.mypage-container .chip {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 999px;
-    font-size: .85rem;
-    background: var(--soft);
+
+/* 칩 라인: 1번째 칩(타입/직무)만 알약, 2번째 칩(날짜)은 평문 */
+.mypage-container .chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
-.mypage-container .chip-date { background: #e8f4ff; }
-.mypage-container .chip-type { background: #eaf7f1; }
-.mypage-container .score-wrap { display: flex; gap: 8px; align-items: center; }
-.mypage-container .score {
-    background: #e9f5ff;
-    padding: 6px 10px;
-    border-radius: 8px;
+.mypage-container .chips .chip {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: #6b7a90;
+    font-weight: 600;
+    align-content: center;
+}
+.mypage-container .chips .chip:first-child,
+.mypage-container .chip-type,
+.mypage-container .pill-dark {
+    background: #20374d !important;
+    color: #fff !important;
+    padding: 6px 12px;
+    border-radius: 999px;
     font-weight: 700;
 }
-.mypage-container .grade { font-weight: 600; color: #228be6; }
-.mypage-container .feedback { margin-top: 10px; color: #444; }
+.mypage-container .chip-date,
+.mypage-container .date-chip,
+.mypage-container .chips .date {
+    background: transparent !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    color: #6b7a90 !important;
+}
 
-/* 스크랩 목록 */
+/* 점수/등급 영역 */
+.mypage-container .score-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    margin-left: auto;
+}
+.mypage-container .score {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-weight: 800;
+    font-size: 24px;
+    line-height: 1;
+    color: #4AB2E3;
+}
+.mypage-container .grade {
+    font-weight: 700;
+    font-size: 16px;
+    color: #2fb344;
+}
+
+/* JS 렌더(.interview-row) */
+.mypage-container .interview-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #eef0f3;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+.mypage-container .interview-row + .interview-row { margin-top: 14px; }
+.mypage-container .interview-row .item-left { flex: 1 1 auto; min-width: 0; }
+.mypage-container .interview-row .item-right {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.mypage-container .meta-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: #6b7a90;
+}
+.mypage-container .meta-line .dot { color: #c2c9d6; }
+.mypage-container .meta-line .date {
+    color: #6b7a90;
+    font-weight: 600;
+}
+
+.mypage-container .iv-title {
+    margin: 0;
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: #2d3643;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mypage-container .score-big {
+    font-size: 24px;
+    font-weight: 800;
+    color: #4AB2E3;
+    line-height: 1;
+}
+
+.mypage-container .grade-txt { font-weight: 700; font-size: 16px; }
+.mypage-container .grade-txt.g-a { color: #2fb344; }
+.mypage-container .grade-txt.g-b { color: #2f7ae5; }
+.mypage-container .grade-txt.g-c { color: #f59f00; }
+.mypage-container .grade-txt.g-etc { color: #6b7a90; }
+
+.mypage-container .btn.outline {
+    background: #fff;
+    border-color: #243648;
+    color: #243648;
+}
+.mypage-container .btn.outline:hover { background: #f2f5f8; }
+
+/* ========== 상세보기 버튼: 카드 우하단 고정 (SSR + JS 공통, 선택자 보강) ========== */
+.mypage-container .interview-item,
+.mypage-container .interview-row {
+    position: relative;           /* 절대배치 기준 */
+    padding-bottom: 64px;         /* 버튼 높이+여백만큼 공간 확보(겹침 방지) */
+}
+/* SSR: <a class="btn small">상세 보기</a> (직접 자식) */
+.mypage-container .interview-item > a.btn.small {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    margin-top: 0;
+}
+/* JS: <button class="btn small outline detail-btn"> */
+.mypage-container .interview-item .detail-btn,
+.mypage-container .interview-row .detail-btn {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    margin-top: 0;
+}
+
+/* ==============================   스크랩 목록   ============================== */
+.mypage-container .scrap-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 .mypage-container .scrap-item {
     display: block;
-    background: #fcfcfd;
+    background: #fff;
     border: 1px solid #eef0f3;
-    border-radius: 10px;
-    padding: 12px 14px;
+    border-radius: 12px;
+    padding: 16px 18px;
     margin-bottom: 10px;
     text-decoration: none;
     color: inherit;
-    transition: background .15s ease, transform .06s ease;
+    transition: background 0.15s ease, transform 0.06s ease, box-shadow 0.15s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
-.mypage-container .scrap-item:hover { background: #f4f6f8; transform: translateY(-1px); }
-.mypage-container .scrap-item h4 { margin: 0 0 6px; font-size: 1rem; font-weight: 600; }
-.mypage-container .meta { font-size: .86rem; color: #555; display: flex; gap: 12px; }
+.mypage-container .scrap-item:hover {
+    background: #f4f6f8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+.mypage-container .scrap-item h4 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+.mypage-container .meta {
+    font-size: 0.86rem;
+    color: #555;
+    display: flex;
+    gap: 12px;
+}
 
+/* 그리드 */
+.mypage-container .scrap-section .scrap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
 
-/* 반응형 */
+/* ==============================   반응형   ============================== */
 @media (max-width: 1024px) {
-    .mypage-container .profile-layout {
-        grid-template-columns: 1fr;
-    }
+    .mypage-container .profile-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+    .mypage-container .scrap-section .scrap-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+    .mypage-container .graph-card canvas { height: 300px !important; }
 }

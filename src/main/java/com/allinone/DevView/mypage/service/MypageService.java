@@ -1,6 +1,7 @@
 package com.allinone.DevView.mypage.service;
 
 import com.allinone.DevView.common.exception.UserNotFoundException;
+import com.allinone.DevView.community.repository.ScrapsRepository;
 import com.allinone.DevView.interview.entity.Interview;
 import com.allinone.DevView.interview.entity.InterviewResult;
 import com.allinone.DevView.interview.repository.InterviewRepository;
@@ -9,6 +10,7 @@ import com.allinone.DevView.mypage.dto.CareerChartDto;
 import com.allinone.DevView.mypage.dto.InterviewDto;
 import com.allinone.DevView.mypage.dto.MypageResponseDto;
 import com.allinone.DevView.mypage.dto.ScoreGraphDto;
+import com.allinone.DevView.mypage.dto.ScrapDto;
 import com.allinone.DevView.mypage.dto.UserProfileUpdateRequest;
 import com.allinone.DevView.mypage.entity.UserProfile;
 import com.allinone.DevView.mypage.mapper.MypageMapper;
@@ -34,8 +36,9 @@ public class MypageService {
     private final InterviewRepository interviewRepository;
     private final InterviewResultRepository interviewResultRepository;
     private final ProfileImageService profileImageService;
+    private final ScrapsRepository scrapsRepository;
 
-    /** 마이페이지 메인 데이터 (면접 요약/목록 포함) */
+    /** 마이페이지 메인 데이터 (면접 요약/목록 + 스크랩 포함) */
     public MypageResponseDto getMypageData(Long userId) {
         User user = getUserOrThrow(userId);
 
@@ -54,10 +57,18 @@ public class MypageService {
                 .toList();
 
         int totalInterviews = results.size();
-        int avgScore = (int) Math.round(results.stream().mapToInt(InterviewResult::getTotalScore).average().orElse(0));
+        int avgScore = (int) Math.round(
+                results.stream().mapToInt(InterviewResult::getTotalScore).average().orElse(0)
+        );
         String latestGrade = results.isEmpty() ? null : results.get(0).getGrade().name();
 
-        return MypageResponseDto.from(user, totalInterviews, avgScore, latestGrade, interviews, Collections.emptyList());
+        // ✅ 스크랩 목록 (title/link/likes/comments) — 마이페이지 전용 DTO로 바로 조회
+        List<ScrapDto> scraps = scrapsRepository.findMypageScrapListByUserId(userId)
+                .stream()
+                .limit(10)
+                .toList();
+
+        return MypageResponseDto.from(user, totalInterviews, avgScore, latestGrade, interviews, scraps);
     }
 
     /** 점수 그래프 데이터 (최근 8개, 과거→현재) */
