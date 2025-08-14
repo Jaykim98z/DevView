@@ -90,7 +90,8 @@
                         <div class="interview-item">
                             <div class="row">
                                 <div class="chips">
-                                    <span class="chip chip-date" th:text="${interview.interviewDate != null ? #temporals.format(interview.interviewDate, 'yyyy-MM-dd') : ''}">YYYY-MM-DD</span>
+                                    <span class="chip chip-date"
+                                          th:text="${interview.interviewDate != null ? interview.interviewDate : ''}">YYYY-MM-DD</span>
                                     <span class="chip chip-type" th:text="${interview.interviewType}">직무</span>
                                 </div>
                                 <div class="score-wrap">
