@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const feedbackEl = document.getElementById('feedback-text');
     const summaryEl = document.getElementById('summary-text');
     const recommendationsEl = document.getElementById('recommendations-text');
+
     const skillTechScore = document.getElementById('skill-tech-score');
     const skillTechProgress = document.getElementById('skill-tech-progress');
     const skillProblemScore = document.getElementById('skill-problem-score');
@@ -35,25 +36,18 @@ document.addEventListener('DOMContentLoaded', async function() {
             throw new Error('Failed to fetch interview results.');
         }
         const result = await response.json();
+        const analysis = JSON.parse(result.feedback);
 
-        scoreEl.textContent = result.totalScore;
+        scoreEl.textContent = analysis.totalScore;
         gradeEl.textContent = `Grade ${result.grade}`;
-        feedbackEl.textContent = result.feedback;
-        recommendationsEl.textContent = result.recommendedResource;
+        feedbackEl.textContent = analysis.feedback;
+        summaryEl.textContent = analysis.summary;
+        recommendationsEl.innerHTML = result.recommendedResource;
 
-        // TODO: Replace with real data when AI provides detailed scores
-        // For now, we simulate the detailed scores based on the total score
-        const techScore = result.totalScore * 0.95; // Simulate
-        const problemScore = result.totalScore * 0.88; // Simulate
-        const commScore = result.totalScore * 0.92; // Simulate
-        const attitudeScore = result.totalScore * 0.85; // Simulate
-
-        summaryEl.textContent = `전반적으로 우수한 역량을 보여주셨습니다. 특히 의사소통 능력과 기술 지식 면에서 뛰어난 성과를 거두었습니다. (This is a simulated summary)`;
-
-        setProgress(skillTechProgress, skillTechScore, Math.round(techScore));
-        setProgress(skillProblemProgress, skillProblemScore, Math.round(problemScore));
-        setProgress(skillCommProgress, skillCommScore, Math.round(commScore));
-        setProgress(skillAttitudeProgress, skillAttitudeScore, Math.round(attitudeScore));
+        setProgress(skillTechProgress, skillTechScore, analysis.techScore);
+        setProgress(skillProblemProgress, skillProblemScore, analysis.problemScore);
+        setProgress(skillCommProgress, skillCommScore, analysis.commScore);
+        setProgress(skillAttitudeProgress, skillAttitudeScore, analysis.attitudeScore);
 
     } catch (error) {
         console.error('Error fetching results:', error);
