@@ -301,3 +301,64 @@ function __secureHeaders__(json = true) {
     fetchList();
   }
 })();
+
+document.addEventListener("DOMContentLoaded", function () {
+    const postId = window.POST_ID;
+    const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+    // 수정 버튼 클릭
+    const editBtn = document.getElementById("btn-edit-post");
+    if (editBtn) {
+        editBtn.addEventListener("click", function () {
+            const newTitle = prompt("새 제목을 입력하세요:", document.querySelector(".post-title").innerText);
+            const newContent = prompt("새 내용을 입력하세요:", document.querySelector(".post-content").innerText);
+
+            if (!newTitle || !newContent) {
+                alert("제목과 내용은 비워둘 수 없습니다.");
+                return;
+            }
+
+            fetch(`/api/community/posts/${postId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify({
+                    title: newTitle,
+                    content: newContent
+                })
+            }).then(res => {
+                if (res.ok) {
+                    alert("수정되었습니다.");
+                    location.reload();
+                } else {
+                    alert("수정 실패");
+                }
+            });
+        });
+    }
+
+    // 삭제 버튼 클릭
+    const deleteBtn = document.getElementById("btn-delete-post");
+    if (deleteBtn) {
+        deleteBtn.addEventListener("click", function () {
+            if (!confirm("정말 삭제하시겠습니까?")) return;
+
+            fetch(`/api/community/posts/${postId}`, {
+                method: "DELETE",
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            }).then(res => {
+                if (res.ok) {
+                    alert("삭제되었습니다.");
+                    window.location.href = "/community";
+                } else {
+                    alert("삭제 실패");
+                }
+            });
+        });
+    }
+});
