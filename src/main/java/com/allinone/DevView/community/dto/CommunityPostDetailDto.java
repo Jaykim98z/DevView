@@ -13,6 +13,7 @@ public class CommunityPostDetailDto {
     private String title;
     private String summary;
     private String username;
+    private Long writerId;
     private int score;
     private String grade;
     private int viewCount;
@@ -21,16 +22,13 @@ public class CommunityPostDetailDto {
     private LocalDateTime createdAt;
     private String interviewType;
 
-    /** 엔티티 -> DTO 매핑 (summary 필드 우선, 없으면 content 기준으로 100자 컷) */
     public static CommunityPostDetailDto from(CommunityPosts post) {
         if (post == null) {
             throw new IllegalArgumentException("post is null");
         }
 
-        // username은 Lazy 로딩 주의: 레포에서 JOIN FETCH 하거나 서비스 @Transactional 범위 내에서 호출하세요.
         String username = (post.getUser() != null) ? post.getUser().getUsername() : null;
 
-        // summary 우선 사용, 없으면 content 100자 컷(널 방어)
         String summary = post.getSummary();
         if (isBlank(summary)) {
             String content = post.getContent();
@@ -46,6 +44,7 @@ public class CommunityPostDetailDto {
                 .title(post.getTitle())
                 .summary(summary)
                 .username(username)
+                .writerId(post.getUser() != null ? post.getUser().getUserId() : null)
                 .score(post.getScore())
                 .grade(post.getGrade() != null ? post.getGrade().name() : null)
                 .viewCount(post.getViewCount())

@@ -12,18 +12,16 @@
 
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-
-    <script th:inline="javascript">
-        window.CURRENT_USER_ID    = [[${#authentication?.principal?.userId}]];
-        window.CURRENT_USERNAME   = /*[['${#authentication?.name}']]*/ null;
-        window.CURRENT_USER_EMAIL = /*[['${#authentication?.principal?.email}']]*/ null;
-        window.POST_ID            = [[${post.id}]];
-    </script>
-
 </head>
 
-<body data-page="detail">
+<body data-page="detail"
+      th:attr="data-post-id=${post.id}"
+      th:data-current-user-id="${#authentication?.principal?.userId}"
+      th:data-current-username="${#authentication?.name}"
+      th:data-current-user-email="${#authorization.expression('isAuthenticated()') ? #authentication.principal.username : null}">
+
 <div th:replace="~{fragments/header :: header}"></div>
+
 
 <main class="main-container">
     <div class="post-detail-card" th:attr="data-post-id=${post.id}">
@@ -34,8 +32,8 @@
                 <span class="username" th:text="${post.username}">testuser</span>
                 <span class="post-date"
                       th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd') : ''}">
-            2025-08-08
-          </span>
+                  2025-08-08
+                </span>
             </div>
         </header>
 
@@ -44,7 +42,7 @@
         <div class="badges">
             <span class="badge badge-tech" th:text="${post.interviewType}">PRACTICE</span>
             <span class="score" th:text="${post.score} + ' 점'">0 점</span>
-            <span class="grade" th:text="'• ' + ${post.grade} + ' 등급'">• C 등급</span>
+            <span class="grade" th:text="|• ${post.grade} 등급|">• C 등급</span>
         </div>
 
         <div class="post-content" th:text="${post.summary}">
@@ -53,8 +51,9 @@
 
         <div class="post-actions"
              th:if="${#authorization.expression('isAuthenticated()')
-            and (post.userId == #authentication.principal.userId or #authorization.expression('hasRole(''ADMIN'')'))}">
-            <button id="btn-edit-post" class="btn-action">수정</button>
+        and (post.writerId == #authentication.principal.userId
+             or #authorization.expression('hasRole(''ADMIN'')'))}">
+            <button id="btn-edit-post"  class="btn-action">수정</button>
             <button id="btn-delete-post" class="btn-action btn-danger">삭제</button>
         </div>
 
@@ -83,20 +82,20 @@
             <hr class="meta-divider" />
         </div>
 
+
         <section class="comments-section">
             <div class="comments">
                 <div class="comments__title">
                     <span>댓글</span>
                     <span class="comments__badge">
+                        <!-- ✅ 중첩 ${} 제거 -->
                         <span id="comment-count"
-                              th:text="${comments} != null ? ${#lists.size(comments)} : 0">0</span>개
+                              th:text="${comments != null ? #lists.size(comments) : 0}">0</span>개
                     </span>
                 </div>
 
-
                 <form id="comment-form" class="comment-form" onsubmit="return false;">
-
-                <textarea id="comment-input" name="content" placeholder="댓글을 입력하세요..." required></textarea>
+                    <textarea id="comment-input" name="content" placeholder="댓글을 입력하세요..." required></textarea>
                     <button id="comment-submit" type="button" class="btn-submit"
                             th:disabled="${#authorization.expression('!isAuthenticated()')}">등록</button>
                 </form>
@@ -115,6 +114,17 @@
     </div>
 </main>
 
-<script th:src="@{/js/post-detail-comments.js}" defer></script>
+<script>
+    (function(){
+      const d = document.body.dataset;
+      window.POST_ID            = d.postId ? Number(d.postId) : null;
+      window.CURRENT_USER_ID    = d.currentUserId ? Number(d.currentUserId) : null;
+      window.CURRENT_USERNAME   = d.currentUsername || null;
+      window.CURRENT_USER_EMAIL = d.currentUserEmail || null;
+    })();
+</script>
+
+<script th:src="@{/js/post-detail-comments.js(v=${#dates.createNow().time})}" defer></script>
+
 </body>
 </html>
