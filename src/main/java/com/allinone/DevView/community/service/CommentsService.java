@@ -23,14 +23,14 @@ public class CommentsService {
     private final UserRepository userRepository;
 
     @Transactional
-    public CommentsDto.Res create(Long postId, Long userId, String ignoreWriterName, CommentsDto.CreateReq req) {
+    public CommentsDto.Res create(Long postId, Long userId, String writerName, CommentsDto.CreateReq req) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. id=" + userId));
 
         Comments c = new Comments();
         c.setPostId(postId);
         c.setUserId(userId);
-        c.setWriterName(user.getUsername());
+        c.setWriterName(writerName != null ? writerName : user.getUsername());
         c.setParentId(req.getParentId());
         c.setContent(req.getContent());
         c.setDeleted(false);
@@ -41,7 +41,7 @@ public class CommentsService {
                 saved.getId(),
                 saved.getUserId(),
                 user.getUsername(),
-                user.getUsername(),
+                saved.getWriterName(),
                 saved.getContent(),
                 saved.getCreatedAt()
         );
@@ -49,7 +49,6 @@ public class CommentsService {
 
     @Transactional(readOnly = true)
     public Page<CommentsDto.Res> list(Long postId, Long meUserId, Pageable pageable) {
-
         Page<Comments> page = commentsRepository.findByPostIdAndDeletedFalse(postId, pageable);
 
         List<Comments> items = page.getContent();
@@ -64,7 +63,6 @@ public class CommentsService {
 
         Map<Long, String> usernameMap = userRepository.findAllById(userIds).stream()
                 .collect(Collectors.toMap(User::getUserId, User::getUsername));
-
 
         List<CommentsDto.Res> resList = items.stream()
                 .map(c -> {

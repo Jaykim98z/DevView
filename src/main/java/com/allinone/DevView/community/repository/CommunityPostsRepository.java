@@ -4,9 +4,7 @@ import com.allinone.DevView.community.entity.CommunityPosts;
 import com.allinone.DevView.common.enums.Grade;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -16,19 +14,19 @@ import java.util.Optional;
 @Repository
 public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, Long> {
 
-    @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user")
+    // ✅ 목록에서 삭제글 제외
+    @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user WHERE p.deleted = false ORDER BY p.createdAt DESC")
     List<CommunityPosts> findAllWithUser();
 
-    @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user WHERE p.postId = :postId")
+    // ✅ 상세에서 삭제글 제외
+    @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user WHERE p.postId = :postId AND p.deleted = false")
     Optional<CommunityPosts> findByIdWithUser(@Param("postId") Long postId);
 
-    List<CommunityPosts> findByCategory(String category);
-
-    List<CommunityPosts> findByGradeOrderByCreatedAtDesc(Grade grade);
-
-    List<CommunityPosts> findByTitleContainingIgnoreCase(String keyword);
-
+    // 필요 시 필터에도 deleted 제외를 고려
     List<CommunityPosts> findByCategoryAndLevel(String category, String level);
+    List<CommunityPosts> findByCategory(String category);
+    List<CommunityPosts> findByGradeOrderByCreatedAtDesc(Grade grade);
+    List<CommunityPosts> findByTitleContainingIgnoreCase(String keyword);
 
     boolean existsByInterviewResultId(Long interviewResultId);
 
@@ -38,7 +36,7 @@ public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, 
            SELECT p
            FROM CommunityPosts p
            JOIN FETCH p.user
-           WHERE p.type = 'INTERVIEW_SHARE'
+           WHERE p.type = 'INTERVIEW_SHARE' AND p.deleted = false
            ORDER BY p.createdAt DESC
            """)
     List<CommunityPosts> findInterviewShareWithUser();
@@ -47,8 +45,7 @@ public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, 
            SELECT p
            FROM CommunityPosts p
            JOIN FETCH p.user
-           WHERE p.postId = :postId
-             AND p.type = 'INTERVIEW_SHARE'
+           WHERE p.postId = :postId AND p.type = 'INTERVIEW_SHARE' AND p.deleted = false
            """)
     Optional<CommunityPosts> findInterviewShareByIdWithUser(@Param("postId") Long postId);
 
@@ -57,24 +54,22 @@ public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, 
                 SELECT p
                 FROM CommunityPosts p
                 JOIN FETCH p.user
-                WHERE p.type = 'INTERVIEW_SHARE'
+                WHERE p.type = 'INTERVIEW_SHARE' AND p.deleted = false
                 ORDER BY p.createdAt DESC
                 """,
             countQuery = """
                      SELECT COUNT(p)
                      FROM CommunityPosts p
-                     WHERE p.type = 'INTERVIEW_SHARE'
+                     WHERE p.type = 'INTERVIEW_SHARE' AND p.deleted = false
                      """
     )
     Page<CommunityPosts> pageInterviewShareWithUser(Pageable pageable);
 
     List<CommunityPosts> findByTypeAndTitleContainingIgnoreCase(String type, String keyword);
-
     List<CommunityPosts> findByTypeAndContentContainingIgnoreCase(String type, String keyword);
-
     List<CommunityPosts> findTop10ByTypeOrderByScoreDesc(String type);
 
-
+    // 카운트 업데이트
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update CommunityPosts p set p.viewCount = p.viewCount + 1 where p.postId = :postId")
     int incrementViewCount(@Param("postId") Long postId);
@@ -102,4 +97,13 @@ public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, 
        where p.postId = :postId
        """)
     int decrementScrapCount(@Param("postId") Long postId);
+
+    Page<CommunityPosts> findByDeletedFalse(Pageable pageable);
+
+    Optional<CommunityPosts> findByPostIdAndDeletedFalse(Long postId);
+
+    @Query("select p from CommunityPosts p where p.postId = :postId and p.deleted = false")
+    Optional<CommunityPosts> findActiveByPostId(@Param("postId") Long postId);
+
+
 }

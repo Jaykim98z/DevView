@@ -6,6 +6,7 @@ import com.allinone.DevView.security.handler.LocalLoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,6 +21,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true) // @PreAuthorize 사용을 활성화
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -104,6 +106,8 @@ public class SecurityConfig {
 
                         // 임시: 테스트용 API
                         .requestMatchers("/api/v1/interviews/**").permitAll()
+
+                        .requestMatchers("/api/community/posts/**").authenticated() // 커뮤니티 글 수정/삭제 API는 로그인 필요
 
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
