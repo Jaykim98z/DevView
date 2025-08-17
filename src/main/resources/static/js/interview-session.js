@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function endInterview() {
         submitAnswerBtnEl.textContent = 'Submitting...';
+        spinner.show();
         submitAnswerBtnEl.disabled = true;
         clearInterval(timerInterval);
 
@@ -130,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Failed to submit results. Please try again.');
             submitAnswerBtnEl.textContent = 'Submit Answer';
             submitAnswerBtnEl.disabled = false;
+            spinner.hide();
         }
     }
 

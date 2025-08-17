@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Interview Settings - DevView</title>
     <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/loading-spinner.css}">
     <link rel="stylesheet" th:href="@{/css/interview-settings.css}">
 </head>
 <body>
@@ -34,8 +35,10 @@
 
             <h2>인터뷰 타입</h2>
             <div class="options-group" id="type-group">
-                <button type="button" class="option-btn active" data-value="PRACTICE">연습</button>
-                <button type="button" class="option-btn" data-value="REAL">실전</button>
+                <button type="button" class="option-btn active" data-value="TECHNICAL">기술면접</button>
+                <button type="button" class="option-btn" data-value="PRACTICAL">실무면접</button>
+                <button type="button" class="option-btn" data-value="BEHAVIORAL">인성면접</button>
+                <button type="button" class="option-btn" data-value="COMPREHENSIVE">종합면접</button>
             </div>
 
             <button type="submit" class="start-btn">인터뷰 시작하기 →</button>
@@ -43,6 +46,8 @@
     </div>
 </main>
 
+<script th:src="@{/js/spinner.js}"></script>
 <script th:src="@{/js/interview-settings.js}"></script>
+<div th:replace="~{fragments/loading-spinner :: spinner}"></div>
 </body>
 </html>
