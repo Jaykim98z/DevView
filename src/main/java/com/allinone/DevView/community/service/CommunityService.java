@@ -4,6 +4,7 @@ import com.allinone.DevView.community.dto.CreateInterviewSharePostRequest;
 import com.allinone.DevView.community.dto.CreatePostRequest;
 import com.allinone.DevView.community.dto.CommunityPostDetailDto;
 import com.allinone.DevView.community.dto.CommunityPostsDto;
+import com.allinone.DevView.community.dto.PostUpdateRequestDto;
 import com.allinone.DevView.community.entity.Comments;
 import com.allinone.DevView.community.entity.CommunityPosts;
 import com.allinone.DevView.community.entity.Likes;
@@ -21,6 +22,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -191,7 +193,6 @@ public class CommunityService {
 
     @Transactional
     public CommunityPostDetailDto getPostDetailDto(Long postId) {
-        // 먼저 +1 (clearAutomatically=true로 1차 캐시 갱신)
         postsRepository.incrementViewCount(postId);
 
         CommunityPosts post = postsRepository.findByIdWithUser(postId)
@@ -273,5 +274,46 @@ public class CommunityService {
                     post.getCreatedAt()
             );
         }).toList();
+    }
+
+    /** 게시글 부분 수정 (본인/관리자만) */
+    @Transactional
+    public Long updatePost(Long postId, Long requestUserId, PostUpdateRequestDto updated) {
+        CommunityPosts post = postsRepository.findActiveByPostId(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        if (!isOwner(post, requestUserId) && !hasRoleAdmin()) {
+            throw new AccessDeniedException("수정 권한이 없습니다.");
+        }
+
+        // 엔티티 도메인 메서드 (CommunityPosts에 반드시 존재)
+        post.update(updated.getTitle(), updated.getContent());
+        return post.getPostId();
+    }
+
+    /** 게시글 삭제 (Soft Delete, 본인/관리자만) */
+    @Transactional
+    public void deletePost(Long postId, Long requestUserId) {
+        CommunityPosts post = postsRepository.findActiveByPostId(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        if (!isOwner(post, requestUserId) && !hasRoleAdmin()) {
+            throw new AccessDeniedException("삭제 권한이 없습니다.");
+        }
+
+        // 엔티티 도메인 메서드 (CommunityPosts에 반드시 존재)
+        post.softDelete();
+    }
+
+    // --- 권한 유틸 ---
+    private boolean isOwner(CommunityPosts post, Long userId) {
+        return post.getUser() != null
+                && post.getUser().getUserId() != null
+                && post.getUser().getUserId().equals(userId);
+    }
+
+    private boolean hasRoleAdmin() {
+        // TODO: SecurityContext에서 ROLE_ADMIN 검사로 교체
+        return false;
     }
 }

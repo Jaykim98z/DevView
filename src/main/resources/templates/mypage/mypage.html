@@ -3,9 +3,15 @@
 <head>
     <meta charset="UTF-8" />
     <title>마이페이지</title>
+    <!-- CSRF 토큰 메타 태그 추가 -->
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
     <link rel="stylesheet" th:href="@{/css/mypage.css}" />
     <link rel="stylesheet" th:href="@{/css/header.css}" />
+    <!-- Chart.js (이미 포함) -->
     <script th:src="@{/js/lib/chart.min.js}"></script>
+    <!-- 통합 JS -->
     <script defer th:src="@{/js/mypage.js}"></script>
 </head>
 <body>
@@ -30,11 +36,11 @@
                     <p class="job-level" th:text="${user.job + ', ' + user.careerLevel}">백엔드개발, 주니어 레벨</p>
                 </div>
 
-                <!-- 통계 -->
+                <!-- 통계 (ID 추가) -->
                 <div class="stats">
-                    <div><strong th:text="${user.totalInterviews}">0</strong><span>면접 횟수</span></div>
-                    <div><strong th:text="${user.avgScore}">0</strong><span>평균 점수</span></div>
-                    <div><strong th:text="${user.grade != null ? user.grade : 'F'}">F</strong><span>최종 등급</span></div>
+                    <div><strong id="interviewCount" th:text="${user.totalInterviews}">0</strong><span>면접 횟수</span></div>
+                    <div><strong id="avgScore" th:text="${user.avgScore}">0</strong><span>평균 점수</span></div>
+                    <div><strong id="bestGrade" th:text="${user.grade != null ? user.grade : 'F'}">F</strong><span>최종 등급</span></div>
                 </div>
 
                 <!-- 액션 버튼 -->
@@ -45,8 +51,9 @@
                             프로필 수정
                         </button>
                     </form>
-                    <form th:action="@{/mypage/delete}" method="post"
-                          onsubmit="return confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')">
+                    <form th:action="@{/mypage/delete}" method="post" id="withdrawalForm">
+                        <!-- CSRF 토큰 히든 필드 추가 -->
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <button type="submit" class="btn danger">
                             <img src="/img/bye.svg" class="icon" alt="회원 탈퇴" />
                             회원 탈퇴
@@ -75,7 +82,8 @@
                     <h3>점수 변화 그래프</h3>
                 </div>
                 <canvas id="scoreChart"
-                        th:attr="data-labels=${scoreGraph.labelsJson}, data-scores=${scoreGraph.scoresJson}">
+                        th:attr="data-labels=${scoreGraph != null ? scoreGraph.labelsJson : null},
+                                 data-scores=${scoreGraph != null ? scoreGraph.scoresJson : null}">
                 </canvas>
             </div>
 
@@ -85,21 +93,21 @@
                     <img src="/img/interviewslist.svg" class="icon" alt="나의 면접 목록"/>
                     <h3>나의 면접 목록</h3>
                 </div>
-                <ul>
+                <ul id="interviewList">
                     <li th:each="interview : ${user.interviews}">
                         <div class="interview-item">
                             <div class="row">
                                 <div class="chips">
+                                    <span class="chip chip-type" th:text="${interview.jobPositionDisplayName}">직무</span>
                                     <span class="chip chip-date"
                                           th:text="${interview.interviewDate != null ? interview.interviewDate : ''}">YYYY-MM-DD</span>
-                                    <span class="chip chip-type" th:text="${interview.interviewType}">직무</span>
                                 </div>
                                 <div class="score-wrap">
                                     <span class="score" th:text="${interview.score + '점'}">0점</span>
-                                    <span class="grade" th:text="${interview.grade}">-</span>
+                                    <span class="grade" th:text="${interview.grade + '등급'}">-</span>
                                 </div>
                             </div>
-                            <p class="feedback" th:text="${interview.feedback}">피드백</p>
+                            <a class="btn small" th:href="${interview.detailUrl}">상세 보기</a>
                         </div>
                     </li>
                 </ul>
@@ -111,13 +119,14 @@
                     <img src="/img/scrap.svg" class="icon" alt="스크랩 목록"/>
                     <h3>스크랩 목록</h3>
                 </div>
-                <ul>
+                <ul id="scrapList" class="scrap-grid">
                     <li th:each="scrap : ${user.scraps}">
                         <a th:href="${scrap.link}" target="_blank" rel="noopener noreferrer" class="scrap-item">
-                            <h4 th:text="${scrap.title}">제목</h4>
-                            <div class="meta">
-                                <span>❤️ <span th:text="${scrap.likes}">0</span></span>
-                                <span>💬 <span th:text="${scrap.comments}">0</span></span>
+                            <h4 class="scrap-title" th:text="${scrap.title}">제목</h4>
+                            <p class="scrap-desc" th:text="${scrap.preview}">요약 내용</p>
+                            <div class="scrap-meta">
+                                <span class="writer">👤 <span th:text="${scrap.writerName}">작성자</span></span>
+                                <span class="likes">❤️ <span th:text="${scrap.likes}">0</span></span>
                             </div>
                         </a>
                     </li>

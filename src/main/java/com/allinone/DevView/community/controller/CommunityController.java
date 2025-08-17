@@ -1,24 +1,17 @@
 package com.allinone.DevView.community.controller;
 
-import com.allinone.DevView.community.dto.CommunityPostsDto;
-import com.allinone.DevView.community.dto.CreateInterviewSharePostRequest;
-import com.allinone.DevView.community.dto.PostListDto;
-import com.allinone.DevView.community.entity.CommunityPosts;
-import com.allinone.DevView.community.entity.Likes;
-import com.allinone.DevView.community.entity.Scraps;
-import com.allinone.DevView.community.service.CommunityQueryService;
-import com.allinone.DevView.community.service.CommunityService;
+import com.allinone.DevView.community.dto.*;
+import com.allinone.DevView.community.entity.*;
+import com.allinone.DevView.community.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.allinone.DevView.security.CustomUserDetails;
 
 @RestController
 @RequestMapping("/api/community")
@@ -62,11 +55,13 @@ public class CommunityController {
         return ResponseEntity.ok(Map.of("postId", postId));
     }
 
+    // (레거시) 전체 교체 업데이트 - 기존 호출부 유지
     @PutMapping("/posts/{id}")
     public CommunityPosts updatePost(@PathVariable Long id, @RequestBody CommunityPosts post) {
         return communityService.updatePost(id, post);
     }
 
+    // (레거시) 하드 삭제 - 기존 호출부 유지
     @DeleteMapping("/posts/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         communityService.deletePost(id);
@@ -100,5 +95,26 @@ public class CommunityController {
     public Map<String, Long> increaseView(@PathVariable Long postId) {
         long cnt = communityService.increaseViewCount(postId);
         return Map.of("viewCount", cnt);
+    }
+
+    /** 게시글 부분 수정 (본인/관리자만) */
+    @PatchMapping("/posts/{postId}")
+    public ResponseEntity<?> patchUpdatePost(
+            @PathVariable Long postId,
+            @Valid @RequestBody PostUpdateRequestDto request,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Long id = communityService.updatePost(postId, user.getUserId(), request);
+        return ResponseEntity.ok(id);
+    }
+
+    /** 게시글 삭제 (Soft Delete, 본인/관리자만) */
+    @DeleteMapping("/posts/{postId}/soft")
+    public ResponseEntity<?> softDeletePost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        communityService.deletePost(postId, user.getUserId());
+        return ResponseEntity.noContent().build();
     }
 }

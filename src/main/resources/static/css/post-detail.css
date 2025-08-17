@@ -220,6 +220,32 @@ html, body {
   cursor:pointer;
 }
 .comment-action--danger{ color:#c73a3a; border-color:#ffd9d9; background:#fff5f5; }
+.post-detail__nav{
+  display:flex; justify-content:flex-end;
+  margin-top:24px;
+}
+
+#btn-back-to-list{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 16px; border-radius:12px;
+  background:#fff; color:#2d3a4a; text-decoration:none; font-weight:600;
+  border:1px solid #dbe3f0;
+  transition: border-color .2s, box-shadow .2s, transform .1s;
+}
+
+#btn-back-to-list:hover{
+  border-color:#8fa6ff;
+  box-shadow:0 6px 18px rgba(76, 102, 235, .18);
+  transform: translateY(-1px);
+}
+
+#btn-back-to-list:active{
+  transform: translateY(0);
+}
+
+#btn-back-to-list .fa{
+  font-size:14px;
+}
 
 /* 반응형 */
 @media (max-width: 640px){
@@ -231,4 +257,76 @@ html, body {
   .comment-item__avatar{ width:28px; height:28px; }
   .comment-form{ padding:8px; }
   .comment-form .btn-submit{ padding:8px 12px; }
+}
+
+/* === 추가: 액션 버튼을 카드 오른쪽 하단으로, 톤앤매너 통일 === */
+.post-detail-card{
+  position: relative;              /* 하단 고정 버튼 위한 기준 */
+  padding-bottom: 96px;            /* 버튼이 내용 가리지 않도록 여백 */
+}
+
+.post-actions{
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1;
+}
+
+/* 버튼 공통 */
+.btn-action,
+.btn-submit,
+.btn-danger{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .12s ease, box-shadow .12s ease, color .12s ease, border-color .12s ease, transform .06s ease;
+}
+.btn-action:hover,
+.btn-submit:hover,
+.btn-danger:hover{
+  background: #f5f8fc;
+  box-shadow: 0 2px 6px rgba(27,39,51,.08);
+  transform: translateY(-1px);
+}
+.btn-action:active,
+.btn-submit:active,
+.btn-danger:active{
+  transform: translateY(0);
+}
+
+.btn-submit{
+  background: #eef6ff;
+  border-color: #cfe0f2;
+  color: #2b6cb0;
+}
+.btn-submit:hover{ background:#e6f0ff; }
+
+/* 삭제(위험) */
+.btn-danger{
+  color:#c73a3a;
+  border-color:#ffd9d9;
+  background:#fff5f5;
+}
+.btn-danger:hover{ background:#ffeef0; }
+
+.btn-like.is-active i{ color: var(--like); }
+.btn-scrap.is-active i{ color: var(--scrap); }
+
+/* 반응형 보정 */
+@media (max-width: 560px){
+  .post-detail-card{ padding-bottom: 104px; }
+  .post-actions{ right:12px; bottom:12px; }
 }
