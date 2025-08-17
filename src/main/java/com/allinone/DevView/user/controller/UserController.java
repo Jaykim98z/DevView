@@ -9,6 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.allinone.DevView.user.dto.request.PasswordChangeRequest;
+import com.allinone.DevView.common.util.SecurityUtils;
+import org.springframework.web.bind.annotation.PutMapping;
+
 /**
  * 사용자 관련 REST API 컨트롤러
  * GlobalExceptionHandler에서 예외 처리를 담당하므로 비즈니스 로직에만 집중
@@ -81,4 +85,22 @@ public class UserController {
 
         return ResponseEntity.ok(available);
     }
+
+    /**
+     * 비밀번호 변경 API
+     *
+     * @param request 비밀번호 변경 요청 데이터
+     * @return 변경된 사용자 정보
+     */
+    @PutMapping("/password")
+    public ResponseEntity<UserResponse> changePassword(@Valid @RequestBody PasswordChangeRequest request) {
+        Long userId = SecurityUtils.getUserId();
+        log.info("비밀번호 변경 요청: userId={}", userId);
+
+        UserResponse userResponse = userService.changePassword(userId, request);
+
+        log.info("비밀번호 변경 완료: userId={}", userId);
+        return ResponseEntity.ok(userResponse);
+    }
+
 }

@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     void initSummary();
     void initScoreChart();
     void initLists();
+    // 회원탈퇴 모달 초기화 추가
+    void initWithdrawalModal();
 });
 
 async function initSummary(){
@@ -272,3 +274,234 @@ function gradeClass(g){ const s=String(g||'').toUpperCase(); if(s.startsWith('A'
 function parseJSONSafe(s){ try{return JSON.parse(s||'[]')}catch{return[]} }
 function setText(s,v){ const el=document.querySelector(s); if(el) el.textContent=v; }
 function escapeHtml(v){ return v==null?'':String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+// ===== 회원탈퇴 모달 기능 (추가된 부분) =====
+
+function initWithdrawalModal() {
+    console.log('회원탈퇴 모달 초기화 시작');
+
+    // 탈퇴 폼 찾기 - 여러 방법으로 시도
+    const withdrawalForm = document.querySelector('#withdrawalForm') ||
+                          document.querySelector('form[action="/mypage/delete"]');
+
+    if (withdrawalForm) {
+        console.log('탈퇴 폼 찾음:', withdrawalForm);
+
+        // 기존 onsubmit 속성 제거
+        withdrawalForm.removeAttribute('onsubmit');
+
+        // 새로운 이벤트 리스너 추가
+        withdrawalForm.addEventListener('submit', function(e) {
+            console.log('탈퇴 버튼 클릭됨');
+            e.preventDefault(); // 기본 제출 방지
+
+            // 커스텀 확인 모달 표시
+            showWithdrawalConfirmModal(withdrawalForm);
+        });
+    } else {
+        console.error('탈퇴 폼을 찾을 수 없습니다');
+    }
+}
+
+/**
+ * 회원탈퇴 확인 모달 표시
+ * @param {HTMLFormElement} form 제출할 폼 엘리먼트
+ */
+function showWithdrawalConfirmModal(form) {
+    console.log('모달 표시');
+
+    // 모달 HTML 생성
+    const modalHTML = `
+        <div id="withdrawalModal" class="withdrawal-modal-overlay">
+            <div class="withdrawal-modal">
+                <div class="modal-header">
+                    <h3>회원탈퇴 확인</h3>
+                </div>
+                <div class="modal-body">
+                    <p><strong>정말로 탈퇴하시겠습니까?</strong></p>
+                    <p>탈퇴 시 다음 데이터가 모두 삭제됩니다:</p>
+                    <ul>
+                        <li>프로필 정보</li>
+                        <li>면접 기록 및 결과</li>
+                        <li>커뮤니티 글 및 댓글</li>
+                        <li>랭킹 정보</li>
+                    </ul>
+                    <p class="warning">⚠️ 이 작업은 되돌릴 수 없습니다.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="modal-btn cancel-btn" onclick="closeWithdrawalModal()">
+                        취소
+                    </button>
+                    <button type="button" class="modal-btn confirm-btn" onclick="confirmWithdrawal()">
+                        탈퇴하기
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // CSS 스타일 추가 (한 번만)
+    if (!document.getElementById('withdrawalModalStyles')) {
+        const styles = `
+            <style id="withdrawalModalStyles">
+                .withdrawal-modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                }
+
+                .withdrawal-modal {
+                    background: white;
+                    border-radius: 12px;
+                    width: 90%;
+                    max-width: 450px;
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+                    animation: modalAppear 0.2s ease-out;
+                }
+
+                @keyframes modalAppear {
+                    from {
+                        opacity: 0;
+                        transform: scale(0.9) translateY(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: scale(1) translateY(0);
+                    }
+                }
+
+                .modal-header {
+                    padding: 20px 24px 0;
+                    border-bottom: none;
+                }
+
+                .modal-header h3 {
+                    margin: 0;
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                    color: #dc3545;
+                }
+
+                .modal-body {
+                    padding: 16px 24px;
+                }
+
+                .modal-body p {
+                    margin: 0 0 12px 0;
+                    line-height: 1.5;
+                }
+
+                .modal-body ul {
+                    margin: 12px 0;
+                    padding-left: 20px;
+                }
+
+                .modal-body li {
+                    margin: 4px 0;
+                    color: #666;
+                }
+
+                .modal-body .warning {
+                    color: #dc3545;
+                    font-weight: 500;
+                    background: #fff5f5;
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    border-left: 4px solid #dc3545;
+                }
+
+                .modal-footer {
+                    padding: 16px 24px 24px;
+                    display: flex;
+                    gap: 12px;
+                    justify-content: flex-end;
+                }
+
+                .modal-btn {
+                    padding: 10px 20px;
+                    border-radius: 8px;
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    border: none;
+                }
+
+                .cancel-btn {
+                    background: #f8f9fa;
+                    color: #495057;
+                    border: 1px solid #dee2e6;
+                }
+
+                .cancel-btn:hover {
+                    background: #e9ecef;
+                }
+
+                .confirm-btn {
+                    background: #dc3545;
+                    color: white;
+                }
+
+                .confirm-btn:hover {
+                    background: #c82333;
+                }
+            </style>
+        `;
+        document.head.insertAdjacentHTML('beforeend', styles);
+    }
+
+    // 모달을 body에 추가
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // 폼 엘리먼트를 전역 변수에 저장
+    window.withdrawalForm = form;
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', handleModalKeydown);
+}
+
+/**
+ * 모달 닫기
+ */
+function closeWithdrawalModal() {
+    console.log('모달 닫기');
+    const modal = document.getElementById('withdrawalModal');
+    if (modal) {
+        modal.remove();
+    }
+    window.withdrawalForm = null;
+    document.removeEventListener('keydown', handleModalKeydown);
+}
+
+/**
+ * 탈퇴 확인
+ */
+function confirmWithdrawal() {
+    console.log('탈퇴 확인 버튼 클릭');
+
+    const form = window.withdrawalForm;
+    closeWithdrawalModal();
+
+    if (form) {
+        console.log('폼 제출 시작:', form);
+        form.submit();
+    } else {
+        console.error('폼을 찾을 수 없습니다');
+    }
+}
+
+/**
+ * ESC 키 처리
+ */
+function handleModalKeydown(e) {
+    if (e.key === 'Escape') {
+        closeWithdrawalModal();
+    }
+}

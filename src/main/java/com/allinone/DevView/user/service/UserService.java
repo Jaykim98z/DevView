@@ -2,6 +2,7 @@ package com.allinone.DevView.user.service;
 
 import com.allinone.DevView.common.exception.UserNotFoundException;
 import com.allinone.DevView.user.dto.request.LoginRequest;
+import com.allinone.DevView.user.dto.request.PasswordChangeRequest;
 import com.allinone.DevView.user.dto.request.RegisterRequest;
 import com.allinone.DevView.user.dto.response.UserResponse;
 import com.allinone.DevView.user.entity.User;
@@ -161,4 +162,64 @@ public class UserService {
             throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
     }
+
+
+    // UserService.java에 추가할 메서드들
+
+    /**
+     * 비밀번호 변경 처리
+     *
+     * @param userId 사용자 ID
+     * @param request 비밀번호 변경 요청 데이터
+     * @return UserResponse 변경된 사용자 정보
+     */
+    @Transactional
+    public UserResponse changePassword(Long userId, PasswordChangeRequest request) {
+        log.info("비밀번호 변경 처리 시작: userId={}", userId);
+
+        // 1. 입력값 검증
+        validatePasswordChangeRequest(request);
+
+        // 2. 사용자 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        // 3. OAuth2 사용자는 비밀번호 변경 불가
+        if (user.isGoogleUser()) {
+            log.warn("OAuth2 사용자가 비밀번호 변경 시도: userId={}, email={}", userId, user.getEmail());
+            throw new IllegalArgumentException("소셜 로그인 사용자는 비밀번호를 변경할 수 없습니다.");
+        }
+
+        // 4. 현재 비밀번호 검증
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            log.warn("현재 비밀번호 불일치: userId={}", userId);
+            throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+        }
+
+        // 5. 새 비밀번호 암호화 후 저장
+        String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
+        user.setPassword(encodedNewPassword);
+
+        User savedUser = userRepository.save(user);
+
+        log.info("비밀번호 변경 완료: userId={}", userId);
+        return UserResponse.from(savedUser);
+    }
+
+    /**
+     * 비밀번호 변경 요청 검증
+     */
+    private void validatePasswordChangeRequest(PasswordChangeRequest request) {
+        // 1. 새 비밀번호 일치 확인
+        if (!request.isNewPasswordMatched()) {
+            throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 2. 현재 비밀번호와 새 비밀번호가 같은지 확인
+        if (request.isSameAsCurrentPassword()) {
+            throw new IllegalArgumentException("새 비밀번호는 현재 비밀번호와 달라야 합니다.");
+        }
+    }
+
+
 }
