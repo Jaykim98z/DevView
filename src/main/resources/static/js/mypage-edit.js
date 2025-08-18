@@ -14,10 +14,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const jobSelect         = document.getElementById("job");
     const careerLevelSelect = document.getElementById("careerLevel");
 
+    // 자기소개 관련 요소들
+    const selfIntroductionTextarea = document.getElementById("selfIntroduction");
+    const charCountSpan = document.getElementById("charCount");
+    const charCounterDiv = document.querySelector(".char-counter");
+
     // ===== 상수 =====
     const MAX = 5 * 1024 * 1024; // 5MB
     const OK_TYPES = ["image/jpeg", "image/jpg", "image/png"];
     const REDIRECT_TO = "/mypage"; // 저장 성공 시 이동할 경로
+    const MAX_CHARS = 200; // 자기소개 최대 글자수
 
     // 브라우저가 파일 드롭 시 바로 열어버리는 기본 동작 방지
     ["dragover", "drop"].forEach(evt => {
@@ -72,70 +78,108 @@ document.addEventListener("DOMContentLoaded", function () {
             switch (res.status) {
                 case 400: friendly = "입력값을 다시 확인해 주세요 (400)."; break;
                 case 401: friendly = "로그인이 필요합니다 (401)."; break;
-                case 403: friendly = "권한/CSRF 문제가 있습니다 (403). 새로고침 후 다시 시도해 주세요."; break;
-                case 404: friendly = "요청 경로가 없습니다 (404)."; break;
-                case 413: friendly = "파일이 너무 큽니다 (413). 5MB 이하 이미지를 올려주세요."; break;
-                case 415: friendly = "지원하지 않는 콘텐츠 형식입니다 (415)."; break;
-                default:  friendly = `요청 실패 (${res.status}).`;
+                case 403: friendly = "접근 권한이 없습니다 (403)."; break;
+                case 404: friendly = "페이지를 찾을 수 없습니다 (404)."; break;
+                case 413: friendly = "파일 크기가 너무 큽니다 (413)."; break;
+                case 500: friendly = "서버 오류가 발생했습니다 (500)."; break;
+                default:  friendly = `오류가 발생했습니다 (${res.status}).`;
             }
-            const serverMsg =
-                (data && (data.message || data.error || data.detail)) ||
-                text ||
-                "";
-            console.error("API ERROR", { status: res.status, body: serverMsg });
-            alert(`${friendly}\n\n서버 응답: ${serverMsg.substring(0, 500)}`);
+            alert((data && data.message) || friendly);
             return null;
         }
-        return data ?? {};
+        return data;
     }
 
     function toProfilePayload() {
-        return {
-            name: (nameInput?.value ?? "").trim(),
-            job: (jobSelect?.value ?? "").trim(),
-            careerLevel: (careerLevelSelect?.value ?? "").trim()
-            // 확장 필드가 있으면 여기에 추가 (bio, location, skills 등)
-        };
+        const name = nameInput?.value?.trim() || "";
+        const job = jobSelect?.value || "";
+        const careerLevel = careerLevelSelect?.value || "";
+        const selfIntroduction = selfIntroductionTextarea?.value?.trim() || "";
+
+        return { name, job, careerLevel, selfIntroduction };
     }
 
-    // ===== 이미지 유틸 =====
+    // ===== 자기소개 글자수 카운팅 기능 =====
+    function initSelfIntroductionCounter() {
+        if (!selfIntroductionTextarea || !charCountSpan) return;
+
+        // 글자수 업데이트 함수
+        function updateCharCount() {
+            const currentLength = selfIntroductionTextarea.value.length;
+            charCountSpan.textContent = currentLength;
+
+            // 상태별 색상 변경
+            if (charCounterDiv) {
+                charCounterDiv.classList.remove("warning", "danger");
+
+                if (currentLength >= MAX_CHARS) {
+                    charCounterDiv.classList.add("danger");
+                } else if (currentLength >= MAX_CHARS - 20) { // 180자부터 경고
+                    charCounterDiv.classList.add("warning");
+                }
+            }
+
+            // 200자 초과 방지 (maxlength가 있지만 추가 보안)
+            if (currentLength > MAX_CHARS) {
+                selfIntroductionTextarea.value = selfIntroductionTextarea.value.substring(0, MAX_CHARS);
+                updateCharCount(); // 재귀 호출로 다시 업데이트
+            }
+        }
+
+        // 초기 로드 시 글자수 설정
+        updateCharCount();
+
+        // 실시간 글자수 업데이트
+        selfIntroductionTextarea.addEventListener("input", updateCharCount);
+        selfIntroductionTextarea.addEventListener("paste", function() {
+            // paste 이벤트는 내용이 실제로 붙여넣어진 후에 실행되도록 지연
+            setTimeout(updateCharCount, 10);
+        });
+    }
+
+    // ===== 이미지 업로드 관련 =====
     function validateImage(file) {
-        if (!file) return false;
-        if (!OK_TYPES.includes(file.type)) {
-            alert("JPG/JPEG/PNG 형식만 업로드할 수 있습니다.");
+        if (!file) {
+            alert("파일을 선택해 주세요.");
             return false;
         }
         if (file.size > MAX) {
-            alert("5MB 이하의 이미지만 업로드 가능합니다.");
+            alert("파일 크기는 5MB 이하만 허용됩니다.");
+            return false;
+        }
+        if (!OK_TYPES.includes(file.type)) {
+            alert("JPG, JPEG, PNG 파일만 업로드할 수 있습니다.");
             return false;
         }
         return true;
     }
 
     function preview(file) {
-        if (!file || !imagePreview) return;
+        if (!imagePreview) return;
         const reader = new FileReader();
-        reader.onload = e => { imagePreview.src = e.target.result; };
+        reader.onload = e => imagePreview.src = e.target.result;
         reader.readAsDataURL(file);
     }
 
     function assignFileToInput(file) {
-        if (!imageInput || !file) return;
-        try {
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            imageInput.files = dt.files;
-        } catch { /* fallback 무시 */ }
+        if (!imageInput) return;
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        imageInput.files = dt.files;
     }
 
-    // ===== 파일 선택/드래그앤드랍 UI =====
+    // 업로드 트리거 버튼 클릭 시 파일 선택 창 열기
     if (uploadTrigger && imageInput) {
-        uploadTrigger.addEventListener("click", () => imageInput.click());
+        uploadTrigger.addEventListener("click", e => {
+            e.preventDefault();
+            imageInput.click();
+        });
     }
 
+    // 파일 선택 시 미리보기 + 유효성 검증
     if (imageInput) {
-        imageInput.addEventListener("change", () => {
-            const file = imageInput.files?.[0];
+        imageInput.addEventListener("change", e => {
+            const file = e.target.files?.[0];
             if (!file) return;
             if (!validateImage(file)) {
                 imageUploadForm?.reset();
@@ -145,6 +189,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    // 드래그&드랍 처리
     if (dropArea && imageInput) {
         ["dragenter", "dragover"].forEach(evt =>
             dropArea.addEventListener(evt, e => {
@@ -182,6 +227,27 @@ document.addEventListener("DOMContentLoaded", function () {
     if (profileForm) {
         profileForm.addEventListener("submit", async e => {
             e.preventDefault();
+
+            // 필수 필드 검증
+            const name = nameInput?.value?.trim();
+            const job = jobSelect?.value;
+            const careerLevel = careerLevelSelect?.value;
+
+            if (!name) {
+                alert("이름을 입력해 주세요.");
+                nameInput?.focus();
+                return;
+            }
+            if (!job) {
+                alert("개발 직군을 선택해 주세요.");
+                jobSelect?.focus();
+                return;
+            }
+            if (!careerLevel) {
+                alert("경력 수준을 선택해 주세요.");
+                careerLevelSelect?.focus();
+                return;
+            }
 
             const profile = toProfilePayload();
             const hasImage = !!(imageInput && imageInput.files && imageInput.files.length > 0);
@@ -266,4 +332,11 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("이미지가 삭제되었습니다.");
         });
     }
+
+    // ===== 초기화 함수들 호출 =====
+
+    // 자기소개 글자수 카운팅 초기화
+    initSelfIntroductionCounter();
+
+    console.log("마이페이지 편집 스크립트가 로드되었습니다.");
 });

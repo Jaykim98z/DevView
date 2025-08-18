@@ -62,6 +62,8 @@
     <!-- 사용자 정보 수정 -->
     <form th:action="@{/mypage/edit}" method="post" class="form-box" id="profileForm" aria-labelledby="personalInfoTitle">
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+        <!-- 개인 정보 섹션 -->
         <h3 id="personalInfoTitle" class="section-title">
             <img class="icon" th:src="@{/img/profileimg.svg}" alt="개인 정보">
             개인 정보
@@ -73,7 +75,7 @@
         </div>
 
         <div class="form-group">
-            <label for="job">직군</label>
+            <label for="job">개발 직군</label>
             <select id="job" name="job" required>
                 <option value="" disabled th:selected="${user.job == null}">직군을 선택하세요</option>
                 <option value="BACKEND"   th:selected="${user.job == 'BACKEND'}">Backend</option>
@@ -94,13 +96,34 @@
             </select>
         </div>
 
+        <!-- 자기소개 섹션 -->
+        <h3 class="section-title" style="margin-top: 32px;">
+            <img class="icon" th:src="@{/img/edit.svg}" alt="자기소개">
+            자기소개
+        </h3>
+
+        <!-- 안내 메시지 -->
+        <div class="info-box">
+            <img class="info-icon" th:src="@{/img/info.svg}" alt="정보">
+            개발경험이나 기술스택을 적어주시면 DevView가 더 좋은 질문을 생성해 드립니다
+        </div>
+
+        <div class="form-group">
+            <label for="selfIntroduction">자기소개 (200자 이내)</label>
+            <textarea id="selfIntroduction" name="selfIntroduction"
+                      rows="4" maxlength="200"
+                      th:text="${user.selfIntroduction}"
+                      placeholder="예: React, Node.js를 활용한 웹 개발 3년 경험. AWS 클라우드 환경에서의 배포 및 운영 경험이 있습니다."></textarea>
+            <div class="char-counter">
+                <span id="charCount">0</span>/200
+            </div>
+        </div>
 
         <div class="form-actions">
             <button type="submit" class="save-btn">
                 <img class="icon" th:src="@{/img/save.svg}" alt=""> 변경사항 저장
             </button>
-            <a th:href="@{/mypage}" class="cancel-btn"> 취소
-            </a>
+            <a th:href="@{/mypage}" class="cancel-btn"> 취소</a>
         </div>
     </form>
 </div>
