@@ -44,6 +44,27 @@ public class MypageEditController {
         return loginUser.getUserId();
     }
 
+    /**
+     * 세션의 사용자 정보 업데이트
+     */
+    private void updateSessionUserInfo(HttpSession session, Long userId) {
+        try {
+            // 최신 사용자 정보로 세션 업데이트
+            MypageResponseDto updatedUserInfo = mypageService.getBasicUserInfo(userId);
+            UserResponse updatedUserResponse = UserResponse.builder()
+                    .userId(userId)
+                    .username(updatedUserInfo.getName())
+                    .email(updatedUserInfo.getEmail())
+                    .build();
+
+            session.setAttribute("loginUser", updatedUserResponse);
+            log.info("세션 사용자 정보 업데이트 완료: userId={}, newName={}", userId, updatedUserInfo.getName());
+        } catch (Exception e) {
+            log.warn("세션 업데이트 실패: userId={}", userId, e);
+            // 세션 업데이트 실패해도 프로필 수정은 성공했으므로 계속 진행
+        }
+    }
+
     /** 에딧 페이지 진입 후 기본 프로필 조회 */
     @Operation(summary = "기본 프로필 조회", description = "마이페이지 에딧 진입 시 기본 프로필 정보를 조회합니다.")
     @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -99,7 +120,12 @@ public class MypageEditController {
         }
 
         // 3) 서비스 호출
-        return ResponseEntity.ok(mypageService.updateProfile(userId, profile, profileImage));
+        MypageResponseDto result = mypageService.updateProfile(userId, profile, profileImage);
+
+        // 4) 세션 정보 업데이트 (헤더 닉네임 즉시 반영)
+        updateSessionUserInfo(session, userId);
+
+        return ResponseEntity.ok(result);
     }
 
     /** 프로필 저장(이미지 없이)*/
@@ -135,7 +161,12 @@ public class MypageEditController {
             HttpSession session
     ) {
         Long userId = getUserIdFromSession(session);
-        return ResponseEntity.ok(mypageService.updateProfile(userId, profile, null));
+        MypageResponseDto result = mypageService.updateProfile(userId, profile, null);
+
+        // 세션 정보 업데이트 (헤더 닉네임 즉시 반영)
+        updateSessionUserInfo(session, userId);
+
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "프로필 이미지 삭제", description = "등록된 프로필 이미지를 삭제합니다.")
