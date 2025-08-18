@@ -21,7 +21,7 @@ public class AlanApiService implements ExternalAiApiService {
     private static final String API_URL = "https://kdt-api-function.azurewebsites.net/api/v1/question";
 
     @Override
-    public List<String> getQuestionFromAi(String jobPosition, String careerLevel) {
+    public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount) {
         // 이 메서드는 Gemini가 담당하므로 여기서는 간단히 구현
         return null;
     }

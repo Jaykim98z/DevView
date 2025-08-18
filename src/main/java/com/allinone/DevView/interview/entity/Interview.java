@@ -39,6 +39,9 @@ public class Interview {
     private String careerLevel;
 
     @Column(nullable = false)
+    private int questionCount;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     private LocalDateTime endedAt;

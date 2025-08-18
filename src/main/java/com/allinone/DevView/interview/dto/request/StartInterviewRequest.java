@@ -9,4 +9,5 @@ public class StartInterviewRequest {
     private InterviewType interviewType;
     private String jobPosition;
     private String careerLevel;
+    private int questionCount;
 }

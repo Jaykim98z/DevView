@@ -52,13 +52,12 @@ public class InterviewService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // DTO를 Entity로 변환하는 로직이 필요합니다.
-        // 여기서는 설명을 위해 간단히 생성합니다.
         Interview interview = Interview.builder()
                 .user(user)
                 .interviewType(request.getInterviewType())
                 .jobPosition(request.getJobPosition())
                 .careerLevel(request.getCareerLevel())
+                .questionCount(request.getQuestionCount())
                 .build();
 
         Interview savedInterview = interviewRepository.save(interview);
@@ -72,7 +71,8 @@ public class InterviewService {
 
         List<String> questionTexts = gemini.getQuestionFromAi(
                 interview.getJobPosition(),
-                interview.getCareerLevel()
+                interview.getCareerLevel(),
+                interview.getQuestionCount()
         );
 
         List<InterviewQuestion> newQuestions = questionTexts.stream()
