@@ -283,6 +283,99 @@ form#profileForm .form-actions {
     box-shadow: 0 1px 6px rgba(15, 23, 42, 0.08);
 }
 
+/* ========================================= 자기소개 섹션 스타일 ========================================= */
+
+/* 안내 메시지 박스 */
+.info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background-color: #e6f3ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    color: #0066cc;
+    line-height: 1.4;
+}
+
+.info-box .info-icon {
+    width: 16px;
+    height: 16px;
+    margin-top: 1px;
+    flex-shrink: 0;
+    filter: brightness(0) saturate(100%) invert(26%) sepia(100%) saturate(3455%) hue-rotate(208deg) brightness(98%) contrast(101%);
+}
+
+/* 자기소개 텍스트 영역 */
+.form-group textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px 16px;
+    border: 1px solid #d1d9e6;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    background-color: #ffffff;
+}
+
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4AB2E3;
+    box-shadow: 0 0 0 3px rgba(74, 178, 227, 0.1);
+}
+
+.form-group textarea::placeholder {
+    color: #94a3b8;
+    font-style: normal;
+}
+
+/* 글자수 카운터 */
+.char-counter {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.char-counter #charCount {
+    font-weight: 600;
+}
+
+/* 글자수 상태별 색상 */
+.char-counter.warning {
+    color: #f59e0b;
+}
+
+.char-counter.danger {
+    color: #dc2626;
+}
+
+/* 섹션 간 간격 조정 */
+.form-box h3.section-title + .info-box,
+.form-box h3.section-title + .form-group {
+    margin-top: 0;
+}
+
+/* 자기소개 섹션 제목 아이콘 */
+.section-title img[alt="자기소개"] {
+    filter: brightness(0) saturate(100%) invert(47%) sepia(79%) saturate(1234%) hue-rotate(184deg) brightness(91%) contrast(92%);
+}
+
+/* 텍스트 영역 포커스 시 카운터 강조 */
+.form-group textarea:focus + .char-counter {
+    color: #4AB2E3;
+}
+
+
+
+
+
 /* =========================================   접근성: 포커스 표시   ========================================= */
 #dropArea:focus {
     outline: 2px solid #97b4ff;
@@ -295,6 +388,15 @@ form#profileForm .form-actions {
         grid-template-columns: 1fr;
         align-items: stretch;
     }
+    .form-group textarea {
+        min-height: 80px;
+        font-size: 16px;
+    }
+    .info-box {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+    }
+
 }
 @media (max-width: 480px) {
     form#profileForm .form-actions {
