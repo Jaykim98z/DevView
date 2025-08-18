@@ -39,4 +39,8 @@ public class UserProfile {
     /** 프로필 이미지 URL (저장 경로나 S3 URL 등) */
     @Column(length = 500)
     private String profileImageUrl;
+
+    /** 자기소개 (AI 면접 질문 개인화에 활용, 프론트엔드에서 한글 200자 제한) */
+    @Column(name = "self_introduction", length = 1000)
+    private String selfIntroduction;
 }
