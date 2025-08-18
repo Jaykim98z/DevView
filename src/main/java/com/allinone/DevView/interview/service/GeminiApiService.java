@@ -2,6 +2,7 @@ package com.allinone.DevView.interview.service;
 
 import com.allinone.DevView.interview.dto.gemini.GeminiRequestDto;
 import com.allinone.DevView.interview.dto.gemini.GeminiResponseDto;
+import com.allinone.DevView.interview.entity.InterviewType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,12 +23,12 @@ public class GeminiApiService implements ExternalAiApiService {
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
     @Override
-    public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount) {
+    public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount, InterviewType interviewType) {
         String prompt = String.format(
-                "You are an interviewer for a %s position targeting a %s developer. " +
-                        "Please generate exactly %d distinct, essential technical questions for this role. " +
-                        "Each question must be on a new line(in KR). Do not number them or add any other text.",
-                jobPosition, careerLevel, questionCount
+                "You are an interviewer. Please generate exactly %d distinct '%s' questions for a %s position targeting a %s developer. " +
+                        "Each question must be on a new line. Do not number them or add any other text. " +
+                        "Please generate the questions in Korean.",
+                questionCount, interviewType.toString(), jobPosition, careerLevel
         );
 
         String rawResponse = generateContent(prompt);

@@ -72,7 +72,8 @@ public class InterviewService {
         List<String> questionTexts = gemini.getQuestionFromAi(
                 interview.getJobPosition(),
                 interview.getCareerLevel(),
-                interview.getQuestionCount()
+                interview.getQuestionCount(),
+                interview.getInterviewType()
         );
 
         List<InterviewQuestion> newQuestions = questionTexts.stream()
