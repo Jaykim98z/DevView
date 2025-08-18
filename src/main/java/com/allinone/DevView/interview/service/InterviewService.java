@@ -58,6 +58,7 @@ public class InterviewService {
                 .jobPosition(request.getJobPosition())
                 .careerLevel(request.getCareerLevel())
                 .questionCount(request.getQuestionCount())
+                .durationMinutes(request.getDurationMinutes())
                 .build();
 
         Interview savedInterview = interviewRepository.save(interview);

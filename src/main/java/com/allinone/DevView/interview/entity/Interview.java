@@ -42,6 +42,9 @@ public class Interview {
     private int questionCount;
 
     @Column(nullable = false)
+    private int durationMinutes;
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     private LocalDateTime endedAt;

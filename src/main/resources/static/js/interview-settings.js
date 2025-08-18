@@ -30,13 +30,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const jobPosition = document.querySelector('#position-group .active').dataset.value;
             const interviewType = document.querySelector('#type-group .active').dataset.value;
             const questionCount = document.getElementById('question-count-select').value;
+            const durationMinutes = document.getElementById('duration-select').value;
 
             const startRequest = {
                 userId: currentUserId,
                 interviewType: interviewType,
                 jobPosition: jobPosition,
                 careerLevel: careerLevel,
-                questionCount: parseInt(questionCount, 10)
+                questionCount: parseInt(questionCount, 10),
+                durationMinutes: parseInt(durationMinutes, 10)
             };
 
             try {
@@ -59,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 localStorage.setItem('interviewId', interviewId);
                 localStorage.setItem('questions', JSON.stringify(questions));
+                localStorage.setItem('durationMinutes', startRequest.durationMinutes);
 
                 window.location.href = '/interview/session';
 

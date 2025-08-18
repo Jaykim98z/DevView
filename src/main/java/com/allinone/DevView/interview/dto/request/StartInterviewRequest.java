@@ -10,4 +10,5 @@ public class StartInterviewRequest {
     private String jobPosition;
     private String careerLevel;
     private int questionCount;
+    private int durationMinutes;
 }
