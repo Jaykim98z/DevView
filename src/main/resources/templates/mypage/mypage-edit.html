@@ -99,17 +99,16 @@
         <!-- 자기소개 섹션 -->
         <h3 class="section-title" style="margin-top: 32px;">
             <img class="icon" th:src="@{/img/edit.svg}" alt="자기소개">
-            자기소개
+            자기소개 (200자 이내)
         </h3>
 
         <!-- 안내 메시지 -->
         <div class="info-box">
-            <img class="info-icon" th:src="@{/img/info.svg}" alt="정보">
-            개발경험이나 기술스택을 적어주시면 DevView가 더 좋은 질문을 생성해 드립니다
+            <img class="info-icon" th:src="@{/img/edit.svg}" alt="정보">
+            개발경험이나 기술스택을 적어주시면 DevView가 더 좋은 면접 경험을 제공 할 수 있습니다.
         </div>
 
         <div class="form-group">
-            <label for="selfIntroduction">자기소개 (200자 이내)</label>
             <textarea id="selfIntroduction" name="selfIntroduction"
                       rows="4" maxlength="200"
                       th:text="${user.selfIntroduction}"

@@ -1,9 +1,9 @@
 package com.allinone.DevView.mypage.controller;
 
-import com.allinone.DevView.common.util.SecurityUtils;
 import com.allinone.DevView.mypage.dto.MypageResponseDto;
 import com.allinone.DevView.mypage.dto.UserProfileUpdateRequest;
 import com.allinone.DevView.mypage.service.MypageService;
+import com.allinone.DevView.user.dto.response.UserResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,11 +33,22 @@ public class MypageEditController {
     private final MypageService mypageService;
     private final ObjectMapper objectMapper;
 
+    /**
+     * 세션에서 사용자 ID 가져오기 (인증 확인 포함)
+     */
+    private Long getUserIdFromSession(HttpSession session) {
+        UserResponse loginUser = (UserResponse) session.getAttribute("loginUser");
+        if (loginUser == null) {
+            throw new IllegalStateException("로그인이 필요합니다.");
+        }
+        return loginUser.getUserId();
+    }
+
     /** 에딧 페이지 진입 후 기본 프로필 조회 */
     @Operation(summary = "기본 프로필 조회", description = "마이페이지 에딧 진입 시 기본 프로필 정보를 조회합니다.")
     @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MypageResponseDto> getProfile() {
-        Long userId = SecurityUtils.getUserId();
+    public ResponseEntity<MypageResponseDto> getProfile(HttpSession session) {
+        Long userId = getUserIdFromSession(session);
         return ResponseEntity.ok(mypageService.getBasicUserInfo(userId));
     }
 
@@ -52,7 +64,7 @@ public class MypageEditController {
                             examples = @ExampleObject(
                                     name = "multipart 예시",
                                     description = "form-data 필드 예시",
-                                    value = "{ \"profile\": \"{\\\"name\\\":\\\"홍길동\\\",\\\"job\\\":\\\"BACKEND\\\",\\\"careerLevel\\\":\\\"SENIOR\\\"}\", \"profileImage\": \"(파일 업로드)\" }"
+                                    value = "{ \"profile\": \"{\\\"name\\\":\\\"홍길동\\\",\\\"job\\\":\\\"BACKEND\\\",\\\"careerLevel\\\":\\\"SENIOR\\\",\\\"selfIntroduction\\\":\\\"자기소개 내용\\\"}\", \"profileImage\": \"(파일 업로드)\" }"
                             )
                     )
             )
@@ -66,9 +78,10 @@ public class MypageEditController {
             @Parameter(description = "프로필 정보 JSON (application/json 문자열)", required = true)
             @RequestPart("profile") String profileJson,
             @Parameter(description = "프로필 이미지 파일(JPG/PNG, 5MB 이하)", required = false)
-            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            HttpSession session
     ) {
-        Long userId = SecurityUtils.getUserId();
+        Long userId = getUserIdFromSession(session);
 
         // 1) JSON 파트 로깅(트러블슈팅용, 민감정보 없음 가정)
         if (log.isDebugEnabled()) {
@@ -105,9 +118,7 @@ public class MypageEditController {
                                               "name": "홍길동",
                                               "job": "BACKEND",
                                               "careerLevel": "MID",
-                                              "bio": "도메인 주도 설계를 좋아합니다.",
-                                              "location": "Seoul",
-                                              "skills": ["Java", "Spring Boot", "MySQL"]
+                                              "selfIntroduction": "Java Spring 기반 백엔드 개발 3년 경험. AWS 클라우드 환경에서의 MSA 설계 및 운영 경험이 있습니다."
                                             }
                                             """
                             )
@@ -120,16 +131,17 @@ public class MypageEditController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<MypageResponseDto> updateProfileJson(
-            @Valid @RequestBody UserProfileUpdateRequest profile
+            @Valid @RequestBody UserProfileUpdateRequest profile,
+            HttpSession session
     ) {
-        Long userId = SecurityUtils.getUserId();
+        Long userId = getUserIdFromSession(session);
         return ResponseEntity.ok(mypageService.updateProfile(userId, profile, null));
     }
 
     @Operation(summary = "프로필 이미지 삭제", description = "등록된 프로필 이미지를 삭제합니다.")
     @DeleteMapping(value = "/profile/image", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MypageResponseDto> deleteProfileImage() {
-        Long userId = SecurityUtils.getUserId();
+    public ResponseEntity<MypageResponseDto> deleteProfileImage(HttpSession session) {
+        Long userId = getUserIdFromSession(session);
         return ResponseEntity.ok(mypageService.deleteProfileImage(userId));
     }
 }
