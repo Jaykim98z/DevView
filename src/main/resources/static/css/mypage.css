@@ -421,7 +421,136 @@
     grid-template-columns: 1fr 1fr;
     gap: 16px;
 }
+/* ==============================   자기소개 카드 스타일   ============================== */
 
+/* 자기소개 카드 */
+.mypage-container .self-intro-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+}
+
+/* 카드 제목 (기존 account-card와 동일한 스타일) */
+.mypage-container .self-intro-card .card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.mypage-container .self-intro-card .card-title .icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    /* 다른 카드들과 동일한 기본 색상으로 변경 */
+}
+
+.mypage-container .self-intro-card .card-title h3 {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+}
+
+/* 자기소개 내용 (있을 때) */
+.mypage-container .self-intro-card .self-intro-content {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    line-height: 1.6;
+}
+
+.mypage-container .self-intro-card .self-intro-content p {
+    margin: 0;
+    color: #334155;
+    font-size: 0.95rem;
+    white-space: pre-wrap; /* 줄바꿈 유지 */
+    word-break: break-word; /* 긴 단어 줄바꿈 */
+}
+
+/* 자기소개 안내 문구 (없을 때) */
+.mypage-container .self-intro-card .self-intro-empty {
+    text-align: center;
+    padding: 24px 16px;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e0;
+    border-radius: 12px;
+    color: #64748b;
+}
+
+.mypage-container .self-intro-card .empty-icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}
+
+.mypage-container .self-intro-card .empty-message {
+    margin: 0 0 16px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #475569;
+}
+
+.mypage-container .self-intro-card .empty-message strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* 자기소개 추가 버튼 */
+.mypage-container .self-intro-card .add-intro-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #4AB2E3;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.mypage-container .self-intro-card .add-intro-btn:hover {
+    background: #3a9bc1;
+    transform: translateY(-1px);
+}
+
+.mypage-container .self-intro-card .add-intro-btn .btn-icon {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1); /* 흰색으로 변경 */
+}
+
+/* 반응형: 모바일에서 자기소개 카드 조정 */
+@media (max-width: 640px) {
+    .mypage-container .self-intro-card {
+        padding: 16px;
+    }
+
+    .mypage-container .self-intro-card .self-intro-content {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+
+    .mypage-container .self-intro-card .self-intro-empty {
+        padding: 20px 12px;
+    }
+
+    .mypage-container .self-intro-card .empty-message {
+        font-size: 0.85rem;
+    }
+
+    .mypage-container .self-intro-card .add-intro-btn {
+        font-size: 0.85rem;
+        padding: 7px 14px;
+    }
+}
 /* ==============================   반응형   ============================== */
 @media (max-width: 1024px) {
     .mypage-container .profile-layout { grid-template-columns: 1fr; }

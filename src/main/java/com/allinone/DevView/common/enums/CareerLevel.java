@@ -5,19 +5,20 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum JobPosition {
-    BACKEND("BACKEND"),
-    FRONTEND("FRONTEND"),
-    FULLSTACK("FULLSTACK"),
-    DEVOPS("DEVOPS"),
-    DATA_AI("DATA/AI");
+public enum CareerLevel {
+    INTERN("INTERN"),
+    JUNIOR("JUNIOR"),
+    MID("MID"),
+    SENIOR("SENIOR"),
+    LEAD("LEAD"),
+    MANAGER("MANAGER"),;
 
     private final String displayName;
 
-    public static JobPosition fromString(String value) {
+    public static CareerLevel fromString(String value) {
         if (value == null) return null;
         try {
-            return JobPosition.valueOf(value.toUpperCase());
+            return CareerLevel.valueOf(value.toUpperCase());
         } catch (IllegalArgumentException e) {
             return null;
         }

@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function initializeInterview() {
         interviewId = localStorage.getItem('interviewId');
         const storedQuestions = localStorage.getItem('questions');
+        const durationMinutes = localStorage.getItem('durationMinutes');
 
         if (!interviewId || !storedQuestions) {
             alert('Interview data not found.');
@@ -28,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
         questions = JSON.parse(storedQuestions);
         setupProgressTracker();
         displayCurrentQuestion();
-        startTimer(15 * 60);
+        startTimer(parseInt(durationMinutes, 10) * 60);
     }
 
     function displayCurrentQuestion() {

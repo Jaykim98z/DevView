@@ -1,5 +1,6 @@
 package com.allinone.DevView.interview.entity;
 
+import com.allinone.DevView.common.enums.Grade;
 import jakarta.persistence.*;
 import lombok.*;
 
