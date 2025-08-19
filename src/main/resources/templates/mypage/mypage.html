@@ -89,33 +89,6 @@
                                  data-scores=${scoreGraph != null ? scoreGraph.scoresJson : null}">
                 </canvas>
             </div>
-
-            <!-- 자기소개 카드 (점수 변화 그래프 아래로 이동) -->
-            <div class="self-intro-card">
-                <div class="card-title">
-                    <img src="/img/edit.svg" class="icon" alt="자기소개" />
-                    <h3>자기소개</h3>
-                </div>
-
-                <!-- 자기소개가 있을 때 -->
-                <div class="self-intro-content" th:if="${user.selfIntroduction != null and !#strings.isEmpty(user.selfIntroduction)}">
-                    <p th:text="${user.selfIntroduction}">자기소개 내용이 여기에 표시됩니다.</p>
-                </div>
-
-                <!-- 자기소개가 없을 때 안내 문구 -->
-                <div class="self-intro-empty" th:if="${user.selfIntroduction == null or #strings.isEmpty(user.selfIntroduction)}">
-                    <div class="empty-icon">✏️</div>
-                    <p class="empty-message">
-                        <strong>자기소개를 작성하면 더 나은 AI 면접 질문을 받을 수 있어요!</strong><br>
-                        개발 경험, 기술 스택, 관심 분야 등을 작성해보세요.
-                    </p>
-                    <a href="/mypage/edit" class="add-intro-btn">
-                        <img src="/img/edit.svg" class="btn-icon" alt="편집" />
-                        자기소개 추가하기
-                    </a>
-                </div>
-            </div>
-
             <!-- 면접 목록  -->
             <section class="interview-history">
                 <div class="section-title">
@@ -128,6 +101,8 @@
                             <div class="row">
                                 <div class="chips">
                                     <span class="chip chip-type" th:text="${interview.jobPositionDisplayName}">직무</span>
+                                    <span class="chip chip-level" th:text="${interview.careerLevelDisplayName}">레벨</span>
+                                    <span class="chip chip-type" th:text="${interview.interviewType}">면접타입</span>
                                     <span class="chip chip-date"
                                           th:text="${interview.interviewDate != null ? interview.interviewDate : ''}">YYYY-MM-DD</span>
                                 </div>
@@ -141,16 +116,22 @@
                     </li>
                 </ul>
             </section>
-
             <!-- 스크랩 목록 -->
             <section class="scrap-section">
                 <div class="section-title">
                     <img src="/img/scrap.svg" class="icon" alt="스크랩 목록"/>
                     <h3>스크랩 목록</h3>
                 </div>
+
                 <ul id="scrapList" class="scrap-grid">
-                    <li th:each="scrap : ${user.scraps}">
-                        <a th:href="${scrap.link}" target="_blank" rel="noopener noreferrer" class="scrap-item">
+                    <li th:each="scrap : ${user.scraps}"
+                        th:with="isExternal=${#strings.startsWith(scrap.link,'http')}">
+
+                        <!-- 링크: 컨텍스트 경로 보정(@{...}) + 외부/내부에 따라 target/rel 분기 -->
+                        <a th:href="@{${scrap.link}}"
+                           th:attr="target=${isExternal ? '_blank' : null},
+                  rel=${isExternal ? 'noopener noreferrer' : null}"
+                           class="scrap-item">
                             <h4 class="scrap-title" th:text="${scrap.title}">제목</h4>
                             <p class="scrap-desc" th:text="${scrap.preview}">요약 내용</p>
                             <div class="scrap-meta">
@@ -158,6 +139,10 @@
                                 <span class="likes">❤️ <span th:text="${scrap.likes}">0</span></span>
                             </div>
                         </a>
+                    </li>
+                    <!-- 스크랩이 비어있을 때 메시지 (옵션) -->
+                    <li th:if="${#lists.isEmpty(user.scraps)}" class="empty">
+                        아직 스크랩이 없습니다.
                     </li>
                 </ul>
             </section>
@@ -211,7 +196,15 @@
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
+                <div class="form-hint">영문, 숫자, 특수문자를 포함하여 8자 이상 입력해주세요</div>
+                <div class="password-strength" id="passwordStrength">
+                    <span class="strength-text">보통</span>
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                </div>
                 <div class="error-message" id="newPasswordError"></div>
+                <div class="success-message" id="newPasswordSuccess"></div>
             </div>
 
             <!-- 새 비밀번호 확인 -->
@@ -232,16 +225,19 @@
                     </button>
                 </div>
                 <div class="error-message" id="newPasswordConfirmError"></div>
-            </div>
-
-            <!-- 버튼 -->
-            <div class="modal-actions">
-                <button type="button" id="cancelBtn" class="btn-cancel">취소</button>
-                <button type="submit" id="submitBtn" class="btn-submit">변경하기</button>
+                <div class="success-message" id="newPasswordConfirmSuccess"></div>
             </div>
         </form>
+
+        <div class="modal-footer">
+            <button type="button" id="cancelBtn" class="btn btn-secondary">취소</button>
+            <button type="submit" form="passwordChangeForm" id="submitBtn" class="btn btn-primary" disabled>
+                비밀번호 변경
+            </button>
+        </div>
     </div>
 </div>
+
 
 </body>
 </html>

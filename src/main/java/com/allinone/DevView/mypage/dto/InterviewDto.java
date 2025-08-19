@@ -1,9 +1,9 @@
 package com.allinone.DevView.mypage.dto;
 
 import com.allinone.DevView.common.enums.Grade;
-import com.allinone.DevView.common.enums.InterviewType;
-import com.allinone.DevView.common.enums.JobPosition;
 import com.allinone.DevView.interview.entity.Interview;
+import com.allinone.DevView.interview.entity.InterviewType;
+import com.allinone.DevView.common.enums.JobPosition;
 import com.allinone.DevView.interview.entity.InterviewResult;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,6 +24,7 @@ public class InterviewDto {
     private final String title;
     private final String detailUrl;
     private final JobPosition jobPosition;
+
     public String getJobPositionDisplayName() {
         return jobPosition != null ? jobPosition.getDisplayName() : "기타";
     }
