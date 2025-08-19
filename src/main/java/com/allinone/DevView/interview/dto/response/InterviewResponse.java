@@ -1,7 +1,7 @@
 package com.allinone.DevView.interview.dto.response;
 
+import com.allinone.DevView.common.enums.InterviewType;
 import com.allinone.DevView.interview.entity.Interview;
-import com.allinone.DevView.interview.entity.InterviewType;
 import lombok.Builder;
 import lombok.Getter;
 

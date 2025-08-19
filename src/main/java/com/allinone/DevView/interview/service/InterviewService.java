@@ -1,5 +1,6 @@
 package com.allinone.DevView.interview.service;
 
+import com.allinone.DevView.common.enums.Grade;
 import com.allinone.DevView.common.exception.CustomException;
 import com.allinone.DevView.common.exception.ErrorCode;
 import com.allinone.DevView.interview.dto.alan.AlanRecommendationDto;

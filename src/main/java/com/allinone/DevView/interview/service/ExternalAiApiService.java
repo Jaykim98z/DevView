@@ -1,6 +1,6 @@
 package com.allinone.DevView.interview.service;
 
-import com.allinone.DevView.interview.entity.InterviewType;
+import com.allinone.DevView.common.enums.InterviewType;
 
 import java.util.List;
 
