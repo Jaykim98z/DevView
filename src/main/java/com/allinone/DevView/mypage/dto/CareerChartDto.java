@@ -9,8 +9,8 @@ import java.util.List;
 @Getter
 public class CareerChartDto {
 
-    private final List<String> labels;
-    private final List<Integer> data;
+    private final List<String> labels; // 직무 이름 예: ["백엔드", "프론트", "AI"]
+    private final List<Integer> data;  // 해당 직무 선호도/횟수 예: [40, 30, 30]
 
     public CareerChartDto(List<String> labels, List<Integer> data) {
         this.labels = labels;

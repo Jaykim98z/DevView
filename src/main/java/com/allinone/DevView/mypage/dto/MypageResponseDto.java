@@ -19,7 +19,7 @@ public class MypageResponseDto {
     private final String job;
     private final String careerLevel;
     private String profileImageUrl;
-    private final String selfIntroduction;
+    private final String selfIntroduction; //자기소개
 
     // 📌 계정 정보
     private final Long memberId;

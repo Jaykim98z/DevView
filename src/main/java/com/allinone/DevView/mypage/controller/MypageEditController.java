@@ -65,9 +65,7 @@ public class MypageEditController {
         }
     }
 
-    /**
-     * 에딧 페이지 진입 후 기본 프로필 조회
-     */
+    /** 에딧 페이지 진입 후 기본 프로필 조회 */
     @Operation(summary = "기본 프로필 조회", description = "마이페이지 에딧 진입 시 기본 프로필 정보를 조회합니다.")
     @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MypageResponseDto> getProfile(HttpSession session) {
@@ -75,9 +73,7 @@ public class MypageEditController {
         return ResponseEntity.ok(mypageService.getBasicUserInfo(userId));
     }
 
-    /**
-     * 프로필 저장(이미지 포함)
-     */
+    /** 프로필 저장(이미지 포함)*/
     @Operation(
             summary = "프로필 저장 (multipart)",
             description = "프로필 정보(JSON)와 프로필 이미지 파일을 함께 업로드합니다.",
@@ -132,9 +128,7 @@ public class MypageEditController {
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * 프로필 저장(이미지 없이)
-     */
+    /** 프로필 저장(이미지 없이)*/
     @Operation(
             summary = "프로필 저장 (JSON)",
             description = "이미지 없이 프로필 정보만 JSON으로 저장합니다.",
