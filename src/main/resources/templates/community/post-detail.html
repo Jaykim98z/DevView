@@ -88,7 +88,6 @@
                 <div class="comments__title">
                     <span>댓글</span>
                     <span class="comments__badge">
-                        <!-- ✅ 중첩 ${} 제거 -->
                         <span id="comment-count"
                               th:text="${comments != null ? #lists.size(comments) : 0}">0</span>개
                     </span>

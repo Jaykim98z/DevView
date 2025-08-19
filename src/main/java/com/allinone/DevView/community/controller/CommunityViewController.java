@@ -59,7 +59,7 @@ public class CommunityViewController {
             return "redirect:/user/login?redirect=/community/posts/new";
         }
         model.addAttribute("form", CombinedPostRequest.empty());
-        return "community/post-new";
+        return "community/post-write";
     }
 
     @PostMapping("/posts/interview")
@@ -70,7 +70,7 @@ public class CommunityViewController {
             Principal principal
     ) {
         if (bindingResult.hasErrors()) {
-            return "community/post-new";
+            return "community/post-write";
         }
         if (principal == null) {
             return "redirect:/user/login?redirect=/community/posts/new";

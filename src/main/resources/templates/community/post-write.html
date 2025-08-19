@@ -5,7 +5,7 @@
     <title>커뮤니티 글쓰기</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/post-new.css"/>
+    <link rel="stylesheet" href="/css/post-write.css"/>
 </head>
 <body>
 <div th:replace="~{fragments/header :: header}"></div>
@@ -13,7 +13,6 @@
 <h1 class="page-title">커뮤니티 글쓰기</h1>
 
 <div class="container">
-
     <form th:action="@{/community/posts/interview}" th:object="${form}" method="post" novalidate>
         <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}"/>
 
@@ -90,6 +89,6 @@
     </form>
 </div>
 
-<script src="/js/post-new.js"></script>
+<script defer src="/js/post-write.js"></script>
 </body>
 </html>

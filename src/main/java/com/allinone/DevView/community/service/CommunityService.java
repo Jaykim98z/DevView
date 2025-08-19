@@ -1,10 +1,6 @@
 package com.allinone.DevView.community.service;
 
-import com.allinone.DevView.community.dto.CreateInterviewSharePostRequest;
-import com.allinone.DevView.community.dto.CreatePostRequest;
-import com.allinone.DevView.community.dto.CommunityPostDetailDto;
-import com.allinone.DevView.community.dto.CommunityPostsDto;
-import com.allinone.DevView.community.dto.PostUpdateRequestDto;
+import com.allinone.DevView.community.dto.*;
 import com.allinone.DevView.community.entity.Comments;
 import com.allinone.DevView.community.entity.CommunityPosts;
 import com.allinone.DevView.community.entity.Likes;
@@ -16,6 +12,9 @@ import com.allinone.DevView.community.repository.LikesRepository;
 import com.allinone.DevView.community.repository.ScrapsRepository;
 import com.allinone.DevView.common.enums.Grade;
 import com.allinone.DevView.common.enums.InterviewType;
+import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
+import com.allinone.DevView.interview.entity.InterviewResult;
+import com.allinone.DevView.interview.repository.InterviewResultRepository;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -40,28 +38,15 @@ public class CommunityService {
     private final LikesRepository likesRepository;
     private final ScrapsRepository scrapsRepository;
     private final UserRepository userRepository;
+    private final InterviewResultRepository interviewResultRepository;
 
     public List<CommunityPosts> getAllPostsWithUserData() {
         return postsRepository.findAllWithUser();
     }
 
-    public Optional<CommunityPosts> getPostById(Long postId) {
-        return postsRepository.findById(postId);
-    }
-
-    @Transactional
-    public CommunityPosts createPost(CommunityPosts post) {
-        return postsRepository.save(post);
-    }
-
-    @Transactional
-    public CommunityPosts updatePost(Long postId, CommunityPosts updatedPost) {
-        Optional<CommunityPosts> existingPostOpt = postsRepository.findById(postId);
-        if (existingPostOpt.isEmpty()) throw new RuntimeException("Post not found");
-        CommunityPosts existingPost = existingPostOpt.get();
-        existingPost.setTitle(updatedPost.getTitle());
-        existingPost.setContent(updatedPost.getContent());
-        return postsRepository.save(existingPost);
+    public CommunityPosts getPostById(Long postId) {
+        return postsRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글 없음: " + postId));
     }
 
     @Transactional
@@ -78,21 +63,16 @@ public class CommunityService {
         CommunityPosts post = new CommunityPosts();
         post.setUser(user);
         post.setWriterName(user.getUsername());
-
         post.setTitle(req.title());
         post.setContent(content);
         post.setSummary(summary);
-
         post.setInterviewType(interviewType.name());
         if (grade != null) post.setGrade(grade);
-
         post.setTechTag(req.techTag());
-        post.setLevel(req.level());
+        post.setLevelTag(req.level());
         post.setCategory(req.category());
         post.setType(req.type());
-
         post.setScore(req.score() != null ? req.score() : 0);
-
         post.setLikeCount(0);
         post.setScrapCount(0);
         post.setViewCount(0);
@@ -111,32 +91,28 @@ public class CommunityService {
             throw new IllegalStateException("해당 인터뷰 결과는 이미 공유되었습니다.");
         }
 
+        InterviewResult result = interviewResultRepository.findById(req.getInterviewResultId())
+                .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과를 찾을 수 없습니다: " + req.getInterviewResultId()));
+        if (result.getInterview() == null || result.getInterview().getUser() == null
+                || !userId.equals(result.getInterview().getUser().getUserId())) {
+            throw new AccessDeniedException("본인의 인터뷰 결과만 공유할 수 있습니다.");
+        }
+
         final String content = req.getContent();
         final String summary = (content != null && content.length() > 1000) ? content.substring(0, 1000) : content;
 
         CommunityPosts post = new CommunityPosts();
         post.setUser(user);
         post.setWriterName(user.getUsername());
-
         post.setType(TYPE_INTERVIEW_SHARE);
-
         post.setInterviewType(InterviewType.COMPREHENSIVE.name());
-
         post.setTitle(req.getTitle());
         post.setContent(content);
         post.setSummary(summary);
-
-        if (req.getGrade() != null) post.setGrade(req.getGrade());
-
-        try {
-            post.setScore(req.getScore());
-        } catch (Throwable ignore) {
-            post.setScore(0);
-        }
-
-        post.setInterviewFeedback(req.getInterviewFeedback());
-        post.setInterviewResultId(req.getInterviewResultId());
-
+        post.setGrade(result.getGrade());
+        post.setScore(result.getTotalScore());
+        post.setInterviewFeedback(result.getFeedback());
+        post.setInterviewResultId(result.getId());
         post.setLikeCount(0);
         post.setScrapCount(0);
         post.setViewCount(0);
@@ -146,8 +122,27 @@ public class CommunityService {
     }
 
     @Transactional
-    public void deletePost(Long postId) {
-        postsRepository.deleteById(postId);
+    public Long updatePost(Long postId, Long requestUserId, PostUpdateRequestDto updated) {
+        CommunityPosts post = postsRepository.findActiveByPostId(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        if (!isOwner(post, requestUserId) && !hasRoleAdmin()) {
+            throw new AccessDeniedException("수정 권한이 없습니다.");
+        }
+        post.update(updated.getTitle(), updated.getContent());
+        if (updated.getGrade() != null) {
+            post.setGrade(updated.getGrade());
+        }
+        return post.getPostId();
+    }
+
+    @Transactional
+    public void deletePost(Long postId, Long requestUserId) {
+        CommunityPosts post = postsRepository.findActiveByPostId(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        if (!isOwner(post, requestUserId) && !hasRoleAdmin()) {
+            throw new AccessDeniedException("삭제 권한이 없습니다.");
+        }
+        post.softDelete();
     }
 
     public List<Comments> getCommentsByPostId(Long postId) {
@@ -165,14 +160,15 @@ public class CommunityService {
     }
 
     @Transactional
-    public Likes addLike(Long userId, Long postId) {
+    public LikesDto addLike(Long userId, Long postId) {
         if (likesRepository.existsByUserIdAndPostId(userId, postId)) {
             throw new RuntimeException("Already liked");
         }
         Likes like = new Likes();
         like.setUserId(userId);
         like.setPostId(postId);
-        return likesRepository.save(like);
+        Likes saved = likesRepository.save(like);
+        return new LikesDto(saved.getUserId(), saved.getPostId());
     }
 
     @Transactional
@@ -184,13 +180,28 @@ public class CommunityService {
     }
 
     @Transactional
-    public Scraps addScrap(Scraps scrap) {
-        return scrapsRepository.save(scrap);
+    public ScrapsDto addScrap(Long userId, Long postId) {
+        if (scrapsRepository.existsByUserIdAndPostId(userId, postId)) {
+            throw new RuntimeException("Already scrapped");
+        }
+        Scraps scrap = new Scraps();
+        scrap.setUserId(userId);
+        scrap.setPostId(postId);
+        Scraps saved = scrapsRepository.save(scrap);
+        return new ScrapsDto(saved.getScrapId(), saved.getUserId(), saved.getPostId());
     }
 
     @Transactional
-    public void removeScrap(Long scrapId) {
-        scrapsRepository.deleteById(scrapId);
+    public void removeScrap(Long userId, Long postId) {
+        scrapsRepository.deleteByUserIdAndPostId(userId, postId);
+    }
+
+    @Transactional
+    public long increaseViewCount(Long postId) {
+        postsRepository.incrementViewCount(postId);
+        return postsRepository.findById(postId)
+                .map(CommunityPosts::getViewCount)
+                .orElse(0);
     }
 
     @Transactional
@@ -201,49 +212,24 @@ public class CommunityService {
         return CommunityPostDetailDto.from(post);
     }
 
-    @Transactional
-    public long increaseViewCount(Long postId) {
-        postsRepository.incrementViewCount(postId);
-        return 0;
-    }
-
-    public List<Likes> getLikesByUserId(Long userId) {
-        return likesRepository.findByUserId(userId);
-    }
-
-    public long countLikesByPostId(Long postId) {
-        return likesRepository.findByPostId(postId).size();
-    }
-
-    public List<Scraps> getScrapsByUserId(Long userId) {
-        return scrapsRepository.findByUserId(userId);
-    }
-
-    /** 목록 DTO 변환 (InterviewType 라벨 포함) */
     public List<CommunityPostsDto> getAllPostDtos() {
         List<CommunityPosts> posts = postsRepository.findAllWithUser();
-
         return posts.stream().map(post -> {
             var user = post.getUser();
-
             Long uId = (user != null) ? user.getUserId() : null;
             String username = (user != null) ? user.getUsername() : "탈퇴한 사용자";
             if (user == null) log.warn("게시글 ID {} 는 유저 정보가 없습니다.", post.getPostId());
-
             String summary = post.getContent() != null && post.getContent().length() > 100
                     ? post.getContent().substring(0, 100) + "..."
                     : post.getContent();
-
             InterviewType interviewType = parseInterviewType(post.getInterviewType(), InterviewType.COMPREHENSIVE);
             String interviewTypeLabel = switch (interviewType) {
-                case TECHNICAL     -> "기술면접";
-                case PRACTICAL     -> "실무면접";
-                case BEHAVIORAL    -> "인성면접";
+                case TECHNICAL -> "기술면접";
+                case PRACTICAL -> "실무면접";
+                case BEHAVIORAL -> "인성면접";
                 case COMPREHENSIVE -> "종합면접";
             };
-
             String gradeStr = (post.getGrade() != null ? post.getGrade().name() : null);
-
             return new CommunityPostsDto(
                     post.getPostId(),
                     uId,
@@ -269,28 +255,18 @@ public class CommunityService {
     }
 
     @Transactional
-    public Long updatePost(Long postId, Long requestUserId, PostUpdateRequestDto updated) {
-        CommunityPosts post = postsRepository.findActiveByPostId(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
-
-        if (!isOwner(post, requestUserId) && !hasRoleAdmin()) {
-            throw new AccessDeniedException("수정 권한이 없습니다.");
-        }
-
-        post.update(updated.getTitle(), updated.getContent());
-        return post.getPostId();
+    public InterviewResultResponse getLatestInterviewResult(Long userId) {
+        return interviewResultRepository.findByUserId(userId).stream()
+                .findFirst()
+                .map(InterviewResultResponse::fromEntity)
+                .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과가 없습니다."));
     }
 
     @Transactional
-    public void deletePost(Long postId, Long requestUserId) {
-        CommunityPosts post = postsRepository.findActiveByPostId(postId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
-
-        if (!isOwner(post, requestUserId) && !hasRoleAdmin()) {
-            throw new AccessDeniedException("삭제 권한이 없습니다.");
-        }
-
-        post.softDelete();
+    public List<InterviewResultResponse> getAllInterviewResults(Long userId) {
+        return interviewResultRepository.findByUserId(userId).stream()
+                .map(InterviewResultResponse::fromEntity)
+                .toList();
     }
 
     private boolean isOwner(CommunityPosts post, Long userId) {
@@ -305,13 +281,19 @@ public class CommunityService {
 
     private static InterviewType parseInterviewType(String raw, InterviewType def) {
         if (raw == null) return def;
-        try { return InterviewType.valueOf(raw.trim().toUpperCase()); }
-        catch (Exception e) { return def; }
+        try {
+            return InterviewType.valueOf(raw.trim().toUpperCase());
+        } catch (Exception e) {
+            return def;
+        }
     }
 
     private static Grade parseGrade(String raw, Grade def) {
         if (raw == null) return def;
-        try { return Grade.valueOf(raw.trim().toUpperCase()); }
-        catch (Exception e) { return def; }
+        try {
+            return Grade.valueOf(raw.trim().toUpperCase());
+        } catch (Exception e) {
+            return def;
+        }
     }
 }
