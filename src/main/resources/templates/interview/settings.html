@@ -16,36 +16,72 @@
            th:value="${session.loginUser != null ? session.loginUser.userId : ''}">
 
     <div class="settings-container">
-        <h1>인터뷰 사전 설정</h1>
+        <h1>면접 사전 설정</h1>
         <p>Configure your AI interview settings to match your needs.</p>
 
         <form id="interview-form">
             <h2>경력 수준</h2>
             <div class="options-group" id="career-group">
-                <button type="button" class="option-btn" data-value="JUNIOR">Junior</button>
-                <button type="button" class="option-btn active" data-value="MID_LEVEL">Mid-Level</button>
-                <button type="button" class="option-btn" data-value="SENIOR">Senior</button>
+                <button type="button" class="option-btn" data-value="JUNIOR">
+                    <img th:src="@{/img/junior-icon.svg}" alt="Junior Icon" class="btn-icon">
+                    <span>Junior</span>
+                </button>
+                <button type="button" class="option-btn active" data-value="MID_LEVEL">
+                    <img th:src="@{/img/mid-icon.svg}" alt="Mid-Level Icon" class="btn-icon">
+                    <span>Mid-Level</span>
+                </button>
+                <button type="button" class="option-btn" data-value="SENIOR">
+                    <img th:src="@{/img/senior-icon.svg}" alt="Senior Icon" class="btn-icon">
+                    <span>Senior</span>
+                </button>
             </div>
 
             <h2>개발 직군</h2>
             <div class="options-group" id="position-group">
-                <button type="button" class="option-btn" data-value="BACKEND">Backend</button>
-                <button type="button" class="option-btn active" data-value="FRONTEND">Frontend</button>
-                <button type="button" class="option-btn" data-value="FULLSTACK">Fullstack</button>
-                <button type="button" class="option-btn" data-value="DEVOPS">DevOps</button>
-                <button type="button" class="option-btn" data-value="DATA_SCIENCE">Data / AI</button>
+                <button type="button" class="option-btn" data-value="BACKEND">
+                    <img th:src="@{/img/backend-icon.svg}" alt="Backend Icon" class="btn-icon">
+                    <span>Backend</span>
+                </button>
+                <button type="button" class="option-btn active" data-value="FRONTEND">
+                    <img th:src="@{/img/frontend-icon.svg}" alt="Frontend Icon" class="btn-icon">
+                    <span>Frontend</span>
+                </button>
+                <button type="button" class="option-btn" data-value="FULLSTACK">
+                    <img th:src="@{/img/fullstack-icon.svg}" alt="Fullstack Icon" class="btn-icon">
+                    <span>Fullstack</span>
+                </button>
+                <button type="button" class="option-btn" data-value="DEVOPS">
+                    <img th:src="@{/img/devops-icon.svg}" alt="DevOps Icon" class="btn-icon">
+                    <span>DevOps</span>
+                </button>
+                <button type="button" class="option-btn" data-value="DATA_SCIENCE">
+                    <img th:src="@{/img/data-ai-icon.svg}" alt="Data / AI Icon" class="btn-icon">
+                    <span>Data / AI</span>
+                </button>
             </div>
 
-            <h2>인터뷰 타입</h2>
+            <h2>면접 유형</h2>
             <div class="options-group" id="type-group">
-                <button type="button" class="option-btn active" data-value="TECHNICAL">기술면접</button>
-                <button type="button" class="option-btn" data-value="PRACTICAL">실무면접</button>
-                <button type="button" class="option-btn" data-value="BEHAVIORAL">인성면접</button>
-                <button type="button" class="option-btn" data-value="COMPREHENSIVE">종합면접</button>
+                <button type="button" class="option-btn active" data-value="TECHNICAL">
+                    <img th:src="@{/img/technical-icon.svg}" alt="Technical Icon" class="btn-icon">
+                    <span>기술면접</span>
+                </button>
+                <button type="button" class="option-btn" data-value="PRACTICAL">
+                    <img th:src="@{/img/practical-icon.svg}" alt="Practical Icon" class="btn-icon">
+                    <span>실무면접</span>
+                </button>
+                <button type="button" class="option-btn" data-value="BEHAVIORAL">
+                    <img th:src="@{/img/behavioral-icon.svg}" alt="Behavioral Icon" class="btn-icon">
+                    <span>인성면접</span>
+                </button>
+                <button type="button" class="option-btn" data-value="COMPREHENSIVE">
+                    <img th:src="@{/img/comprehensive-icon.svg}" alt="Comprehensive Icon" class="btn-icon">
+                    <span>종합면접</span>
+                </button>
             </div>
 
             <h2>면접 시간</h2>
-            <div class="options-group" id="duration-group">
+            <div class="select-wrapper">
                 <select id="duration-select" class="form-select">
                     <option value="5">5 minutes</option>
                     <option value="10">10 minutes</option>
@@ -56,7 +92,7 @@
             </div>
 
             <h2>질문 갯수</h2>
-            <div class="options-group" id="question-count-group">
+            <div class="select-wrapper">
                 <select id="question-count-select" class="form-select">
                     <option value="3">3 questions</option>
                     <option value="5" selected>5 questions</option>
@@ -65,7 +101,7 @@
                 </select>
             </div>
 
-            <button type="submit" class="start-btn">인터뷰 시작하기 →</button>
+            <button type="submit" class="interview-submit-btn">면접 시작하기 →</button>
         </form>
     </div>
 </main>
