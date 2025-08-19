@@ -1,7 +1,7 @@
 package com.allinone.DevView.interview.service;
 
+import com.allinone.DevView.common.enums.InterviewType;
 import com.allinone.DevView.interview.dto.alan.AlanResponseDto;
-import com.allinone.DevView.interview.entity.InterviewType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

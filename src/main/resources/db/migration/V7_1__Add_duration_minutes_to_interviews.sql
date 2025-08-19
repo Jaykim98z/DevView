@@ -1,1 +1,0 @@
-ALTER TABLE interviews ADD COLUMN duration_minutes INT NOT NULL DEFAULT 15;

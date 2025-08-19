@@ -1,8 +1,8 @@
 package com.allinone.DevView.interview.service;
 
+import com.allinone.DevView.common.enums.InterviewType;
 import com.allinone.DevView.interview.dto.gemini.GeminiRequestDto;
 import com.allinone.DevView.interview.dto.gemini.GeminiResponseDto;
-import com.allinone.DevView.interview.entity.InterviewType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

@@ -29,15 +29,15 @@ public class UserProfile {
     private User user;
 
     /** 직무 (예: 백엔드, 프론트엔드, AI 등) */
-    @Column(length = 50)
+    @Column(name = "job_position", length = 100)
     private String job;
 
     /** 경력 수준 (예: 신입, 주니어, 시니어 등) */
-    @Column(length = 50)
+    @Column(name = "career_level", length = 50)
     private String careerLevel;
 
     /** 프로필 이미지 URL (저장 경로나 S3 URL 등) */
-    @Column(length = 500)
+    @Column(name = "profile_image_url", length = 255)
     private String profileImageUrl;
 
     /** 자기소개 (AI 면접 질문 개인화에 활용, 프론트엔드에서 한글 200자 제한) */

@@ -1,6 +1,6 @@
 package com.allinone.DevView.interview.dto.response;
 
-import com.allinone.DevView.interview.entity.Grade;
+import com.allinone.DevView.common.enums.Grade;
 import com.allinone.DevView.interview.entity.InterviewResult;
 import lombok.Builder;
 import lombok.Getter;
