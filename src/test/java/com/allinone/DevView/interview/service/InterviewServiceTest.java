@@ -1,5 +1,7 @@
 package com.allinone.DevView.interview.service;
 
+import com.allinone.DevView.common.enums.Grade;
+import com.allinone.DevView.common.enums.InterviewType;
 import com.allinone.DevView.interview.dto.gemini.GeminiAnalysisResponseDto;
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;

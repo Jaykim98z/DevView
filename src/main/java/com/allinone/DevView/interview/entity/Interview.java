@@ -1,5 +1,6 @@
 package com.allinone.DevView.interview.entity;
 
+import com.allinone.DevView.common.enums.InterviewType;
 import com.allinone.DevView.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;

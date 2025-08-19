@@ -23,13 +23,19 @@ public class CommunityDataLoader implements ApplicationRunner {
     private final CommunityService communityService;
     private final UserRepository userRepository;
 
+    private static final String SEED_EMAIL = "seed@devview.local";
+
     @Override
     public void run(ApplicationArguments args) {
         if (!communityService.getAllPostDtos().isEmpty()) return;
 
-        User user = userRepository.findById(1L).orElse(null);
+        User user = userRepository.findByEmail(SEED_EMAIL)
+                .orElseGet(() -> {
+                    return userRepository.findAll().stream().findFirst().orElse(null);
+                });
+
         if (user == null) {
-            log.warn("Seed skipped: user id=1 not found");
+            log.warn("Seed skipped: no user available ({} not found, and user table is empty)", SEED_EMAIL);
             return;
         }
 
@@ -46,6 +52,6 @@ public class CommunityDataLoader implements ApplicationRunner {
         post.setCreatedAt(LocalDateTime.now());
 
         communityService.createPost(post);
-        log.info("Seeded 1 community post for dev profile");
+        log.info("Seeded 1 community post for dev profile (author email={})", user.getEmail());
     }
 }
