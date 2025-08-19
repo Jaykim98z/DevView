@@ -31,6 +31,11 @@
 }
 
 .option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     padding: 1rem;
     border: 2px solid #e9ecef;
     border-radius: 8px;
@@ -50,6 +55,11 @@
     background-color: #e7f3ff;
     color: #007bff;
     font-weight: 600;
+}
+
+.btn-icon {
+    width: 24px;
+    height: 24px;
 }
 
 .start-btn {

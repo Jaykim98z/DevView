@@ -1,8 +1,8 @@
 package com.allinone.DevView.common.enums;
 
 public enum InterviewType {
-    PRACTICE, // 연습
-    GENERAL,  // 종합
-    REAL,     // 실전
-    HR        // 인성
+    TECHNICAL,    // 기술면접
+    PRACTICAL,    // 실무면접
+    BEHAVIORAL,   // 인성면접
+    COMPREHENSIVE // 종합면접
 }
