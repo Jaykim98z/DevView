@@ -19,6 +19,7 @@ public class MypageResponseDto {
     private final String job;
     private final String careerLevel;
     private String profileImageUrl;
+    private final String selfIntroduction; //자기소개
 
     // 📌 계정 정보
     private final Long memberId;
@@ -43,11 +44,13 @@ public class MypageResponseDto {
         String job = null;
         String careerLevel = null;
         String profileImageUrl = null;
+        String selfIntroduction = null;
 
         if (user.getUserProfile() != null) {
             job = user.getUserProfile().getJob();
             careerLevel = user.getUserProfile().getCareerLevel();
             profileImageUrl = user.getUserProfile().getProfileImageUrl();
+            selfIntroduction = user.getUserProfile().getSelfIntroduction();
         }
 
         return MypageResponseDto.builder()
@@ -56,6 +59,7 @@ public class MypageResponseDto {
                 .job(job)
                 .careerLevel(careerLevel)
                 .profileImageUrl(profileImageUrl)
+                .selfIntroduction(selfIntroduction)
                 .memberId(user.getUserId())
                 .joinedAt(user.getCreatedAt() != null ? user.getCreatedAt() : null)
                 .totalInterviews(totalInterviews)

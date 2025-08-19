@@ -33,7 +33,7 @@
                 <button type="button" class="option-btn active" data-value="FRONTEND">Frontend</button>
                 <button type="button" class="option-btn" data-value="FULLSTACK">Fullstack</button>
                 <button type="button" class="option-btn" data-value="DEVOPS">DevOps</button>
-                <button type="button" class="option-btn" data-value="DATA_SCIENCE">Data Science</button>
+                <button type="button" class="option-btn" data-value="DATA_SCIENCE">Data / AI</button>
             </div>
 
             <h2>인터뷰 타입</h2>
@@ -42,6 +42,27 @@
                 <button type="button" class="option-btn" data-value="PRACTICAL">실무면접</button>
                 <button type="button" class="option-btn" data-value="BEHAVIORAL">인성면접</button>
                 <button type="button" class="option-btn" data-value="COMPREHENSIVE">종합면접</button>
+            </div>
+
+            <h2>면접 시간</h2>
+            <div class="options-group" id="duration-group">
+                <select id="duration-select" class="form-select">
+                    <option value="5">5 minutes</option>
+                    <option value="10">10 minutes</option>
+                    <option value="15" selected>15 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="60">60 minutes</option>
+                </select>
+            </div>
+
+            <h2>질문 갯수</h2>
+            <div class="options-group" id="question-count-group">
+                <select id="question-count-select" class="form-select">
+                    <option value="3">3 questions</option>
+                    <option value="5" selected>5 questions</option>
+                    <option value="7">7 questions</option>
+                    <option value="10">10 questions</option>
+                </select>
             </div>
 
             <button type="submit" class="start-btn">인터뷰 시작하기 →</button>
