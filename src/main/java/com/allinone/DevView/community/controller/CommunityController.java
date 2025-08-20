@@ -1,17 +1,25 @@
 package com.allinone.DevView.community.controller;
 
 import com.allinone.DevView.community.dto.*;
-import com.allinone.DevView.community.entity.*;
-import com.allinone.DevView.community.service.*;
+import com.allinone.DevView.community.service.CommunityQueryService;
+import com.allinone.DevView.community.service.CommunityService;
+import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
+import com.allinone.DevView.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import java.util.*;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import com.allinone.DevView.security.CustomUserDetails;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/community")
@@ -29,92 +37,136 @@ public class CommunityController {
         return ResponseEntity.ok(communityQueryService.getPosts(pageable));
     }
 
-    @GetMapping("/posts/legacy")
-    public ResponseEntity<List<CommunityPostsDto>> getAllPostDtos() {
-        return ResponseEntity.ok(communityService.getAllPostDtos());
-    }
-
-    @GetMapping("/posts/{id}")
-    public ResponseEntity<CommunityPosts> getPostById(@PathVariable Long id) {
-        return communityService.getPostById(id)
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<Object> getPost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Long viewerId = (user != null) ? user.getUserId() : null;
+        return communityQueryService.getPostDetail(postId, viewerId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/posts")
-    public CommunityPosts createPost(@RequestBody CommunityPosts post) {
-        return communityService.createPost(post);
-    }
-
-    @PostMapping("/posts/interview/{userId}")
-    public ResponseEntity<Map<String, Long>> createInterviewShare(
-            @PathVariable Long userId,
-            @Valid @RequestBody CreateInterviewSharePostRequest req
-    ) {
-        Long postId = communityService.createInterviewSharePost(req, userId);
-        return ResponseEntity.ok(Map.of("postId", postId));
-    }
-
-    // (레거시) 전체 교체 업데이트 - 기존 호출부 유지
-    @PutMapping("/posts/{id}")
-    public CommunityPosts updatePost(@PathVariable Long id, @RequestBody CommunityPosts post) {
-        return communityService.updatePost(id, post);
-    }
-
-    // (레거시) 하드 삭제 - 기존 호출부 유지
-    @DeleteMapping("/posts/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        communityService.deletePost(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/posts/{postId}/likes/{userId}")
-    public Likes addLike(@PathVariable Long postId, @PathVariable Long userId) {
-        return communityService.addLike(userId, postId);
-    }
-
-    @DeleteMapping("/posts/{postId}/likes/{userId}")
-    public ResponseEntity<Void> removeLike(@PathVariable Long postId, @PathVariable Long userId) {
-        communityService.removeLike(userId, postId);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/posts/{postId}/scraps")
-    public Scraps addScrap(@PathVariable Long postId, @RequestBody Scraps scrap) {
-        scrap.setPostId(postId);
-        return communityService.addScrap(scrap);
-    }
-
-    @DeleteMapping("/scraps/{id}")
-    public ResponseEntity<Void> removeScrap(@PathVariable Long id) {
-        communityService.removeScrap(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/posts/{postId}/view")
-    public Map<String, Long> increaseView(@PathVariable Long postId) {
-        long cnt = communityService.increaseViewCount(postId);
-        return Map.of("viewCount", cnt);
-    }
-
-    /** 게시글 부분 수정 (본인/관리자만) */
-    @PatchMapping("/posts/{postId}")
-    public ResponseEntity<?> patchUpdatePost(
-            @PathVariable Long postId,
-            @Valid @RequestBody PostUpdateRequestDto request,
+    public ResponseEntity<Map<String, Long>> createPost(
+            @Valid @RequestBody CreatePostRequest req,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
-        Long id = communityService.updatePost(postId, user.getUserId(), request);
-        return ResponseEntity.ok(id);
+        Long userId = user.getUserId();
+        Long postId = communityService.createPost(req, userId);
+        return ResponseEntity
+                .created(URI.create("/api/community/posts/" + postId))
+                .body(Map.of("postId", postId));
     }
 
-    /** 게시글 삭제 (Soft Delete, 본인/관리자만) */
-    @DeleteMapping("/posts/{postId}/soft")
-    public ResponseEntity<?> softDeletePost(
+    @PostMapping("/posts/interview")
+    public ResponseEntity<Map<String, Long>> createInterviewShare(
+            @Valid @RequestBody CreateInterviewSharePostRequest req,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Long userId = user.getUserId();
+        Long postId = communityService.createInterviewSharePost(req, userId);
+        return ResponseEntity
+                .created(URI.create("/api/community/posts/" + postId))
+                .body(Map.of("postId", postId));
+    }
+
+    @PatchMapping("/posts/{postId}")
+    public ResponseEntity<Long> updatePost(
+            @PathVariable Long postId,
+            @Valid @RequestBody PostUpdateRequestDto req,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Long updatedId = communityService.updatePost(postId, user.getUserId(), req);
+        return ResponseEntity.ok(updatedId);
+    }
+
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<Void> deletePost(
             @PathVariable Long postId,
             @AuthenticationPrincipal CustomUserDetails user
     ) {
         communityService.deletePost(postId, user.getUserId());
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/posts/{postId}/likes")
+    public ResponseEntity<LikesDto> addLike(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        LikesDto like = communityService.addLike(user.getUserId(), postId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(like);
+    }
+
+    @DeleteMapping("/posts/{postId}/likes")
+    public ResponseEntity<Void> removeLike(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        communityService.removeLike(user.getUserId(), postId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/posts/{postId}/scraps")
+    public ResponseEntity<ScrapsDto> addScrap(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        ScrapsDto scrap = communityService.addScrap(user.getUserId(), postId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(scrap);
+    }
+
+    @DeleteMapping("/posts/{postId}/scraps")
+    public ResponseEntity<Void> removeScrap(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        communityService.removeScrap(user.getUserId(), postId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/posts/{postId}/views")
+    public ResponseEntity<Map<String, Long>> increaseView(@PathVariable Long postId) {
+        long cnt = communityService.increaseViewCount(postId);
+        return ResponseEntity.ok(Map.of("viewCount", cnt));
+    }
+
+
+    @GetMapping("/interview-results")
+    public ResponseEntity<List<InterviewResultResponse>> getMyInterviewResults(
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        List<InterviewResultResponse> list = communityService.getAllInterviewResults(user.getUserId());
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/interview-results/latest")
+    public ResponseEntity<InterviewResultResponse> getMyLatestInterviewResult(
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        try {
+            InterviewResultResponse latest = communityService.getLatestInterviewResult(user.getUserId());
+            return ResponseEntity.ok(latest);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.noContent().build();
+        }
+    }
+
+    @GetMapping("/interview-results/{resultId}")
+    public ResponseEntity<InterviewResultResponse> getMyInterviewResultById(
+            @PathVariable Long resultId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        try {
+            InterviewResultResponse dto =
+                    communityService.getInterviewResultById(user.getUserId(), resultId);
+            return ResponseEntity.ok(dto);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

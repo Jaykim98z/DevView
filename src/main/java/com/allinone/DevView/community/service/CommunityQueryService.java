@@ -102,4 +102,8 @@ public class CommunityQueryService {
                 c.getCreatedAt()
         );
     }
+
+    public Optional<Object> getPostDetail(Long postId, Long viewerId) {
+        return null;
+    }
 }

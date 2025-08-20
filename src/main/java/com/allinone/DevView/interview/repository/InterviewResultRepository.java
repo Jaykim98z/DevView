@@ -5,6 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.data.domain.Page;      // 추가
+import org.springframework.data.domain.Pageable; // 추가
+
 import java.util.List;
 import java.util.Optional;
 
@@ -20,4 +23,16 @@ public interface InterviewResultRepository extends JpaRepository<InterviewResult
         ORDER BY i.createdAt DESC
     """)
     List<InterviewResult> findByUserId(@Param("userId") Long userId);
+
+    // ===========================
+    // 추가: 최신 1건 자동 조회용
+    // ===========================
+    Optional<InterviewResult> findTopByInterview_User_UserIdOrderByCreatedAtDesc(Long userId); // 추가
+
+    // ===========================
+    // 추가: 페이지네이션 목록 조회용
+    //  - 커뮤니티 "결과 선택" 모달에서 사용
+    //  - Page/ Pageable 사용으로 안전한 페이징
+    // ===========================
+    Page<InterviewResult> findByInterview_User_UserId(Long userId, Pageable pageable); // 추가
 }
