@@ -1,5 +1,6 @@
 package com.allinone.DevView.mypage.service;
 
+import com.allinone.DevView.common.enums.JobPosition;
 import com.allinone.DevView.common.exception.UserNotFoundException;
 import com.allinone.DevView.community.repository.ScrapsRepository;
 import com.allinone.DevView.interview.entity.Interview;
@@ -103,9 +104,9 @@ public class MypageService {
 
     /** 직무 차트 데이터 (기존 유지) */
     public CareerChartDto getCareerChartData(Long userId) {
-        Map<String, Long> jobCounts = interviewRepository.findAllByUserId(userId).stream()
+        Map<JobPosition, Long> jobCounts = interviewRepository.findAllByUserId(userId).stream()
                 .collect(Collectors.groupingBy(Interview::getJobPosition, Collectors.counting()));
-        List<String> labels = new ArrayList<>(jobCounts.keySet());
+        List<String> labels = jobCounts.keySet().stream().map(JobPosition::name).toList();
         List<Integer> data = jobCounts.values().stream().map(Long::intValue).toList();
         return new CareerChartDto(labels, data);
     }

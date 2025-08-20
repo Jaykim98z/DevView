@@ -1,5 +1,6 @@
 package com.allinone.DevView.mypage.dto;
 
+import com.allinone.DevView.common.enums.CareerLevel;
 import com.allinone.DevView.common.enums.Grade;
 import com.allinone.DevView.common.enums.InterviewType;
 import com.allinone.DevView.common.enums.JobPosition;
@@ -23,20 +24,30 @@ public class InterviewDto {
 
     private final String title;
     private final String detailUrl;
+
     private final JobPosition jobPosition;
+
     public String getJobPositionDisplayName() {
         return jobPosition != null ? jobPosition.getDisplayName() : "기타";
+    }
+
+    private final CareerLevel careerLevel;
+
+    public String getCareerLevelDisplayName() {
+        return careerLevel != null ? careerLevel.getDisplayName() : "-";
     }
 
     public static InterviewDto fromEntity(InterviewResult result) {
         Interview i = result.getInterview();
         LocalDateTime when = (i.getEndedAt() != null ? i.getEndedAt() : i.getCreatedAt());
 
-        Grade commonGrade = (result.getGrade() != null) ? Grade.valueOf(result.getGrade().name()) : null;
-        InterviewType commonType = (i.getInterviewType() != null) ? InterviewType.valueOf(i.getInterviewType().name()) : null;
+        Grade commonGrade = result.getGrade();
+        InterviewType commonType = i.getInterviewType();
 
-        JobPosition jobEnum = JobPosition.fromString(i.getJobPosition());
+        JobPosition jobEnum = JobPosition.fromString(i.getJobPosition().toString());
         String jobDisplay = (jobEnum != null) ? jobEnum.getDisplayName() : "기타";
+
+        CareerLevel levelEnum = CareerLevel.fromString(i.getCareerLevel().toString());
 
         return InterviewDto.builder()
                 .interviewId(i.getId())
@@ -48,6 +59,7 @@ public class InterviewDto {
                 .title(jobDisplay + " 면접")
                 .detailUrl("/interview/result/" + i.getId())
                 .jobPosition(jobEnum)
+                .careerLevel(levelEnum)
                 .build();
     }
 }

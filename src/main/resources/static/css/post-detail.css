@@ -31,6 +31,8 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  position: relative;
+  padding-bottom: 96px;
 }
 
 .post-header { display: flex; align-items: center; gap: 12px; }
@@ -97,6 +99,11 @@ html, body {
 .post-content p { margin: 0 0 14px; }
 .post-content img { max-width: 100%; height: auto; border-radius: 8px; }
 
+.post-extra { margin-top: 16px; }
+.post-extra .extra-title { font-size: 16px; margin: 8px 0; }
+.post-extra .extra-body { line-height: 1.6; white-space: normal; }
+.post-extra .extra-row { display:flex; gap:12px; align-items:center; }
+
 .post-footer {
   display: flex;
   flex-direction: column;
@@ -134,22 +141,16 @@ html, body {
 
 .metric .count { display: inline-block; min-width: 10px; }
 
-
-.btn-like i::before { content: "\f004"; }       /* fa-heart */
-.btn-scrap i::before { content: "\f02e"; }      /* fa-bookmark */
+.btn-like i::before { content: "\f004"; }
+.btn-scrap i::before { content: "\f02e"; }
 .btn-like i, .btn-scrap i { font-family: "Font Awesome 6 Free"; font-weight: 900; }
 
-
-.btn-like i, .btn-scrap i {
-  color: #9aa7b5;
-}
-
+.btn-like i, .btn-scrap i { color: #9aa7b5; }
 
 .btn-like.active i { color: var(--like); }
 .btn-scrap.active i { color: var(--scrap); }
 .btn-like.active i, .btn-scrap.active i { transform: scale(1.02); }
 
-/* divider */
 .meta-divider { border: 0; border-top: 1px solid #e5e7eb; margin: 6px 0 0; }
 
 .comments-section { margin-top: 12px; width: 100%; clear: both; }
@@ -220,6 +221,7 @@ html, body {
   cursor:pointer;
 }
 .comment-action--danger{ color:#c73a3a; border-color:#ffd9d9; background:#fff5f5; }
+
 .post-detail__nav{
   display:flex; justify-content:flex-end;
   margin-top:24px;
@@ -247,24 +249,6 @@ html, body {
   font-size:14px;
 }
 
-/* 반응형 */
-@media (max-width: 640px){
-  .main-container { padding: 16px 12px 40px; }
-  .post-title { font-size: 20px; }
-  .post-detail-card { padding: 16px; border-radius: 12px; }
-
-  .comment-item{ grid-template-columns:28px 1fr; }
-  .comment-item__avatar{ width:28px; height:28px; }
-  .comment-form{ padding:8px; }
-  .comment-form .btn-submit{ padding:8px 12px; }
-}
-
-/* === 추가: 액션 버튼을 카드 오른쪽 하단으로, 톤앤매너 통일 === */
-.post-detail-card{
-  position: relative;              /* 하단 고정 버튼 위한 기준 */
-  padding-bottom: 96px;            /* 버튼이 내용 가리지 않도록 여백 */
-}
-
 .post-actions{
   position: absolute;
   right: 16px;
@@ -275,7 +259,6 @@ html, body {
   z-index: 1;
 }
 
-/* 버튼 공통 */
 .btn-action,
 .btn-submit,
 .btn-danger{
@@ -314,7 +297,6 @@ html, body {
 }
 .btn-submit:hover{ background:#e6f0ff; }
 
-/* 삭제(위험) */
 .btn-danger{
   color:#c73a3a;
   border-color:#ffd9d9;
@@ -325,7 +307,16 @@ html, body {
 .btn-like.is-active i{ color: var(--like); }
 .btn-scrap.is-active i{ color: var(--scrap); }
 
-/* 반응형 보정 */
+@media (max-width: 640px){
+  .main-container { padding: 16px 12px 40px; }
+  .post-title { font-size: 20px; }
+  .post-detail-card { padding: 16px; border-radius: 12px; }
+  .comment-item{ grid-template-columns:28px 1fr; }
+  .comment-item__avatar{ width:28px; height:28px; }
+  .comment-form{ padding:8px; }
+  .comment-form .btn-submit{ padding:8px 12px; }
+}
+
 @media (max-width: 560px){
   .post-detail-card{ padding-bottom: 104px; }
   .post-actions{ right:12px; bottom:12px; }

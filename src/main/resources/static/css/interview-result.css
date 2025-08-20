@@ -76,6 +76,16 @@
     border-bottom: 1px solid #e9ecef;
 }
 
+.feedback-item {
+    margin-bottom: 1rem;
+}
+
+.feedback-item strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #343a40;
+}
+
 .feedback-details, .summary-details {
     background-color: #f8f9fa;
     padding: 1.5rem;

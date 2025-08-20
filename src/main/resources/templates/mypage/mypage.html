@@ -128,6 +128,8 @@
                             <div class="row">
                                 <div class="chips">
                                     <span class="chip chip-type" th:text="${interview.jobPositionDisplayName}">직무</span>
+                                    <span class="chip chip-level" th:text="${interview.careerLevelDisplayName}">레벨</span>
+                                    <span class="chip chip-type" th:text="${interview.interviewType}">면접타입</span>
                                     <span class="chip chip-date"
                                           th:text="${interview.interviewDate != null ? interview.interviewDate : ''}">YYYY-MM-DD</span>
                                 </div>
@@ -148,9 +150,16 @@
                     <img src="/img/scrap.svg" class="icon" alt="스크랩 목록"/>
                     <h3>스크랩 목록</h3>
                 </div>
+
                 <ul id="scrapList" class="scrap-grid">
-                    <li th:each="scrap : ${user.scraps}">
-                        <a th:href="${scrap.link}" target="_blank" rel="noopener noreferrer" class="scrap-item">
+                    <li th:each="scrap : ${user.scraps}"
+                        th:with="isExternal=${#strings.startsWith(scrap.link,'http')}">
+
+                        <!-- 링크: 컨텍스트 경로 보정(@{...}) + 외부/내부에 따라 target/rel 분기 -->
+                        <a th:href="@{${scrap.link}}"
+                           th:attr="target=${isExternal ? '_blank' : null},
+                  rel=${isExternal ? 'noopener noreferrer' : null}"
+                           class="scrap-item">
                             <h4 class="scrap-title" th:text="${scrap.title}">제목</h4>
                             <p class="scrap-desc" th:text="${scrap.preview}">요약 내용</p>
                             <div class="scrap-meta">
@@ -158,6 +167,10 @@
                                 <span class="likes">❤️ <span th:text="${scrap.likes}">0</span></span>
                             </div>
                         </a>
+                    </li>
+                    <!-- 스크랩이 비어있을 때 메시지 (옵션) -->
+                    <li th:if="${#lists.isEmpty(user.scraps)}" class="empty">
+                        아직 스크랩이 없습니다.
                     </li>
                 </ul>
             </section>

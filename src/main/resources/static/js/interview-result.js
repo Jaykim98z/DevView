@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async function() {
     const scoreEl = document.getElementById('total-score');
     const gradeEl = document.getElementById('grade');
-    const feedbackEl = document.getElementById('feedback-text');
+    const feedbackContainer = document.getElementById('feedback-text');
     const summaryEl = document.getElementById('summary-text');
     const recommendationsEl = document.getElementById('recommendations-text');
 
@@ -42,9 +42,24 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         scoreEl.textContent = analysis.totalScore;
         gradeEl.textContent = `Grade ${result.grade}`;
-        feedbackEl.textContent = analysis.feedback;
         summaryEl.textContent = analysis.summary;
         recommendationsEl.innerHTML = result.recommendedResource;
+        feedbackContainer.innerHTML = '';
+
+        const feedbackItems = analysis.feedback.split('\n').filter(line => line.trim() !== '');
+        feedbackItems.forEach(itemText => {
+            const feedbackItem = document.createElement('div');
+            feedbackItem.className = 'feedback-item';
+
+            if (itemText.startsWith('Q:')) {
+                const questionElement = document.createElement('strong');
+                questionElement.textContent = itemText;
+                feedbackItem.appendChild(questionElement);
+            } else {
+                feedbackItem.textContent = itemText;
+            }
+            feedbackContainer.appendChild(feedbackItem);
+        });
 
         setProgress(skillTechProgress, skillTechScore, analysis.techScore);
         setProgress(skillProblemProgress, skillProblemScore, analysis.problemScore);

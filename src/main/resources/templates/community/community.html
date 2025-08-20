@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/css/header.css" />
     <link rel="stylesheet" href="/css/community.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <script th:inline="javascript">
+    <script>
         window.CURRENT_USER_ID = /*[[${session.userId}]]*/ null;
     </script>
 </head>
@@ -19,10 +19,7 @@
     <header class="community-header">
         <h1>커뮤니티</h1>
         <p>다른 개발자들의 면접 결과를 확인해보세요</p>
-        <p class="post-count"
-           th:text="'총 ' + ${(posts != null ? #lists.size(posts) : 0)} + '개의 면접 결과'">
-            총 0개의 면접 결과
-        </p>
+        <p class="post-count" th:text="'총 ' + ${posts.size()} + '개의 면접 결과'">총 0개의 면접 결과</p>
     </header>
 
     <div class="filter-bar">
@@ -73,6 +70,6 @@
 <a href="/community/posts/new" class="write-btn">✏️ 글쓰기</a>
 
 
-<script th:src="@{/js/community.js}" src="/js/community.js" defer></script>
+<script src="/js/community.js"></script>
 </body>
 </html>

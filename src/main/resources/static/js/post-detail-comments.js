@@ -10,12 +10,11 @@ function __getCsrf__() {
 }
 function __secureHeaders__(json = true) {
   const { header, token } = __getCsrf__();
-  const h = { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' };
+  const h = { 'X-Requested-With': 'XMLHttpRequest' };
   if (json) h['Content-Type'] = 'application/json';
   if (header && token) h[header] = token;
   return h;
 }
-
 async function fetchJson(url, opts = {}) {
   const res = await fetch(url, opts);
   if (!res.ok) {
@@ -53,7 +52,7 @@ function initLikeScrap() {
         btn.classList.toggle('is-active', active);
         toggleIconSolid(btn.querySelector('i'), active);
         const countEl = btn.querySelector('.count');
-        if (typeof data.count === 'number') countEl.textContent = String(data.count);
+        if (typeof data.count === 'number' && countEl) countEl.textContent = String(data.count);
       } catch {
         alert('좋아요 처리에 실패했습니다.');
       }
@@ -71,9 +70,9 @@ function initLikeScrap() {
         });
         const active = !!data.active;
         btn.classList.toggle('is-active', active);
-        toggleIconSolid(btn.querySelector('i'), active); // 활성=solid, 비활성=regular
+        toggleIconSolid(btn.querySelector('i'), active);
         const countEl = btn.querySelector('.count');
-        if (typeof data.count === 'number') countEl.textContent = String(data.count);
+        if (typeof data.count === 'number' && countEl) countEl.textContent = String(data.count);
       } catch {
         alert('스크랩 처리에 실패했습니다.');
       }
@@ -157,8 +156,8 @@ async function tryUpdatePost(postId, payload) {
   const headers = __secureHeaders__();
 
   const bodies = [
-    JSON.stringify({ title: payload.title, content: payload.content }), // case1
-    JSON.stringify({ title: payload.title, summary: payload.content })  // case2
+    JSON.stringify({ title: payload.title, content: payload.content }),
+    JSON.stringify({ title: payload.title, summary: payload.content })
   ];
 
   for (const body of bodies) {
@@ -168,7 +167,7 @@ async function tryUpdatePost(postId, payload) {
         headers,
         body
       });
-    } catch {  }
+    } catch {}
   }
 
   return await fetchJson(`/api/community/posts/${postId}`, {
@@ -240,10 +239,39 @@ function initEditDelete() {
   }
 }
 
+function initComments() {
+  const btn = document.getElementById('comment-submit');
+  const input = document.getElementById('comment-input');
+  if (!btn || !input) return;
+
+  btn.addEventListener('click', async () => {
+    const content = (input.value || '').trim();
+    if (!content) return;
+
+    const postId = getPostId();
+    const url = `/api/community/posts/${postId}/comments`;
+
+    try {
+      const data = await fetchJson(url, {
+        method: 'POST',
+        headers: __secureHeaders__(true),
+        body: JSON.stringify({ content })
+      });
+      console.log('comment saved', data);
+      input.value = '';
+      location.reload();
+    } catch (e) {
+      console.error('댓글 등록 실패', e);
+      alert('댓글 등록에 실패했습니다.');
+    }
+  });
+}
+
 (function () {
   const start = () => {
     initLikeScrap();
     initEditDelete();
+    initComments();
   };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start, { once: true });

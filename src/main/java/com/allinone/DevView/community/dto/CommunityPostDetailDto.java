@@ -14,7 +14,6 @@ public class CommunityPostDetailDto {
     private String summary;
     private String username;
     private Long writerId;
-    private String content;
     private int score;
     private String grade;
     private int viewCount;
@@ -22,6 +21,9 @@ public class CommunityPostDetailDto {
     private int scrapCount;
     private LocalDateTime createdAt;
     private String interviewType;
+    private Long interviewResultId;
+    private String interviewFeedback;
+    private String content;
 
     public static CommunityPostDetailDto from(CommunityPosts post) {
         if (post == null) {
@@ -46,7 +48,6 @@ public class CommunityPostDetailDto {
                 .summary(summary)
                 .username(username)
                 .writerId(post.getUser() != null ? post.getUser().getUserId() : null)
-                .content(post.getContent())
                 .score(post.getScore())
                 .grade(post.getGrade() != null ? post.getGrade().name() : null)
                 .viewCount(post.getViewCount())
@@ -54,6 +55,12 @@ public class CommunityPostDetailDto {
                 .scrapCount(post.getScrapCount())
                 .createdAt(post.getCreatedAt())
                 .interviewType(post.getInterviewType())
+
+
+                .interviewResultId(post.getInterviewResultId())
+                .interviewFeedback(post.getInterviewFeedback())
+                .content(post.getContent())
+
                 .build();
     }
 
