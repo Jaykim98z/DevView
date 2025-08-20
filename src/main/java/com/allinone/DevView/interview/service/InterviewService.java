@@ -149,29 +149,24 @@ public class InterviewService {
 
             String recommendationsHtml = "No specific recommendations available.";
             if (alan instanceof AlanApiService && analysis.keywords() != null && !analysis.keywords().isEmpty()) {
-                StringBuilder htmlBuilder = new StringBuilder("<ul>");
-                analysis.keywords().forEach(keyword -> {
-                    try {
-                        String alanJson = ((AlanApiService) alan).getRecommendations(keyword);
-                        String cleanedAlanJson = alanJson.trim().replace("```json", "").replace("```", "").trim();
+                try {
+                    String combinedKeywords = String.join(", ", analysis.keywords());
+                    String alanJson = ((AlanApiService) alan).getRecommendations(combinedKeywords);
+                    String cleanedAlanJson = alanJson.trim().replace("```json", "").replace("```", "").trim();
 
-                        AlanRecommendationDto alanResponse = objectMapper.readValue(cleanedAlanJson, AlanRecommendationDto.class);
-                        if (alanResponse != null && alanResponse.recommendations() != null) {
-                            alanResponse.recommendations().forEach(item -> {
-                                String safeTitle = item.title().replace("<", "&lt;").replace(">", "&gt;");
-                                htmlBuilder.append("<li><a href=\"")
-                                        .append(item.url())
-                                        .append("\" target=\"_blank\" rel=\"noopener noreferrer\">")
-                                        .append(safeTitle)
-                                        .append("</a></li>");
-                            });
-                        }
-                    } catch (Exception e) {
-                        log.warn("Failed to process recommendation for keyword '{}': {}", keyword, e.getMessage());
+                    AlanRecommendationDto alanResponse = objectMapper.readValue(cleanedAlanJson, AlanRecommendationDto.class);
+
+                    if (alanResponse != null && alanResponse.recommendations() != null) {
+                        recommendationsHtml = alanResponse.recommendations().stream()
+                                .map(item -> {
+                                    String safeTitle = item.title().replace("<", "&lt;").replace(">", "&gt;");
+                                    return "<li><a href=\"" + item.url() + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + safeTitle + "</a></li>";
+                                })
+                                .collect(Collectors.joining("", "<ul>", "</ul>"));
                     }
-                });
-                htmlBuilder.append("</ul>");
-                recommendationsHtml = htmlBuilder.toString();
+                } catch (Exception e) {
+                    log.error("Failed to get or process recommendations from Alan API", e);
+                }
             }
 
             interview.endInterviewSession();
@@ -199,6 +194,7 @@ public class InterviewService {
             }
 
             return InterviewResultResponse.fromEntity(savedResult);
+
         } catch (Exception e) {
             log.error("Failed to parse JSON response from AI. Raw Response: {}", aiResponseJson, e);
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
