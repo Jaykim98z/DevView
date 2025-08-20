@@ -6,11 +6,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum JobPosition {
-    BACKEND("Backend"),
-    FRONTEND("Frontend"),
-    FULLSTACK("Fullstack"),
-    DEVOPS("DevOps"),
-    DATA_AI("Data/AI");
+    BACKEND("BACKEND"),
+    FRONTEND("FRONTEND"),
+    FULLSTACK("FULLSTACK"),
+    DEVOPS("DEVOPS"),
+    DATA_AI("DATA/AI");
 
     private final String displayName;
 
