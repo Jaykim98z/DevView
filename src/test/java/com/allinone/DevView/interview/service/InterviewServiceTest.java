@@ -1,7 +1,9 @@
 package com.allinone.DevView.interview.service;
 
+import com.allinone.DevView.common.enums.CareerLevel;
 import com.allinone.DevView.common.enums.Grade;
 import com.allinone.DevView.common.enums.InterviewType;
+import com.allinone.DevView.common.enums.JobPosition;
 import com.allinone.DevView.interview.dto.gemini.GeminiAnalysisResponseDto;
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
@@ -70,8 +72,10 @@ public class InterviewServiceTest {
         StartInterviewRequest request = new StartInterviewRequest();
         ReflectionTestUtils.setField(request, "userId", 1L);
         ReflectionTestUtils.setField(request, "interviewType", InterviewType.TECHNICAL);
-        ReflectionTestUtils.setField(request, "jobPosition", "Backend Developer");
-        ReflectionTestUtils.setField(request, "careerLevel", "Junior");
+        ReflectionTestUtils.setField(request, "jobPosition", JobPosition.BACKEND);
+        ReflectionTestUtils.setField(request, "careerLevel", CareerLevel.JUNIOR);
+        ReflectionTestUtils.setField(request, "questionCount", 5);
+        ReflectionTestUtils.setField(request, "durationMinutes", 15);
 
         // 2. 테스트용 User, Interview 객체를 빌더로 생성
         User user = User.builder().username("testuser").build();
@@ -94,7 +98,8 @@ public class InterviewServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getInterviewId()).isEqualTo(10L);
         assertThat(response.getInterviewType()).isEqualTo(InterviewType.TECHNICAL);
-        assertThat(response.getJobPosition()).isEqualTo("Backend Developer");
+        assertThat(response.getJobPosition()).isEqualTo(JobPosition.BACKEND);
+        assertThat(response.getCareerLevel()).isEqualTo(CareerLevel.JUNIOR);
     }
 
     @Test
@@ -106,7 +111,7 @@ public class InterviewServiceTest {
         Interview mockInterview = Interview.builder()
                 .id(1L)
                 .user(user)
-                .jobPosition("Backend")
+                .jobPosition(JobPosition.BACKEND)
                 .build();
         String questionText = "What is SOLID?";
         InterviewQuestion savedQuestion = InterviewQuestion.builder()
@@ -115,11 +120,9 @@ public class InterviewServiceTest {
                 .text(questionText)
                 .build();
 
-        // interviewQuestionRepository.save가 호출되면, 준비된 객체를 반환하도록 설정
         given(interviewQuestionRepository.save(any(InterviewQuestion.class))).willReturn(savedQuestion);
 
         // when
-        // 이제 `saveQuestion` 메서드를 직접 호출하여 테스트합니다.
         QuestionResponse response = interviewService.saveQuestion(mockInterview, questionText);
 
         // then
@@ -172,8 +175,8 @@ public class InterviewServiceTest {
         Interview mockInterview = Interview.builder()
                 .id(interviewId)
                 .questions(new ArrayList<>())
-                .jobPosition("Backend")
-                .careerLevel("Junior")
+                .jobPosition(JobPosition.BACKEND)
+                .careerLevel(CareerLevel.JUNIOR)
                 .build();
 
         // 1. Mock the AI response as a valid JSON string

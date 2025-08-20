@@ -6,12 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum CareerLevel {
-    INTERN("INTERN"),
     JUNIOR("JUNIOR"),
-    MID("MID"),
-    SENIOR("SENIOR"),
-    LEAD("LEAD"),
-    MANAGER("MANAGER"),;
+    MID_LEVEL("MID_LEVEL"),
+    SENIOR("SENIOR");
 
     private final String displayName;
     public static CareerLevel fromString(String value) {
