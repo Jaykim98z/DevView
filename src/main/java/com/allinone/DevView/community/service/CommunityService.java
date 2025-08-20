@@ -13,6 +13,7 @@ import com.allinone.DevView.community.repository.ScrapsRepository;
 import com.allinone.DevView.common.enums.Grade;
 import com.allinone.DevView.common.enums.InterviewType;
 import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
+import com.allinone.DevView.interview.entity.Interview;
 import com.allinone.DevView.interview.entity.InterviewResult;
 import com.allinone.DevView.interview.repository.InterviewResultRepository;
 import com.allinone.DevView.user.entity.User;
@@ -40,6 +41,7 @@ public class CommunityService {
     private final UserRepository userRepository;
     private final InterviewResultRepository interviewResultRepository;
 
+
     public List<CommunityPosts> getAllPostsWithUserData() {
         return postsRepository.findAllWithUser();
     }
@@ -51,28 +53,27 @@ public class CommunityService {
 
     @Transactional
     public Long createPost(CreatePostRequest req, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
+        User user = findUser(userId);
 
-        final String content = req.content();
-        final String summary = (content != null && content.length() > 1000) ? content.substring(0, 1000) : content;
+        final String content = req.getContent();
+        final String summary = summaryOf(content, 1000);
 
-        final InterviewType interviewType = parseInterviewType(req.interviewType(), InterviewType.TECHNICAL);
-        final Grade grade = parseGrade(req.grade(), null);
+        final InterviewType interviewType = parseInterviewType(req.getInterviewType(), InterviewType.TECHNICAL);
+        final Grade grade = parseGrade(req.getGrade(), null);
 
         CommunityPosts post = new CommunityPosts();
         post.setUser(user);
         post.setWriterName(user.getUsername());
-        post.setTitle(req.title());
+        post.setTitle(req.getTitle());
         post.setContent(content);
         post.setSummary(summary);
         post.setInterviewType(interviewType.name());
         if (grade != null) post.setGrade(grade);
-        post.setTechTag(req.techTag());
-        post.setLevelTag(req.level());
-        post.setCategory(req.category());
-        post.setType(req.type());
-        post.setScore(req.score() != null ? req.score() : 0);
+        post.setTechTag(req.getTechTag());
+        post.setLevelTag(req.getLevel());
+        post.setCategory(req.getCategory());
+        post.setType(req.getType());
+        post.setScore(req.getScore() != null ? req.getScore() : 0);
         post.setLikeCount(0);
         post.setScrapCount(0);
         post.setViewCount(0);
@@ -83,23 +84,14 @@ public class CommunityService {
 
     @Transactional
     public Long createInterviewSharePost(CreateInterviewSharePostRequest req, Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
+        User user = findUser(userId);
 
-        if (req.getInterviewResultId() != null
-                && postsRepository.existsByInterviewResultId(req.getInterviewResultId())) {
-            throw new IllegalStateException("해당 인터뷰 결과는 이미 공유되었습니다.");
-        }
-
-        InterviewResult result = interviewResultRepository.findById(req.getInterviewResultId())
-                .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과를 찾을 수 없습니다: " + req.getInterviewResultId()));
-        if (result.getInterview() == null || result.getInterview().getUser() == null
-                || !userId.equals(result.getInterview().getUser().getUserId())) {
-            throw new AccessDeniedException("본인의 인터뷰 결과만 공유할 수 있습니다.");
-        }
+        validateResultNotShared(req.getInterviewResultId());
+        InterviewResult result = findOwnedResult(userId, req.getInterviewResultId());
 
         final String content = req.getContent();
-        final String summary = (content != null && content.length() > 1000) ? content.substring(0, 1000) : content;
+        final String summary = summaryOf(content, 1000);
+        final int resultScore = result.getTotalScore();
 
         CommunityPosts post = new CommunityPosts();
         post.setUser(user);
@@ -109,9 +101,17 @@ public class CommunityService {
         post.setTitle(req.getTitle());
         post.setContent(content);
         post.setSummary(summary);
-        post.setGrade(result.getGrade());
-        post.setScore(result.getTotalScore());
-        post.setInterviewFeedback(result.getFeedback());
+
+        if (req.getGrade() != null) {
+            post.setGrade(parseGrade(req.getGrade().name(), result.getGrade()));
+        } else {
+            post.setGrade(result.getGrade());
+        }
+
+        post.setScore(req.getScore() != null ? req.getScore() : resultScore);
+
+        post.setInterviewFeedback(firstNonBlank(req.getInterviewFeedback(), result.getFeedback()));
+
         post.setInterviewResultId(result.getId());
         post.setLikeCount(0);
         post.setScrapCount(0);
@@ -120,6 +120,69 @@ public class CommunityService {
 
         return postsRepository.save(post).getPostId();
     }
+
+    @Transactional
+    public Long createInterviewSharePost(CreateInterviewSharePostRequest share,
+                                         CreatePostRequest free,
+                                         Long userId) {
+        User user = findUser(userId);
+
+        validateResultNotShared(share.getInterviewResultId());
+        InterviewResult result = findOwnedResult(userId, share.getInterviewResultId());
+
+        final int resultScore = result.getTotalScore();
+
+        String title = firstNonBlank(
+                share.getTitle(),
+                free.getTitle(),
+                "[면접결과] " + safe(result.getGrade()) + " " + safe(resultScore) + "점"
+        );
+
+        String content = firstNonBlank(
+                free.getContent(),
+                share.getContent(),
+                result.getFeedback()
+        );
+        String summary = summaryOf(content, 1000);
+
+        InterviewType interviewType = parseInterviewType(
+                firstNonBlank(free.getInterviewType(), InterviewType.COMPREHENSIVE.name()),
+                InterviewType.COMPREHENSIVE
+        );
+
+        Grade grade = firstNonNull(
+                share.getGrade(),
+                parseGrade(free.getGrade(), null),
+                result.getGrade()
+        );
+
+        Integer score = firstNonNull(share.getScore(), free.getScore(), resultScore);
+
+        CommunityPosts post = new CommunityPosts();
+        post.setUser(user);
+        post.setWriterName(user.getUsername());
+        post.setType(TYPE_INTERVIEW_SHARE);
+        post.setInterviewType(interviewType.name());
+        post.setTitle(title);
+        post.setContent(content);
+        post.setSummary(summary);
+        if (grade != null) post.setGrade(grade);
+        post.setScore(score != null ? score : 0);
+        post.setInterviewFeedback(firstNonBlank(share.getInterviewFeedback(), result.getFeedback()));
+        post.setInterviewResultId(result.getId());
+
+        post.setTechTag(free.getTechTag());
+        post.setLevelTag(free.getLevel());
+        post.setCategory(free.getCategory());
+
+        post.setLikeCount(0);
+        post.setScrapCount(0);
+        post.setViewCount(0);
+        post.setCreatedAt(LocalDateTime.now());
+
+        return postsRepository.save(post).getPostId();
+    }
+
 
     @Transactional
     public Long updatePost(Long postId, Long requestUserId, PostUpdateRequestDto updated) {
@@ -254,6 +317,7 @@ public class CommunityService {
         }).toList();
     }
 
+
     @Transactional
     public InterviewResultResponse getLatestInterviewResult(Long userId) {
         return interviewResultRepository.findByUserId(userId).stream()
@@ -267,6 +331,38 @@ public class CommunityService {
         return interviewResultRepository.findByUserId(userId).stream()
                 .map(InterviewResultResponse::fromEntity)
                 .toList();
+    }
+
+    @Transactional
+    public InterviewResultResponse getInterviewResultById(Long userId, Long resultId) {
+        InterviewResult result = findOwnedResult(userId, resultId);
+        return InterviewResultResponse.fromEntity(result);
+    }
+
+
+    private User findUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
+    }
+
+    private void validateResultNotShared(Long resultId) {
+        if (resultId != null && postsRepository.existsByInterviewResultId(resultId)) {
+            throw new IllegalStateException("해당 인터뷰 결과는 이미 공유되었습니다.");
+        }
+    }
+
+    private InterviewResult findOwnedResult(Long userId, Long resultId) {
+        if (resultId == null) {
+            throw new IllegalArgumentException("인터뷰 결과 ID가 필요합니다.");
+        }
+        InterviewResult result = interviewResultRepository.findById(resultId)
+                .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과를 찾을 수 없습니다: " + resultId));
+        Interview interview = result.getInterview();
+        if (interview == null || interview.getUser() == null ||
+                !userId.equals(interview.getUser().getUserId())) {
+            throw new AccessDeniedException("본인의 인터뷰 결과만 공유할 수 있습니다.");
+        }
+        return result;
     }
 
     private boolean isOwner(CommunityPosts post, Long userId) {
@@ -295,5 +391,27 @@ public class CommunityService {
         } catch (Exception e) {
             return def;
         }
+    }
+
+    private static String summaryOf(String content, int max) {
+        if (content == null) return null;
+        return (content.length() > max) ? content.substring(0, max) : content;
+    }
+
+    private static String safe(Object o) {
+        return o == null ? "" : String.valueOf(o);
+    }
+
+    @SafeVarargs
+    private static <T> T firstNonNull(T... values) {
+        for (T v : values) if (v != null) return v;
+        return null;
+    }
+
+    private static String firstNonBlank(String... values) {
+        for (String v : values) {
+            if (v != null && !v.trim().isEmpty()) return v.trim();
+        }
+        return null;
     }
 }

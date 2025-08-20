@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="/css/header.css" />
     <link rel="stylesheet" href="/css/community.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <script>
-        window.CURRENT_USER_ID = /*[[${session.userId}]]*/ null;
+    <script th:inline="javascript">
+        window.CURRENT_USER_ID = [[${session.userId}]];
     </script>
 </head>
 <body data-page="list">
@@ -70,6 +70,6 @@
 <a href="/community/posts/new" class="write-btn">✏️ 글쓰기</a>
 
 
-<script src="/js/community.js"></script>
+<script th:src="@{/js/community.js}" src="/js/community.js" defer></script>
 </body>
 </html>

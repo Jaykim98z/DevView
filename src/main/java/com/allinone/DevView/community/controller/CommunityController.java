@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -132,7 +133,6 @@ public class CommunityController {
         return ResponseEntity.ok(Map.of("viewCount", cnt));
     }
 
-    /* ===== 인터뷰 결과 (CommunityService 경유) ===== */
 
     @GetMapping("/interview-results")
     public ResponseEntity<List<InterviewResultResponse>> getMyInterviewResults(
@@ -151,6 +151,22 @@ public class CommunityController {
             return ResponseEntity.ok(latest);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.noContent().build();
+        }
+    }
+
+    @GetMapping("/interview-results/{resultId}")
+    public ResponseEntity<InterviewResultResponse> getMyInterviewResultById(
+            @PathVariable Long resultId,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        try {
+            InterviewResultResponse dto =
+                    communityService.getInterviewResultById(user.getUserId(), resultId);
+            return ResponseEntity.ok(dto);
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }
