@@ -16,7 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.Collections;
@@ -55,56 +54,44 @@ public class CommunityViewController {
     }
 
     @GetMapping("/posts/new")
-    public String newPostForm(Model model, Principal principal) {
+    public String newPostForm(Model model, Principal principal){
         if (principal == null) {
             return "redirect:/user/login?redirect=/community/posts/new";
         }
-        if (!model.containsAttribute("form")) {
-            model.addAttribute("form", CombinedPostRequest.empty());
-        }
-        return "community/post-write";
-    }
-
-    @GetMapping("/posts/interview")
-    public String interviewPostForm(Model model, Principal principal) {
-        if (principal == null) {
-            return "redirect:/user/login?redirect=/community/posts/interview";
-        }
-        if (!model.containsAttribute("form")) {
-            model.addAttribute("form", CombinedPostRequest.empty());
-        }
-        return "community/post-write";
+        model.addAttribute("form", CombinedPostRequest.empty());
+        return "community/post-new";
     }
 
     @PostMapping("/posts/interview")
     @Transactional
-    public String createCombinedByForm(@Valid @ModelAttribute("form") CombinedPostRequest form,
-                                       BindingResult bindingResult,
-                                       Principal principal,
-                                       RedirectAttributes rttr,
-                                       Model model) {
+    public String createCombinedByForm(
+            @Valid @ModelAttribute("form") CombinedPostRequest form,
+            BindingResult bindingResult,
+            Principal principal
+    ) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("form", form);
-            return "community/post-write";
+            return "community/post-new";
         }
         if (principal == null) {
-            return "redirect:/user/login?redirect=/community/posts/interview";
+            return "redirect:/user/login?redirect=/community/posts/new";
         }
 
         String email = principal.getName();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자 정보를 찾을 수 없습니다."));
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자 정보를 찾을 수 없습니다."));
+
         Long userId = user.getUserId();
 
-        // ★ 결합 저장 메서드: 하나의 게시글(postId) 생성
-        Long postId = communityService.createInterviewSharePost(
-                form.getInterviewShare(),
-                form.getFreePost(),
-                userId
+        Long interviewPostId = communityService.createInterviewSharePost(
+                form.getInterviewShare(), userId
         );
 
-        rttr.addFlashAttribute("message", "등록 완료되었습니다.");
-        return "redirect:/community?created=" + postId;
+        communityService.createPost(
+                form.getFreePost(), userId
+        );
+
+        return "redirect:/community/posts/" + interviewPostId + "/detail";
     }
 
     @GetMapping("/posts/interview/new")
