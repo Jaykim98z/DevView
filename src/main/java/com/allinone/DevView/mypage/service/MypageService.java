@@ -7,8 +7,11 @@ import com.allinone.DevView.interview.entity.Interview;
 import com.allinone.DevView.interview.entity.InterviewResult;
 import com.allinone.DevView.interview.repository.InterviewRepository;
 import com.allinone.DevView.interview.repository.InterviewResultRepository;
+// ✅ 추가
+import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
+
 import com.allinone.DevView.mypage.dto.CareerChartDto;
-import com.allinone.DevView.mypage.dto.InterviewDto;
+// ❌ 삭제: import com.allinone.DevView.mypage.dto.InterviewDto;
 import com.allinone.DevView.mypage.dto.MypageResponseDto;
 import com.allinone.DevView.mypage.dto.ScoreGraphDto;
 import com.allinone.DevView.mypage.dto.ScrapDto;
@@ -52,9 +55,9 @@ public class MypageService {
             return i.getEndedAt() != null ? i.getEndedAt() : i.getCreatedAt();
         }).reversed());
 
-        // 목록 DTO
-        List<InterviewDto> interviews = results.stream()
-                .map(InterviewDto::fromEntity)
+        // ✅ 목록 DTO: 인터뷰 패키지의 응답 DTO로 변환 (마이페이지 표시 필드 포함)
+        List<InterviewResultResponse> interviews = results.stream()
+                .map(InterviewResultResponse::fromEntity)
                 .toList();
 
         int totalInterviews = results.size();
@@ -63,7 +66,7 @@ public class MypageService {
         );
         String latestGrade = results.isEmpty() ? null : results.get(0).getGrade().name();
 
-        // ✅ 스크랩 목록 (title/link/likes/comments) — 마이페이지 전용 DTO로 바로 조회
+        // ✅ 스크랩 목록 — 기존 유지
         List<ScrapDto> scraps = scrapsRepository.findMypageScrapListByUserId(userId)
                 .stream()
                 .limit(10)
@@ -72,18 +75,15 @@ public class MypageService {
         return MypageResponseDto.from(user, totalInterviews, avgScore, latestGrade, interviews, scraps);
     }
 
-    /** 점수 그래프 데이터 (최근 8개, 과거→현재) */
+    /** 점수 그래프 데이터 (최근 8개, 과거→현재) — 기존 유지 */
     public ScoreGraphDto getScoreGraphData(Long userId) {
-        // ✅ 사용자별 인터뷰 결과만 조회
         List<InterviewResult> results = interviewResultRepository.findByUserId(userId);
 
-        // 과거→현재: endedAt 우선, 없으면 createdAt
         results.sort(Comparator.comparing((InterviewResult r) -> {
             Interview i = r.getInterview();
             return i.getEndedAt() != null ? i.getEndedAt() : i.getCreatedAt();
         }));
 
-        // 최근 8개
         int size = results.size();
         int from = Math.max(0, size - 8);
         List<InterviewResult> last = results.subList(from, size);
@@ -102,7 +102,7 @@ public class MypageService {
         return new ScoreGraphDto(labels, scores);
     }
 
-    /** 직무 차트 데이터 (기존 유지) */
+    /** 직무 차트 데이터 */
     public CareerChartDto getCareerChartData(Long userId) {
         Map<JobPosition, Long> jobCounts = interviewRepository.findAllByUserId(userId).stream()
                 .collect(Collectors.groupingBy(Interview::getJobPosition, Collectors.counting()));
@@ -111,13 +111,13 @@ public class MypageService {
         return new CareerChartDto(labels, data);
     }
 
-    /** 기본 프로필 조회 (기존 유지) */
+    /** 기본 프로필 조회  */
     public MypageResponseDto getBasicUserInfo(Long userId) {
         User user = getUserOrThrow(userId);
         return buildBasicResponse(user);
     }
 
-    /** 프로필 정보/이미지 저장 (기존 유지) */
+    /** 프로필 정보/이미지 저장 */
     @Transactional
     public MypageResponseDto updateProfile(Long userId, UserProfileUpdateRequest profileReq, MultipartFile profileImage) {
         User user = getUserOrThrow(userId);
@@ -140,7 +140,7 @@ public class MypageService {
         return buildBasicResponse(user);
     }
 
-    /** 프로필 이미지 삭제 (기존 유지) */
+    /** 프로필 이미지 삭제  */
     @Transactional
     public MypageResponseDto deleteProfileImage(Long userId) {
         User user = getUserOrThrow(userId);
