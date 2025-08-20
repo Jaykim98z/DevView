@@ -105,11 +105,9 @@ public class CommunityPosts {
         if (this.createdAt == null) {
             this.createdAt = LocalDateTime.now();
         }
-
-        this.likeCount = this.likeCount;
-        this.scrapCount = this.scrapCount;
-        this.viewCount = this.viewCount;
-        this.score = this.score;
+        if (this.type == null || this.type.isBlank()) {
+            this.type = "POST";
+        }
     }
 
     public void update(String title, String content) {

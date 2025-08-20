@@ -55,13 +55,11 @@ public class CommunityController {
         return ResponseEntity.ok(Map.of("postId", postId));
     }
 
-    // (레거시) 전체 교체 업데이트 - 기존 호출부 유지
     @PutMapping("/posts/{id}")
     public CommunityPosts updatePost(@PathVariable Long id, @RequestBody CommunityPosts post) {
         return communityService.updatePost(id, post);
     }
 
-    // (레거시) 하드 삭제 - 기존 호출부 유지
     @DeleteMapping("/posts/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         communityService.deletePost(id);
@@ -97,7 +95,6 @@ public class CommunityController {
         return Map.of("viewCount", cnt);
     }
 
-    /** 게시글 부분 수정 (본인/관리자만) */
     @PatchMapping("/posts/{postId}")
     public ResponseEntity<?> patchUpdatePost(
             @PathVariable Long postId,
@@ -108,7 +105,6 @@ public class CommunityController {
         return ResponseEntity.ok(id);
     }
 
-    /** 게시글 삭제 (Soft Delete, 본인/관리자만) */
     @DeleteMapping("/posts/{postId}/soft")
     public ResponseEntity<?> softDeletePost(
             @PathVariable Long postId,
@@ -116,5 +112,27 @@ public class CommunityController {
     ) {
         communityService.deletePost(postId, user.getUserId());
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/posts/compose")
+    public ResponseEntity<Map<String, Long>> createComposedPost(
+            @Valid @RequestBody CombinedPostRequest req,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Long userId = user == null ? null : user.getUserId();
+        if (userId == null) return ResponseEntity.status(401).body(Map.of("message", -1L));
+
+        CombinedPostRequest.PostCategory category = req.getCategory();
+        if (category == null) {
+            category = (req.getInterviewShare() != null)
+                    ? CombinedPostRequest.PostCategory.INTERVIEW_SHARE
+                    : CombinedPostRequest.PostCategory.FREE;
+        }
+
+        Long postId = switch (category) {
+            case INTERVIEW_SHARE -> communityService.createInterviewSharePost(req.getInterviewShare(), userId);
+            case FREE -> communityService.createFreePost(req.getFreePost(), userId);
+        };
+        return ResponseEntity.ok(Map.of("postId", postId));
     }
 }
