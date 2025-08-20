@@ -22,7 +22,6 @@
 
 <div th:replace="~{fragments/header :: header}"></div>
 
-
 <main class="main-container">
     <div class="post-detail-card" th:attr="data-post-id=${post.id}">
 
@@ -50,13 +49,12 @@
         </div>
 
         <div class="post-actions"
-             th:if="${#authorization.expression('isAuthenticated()')
-        and (post.writerId == #authentication.principal.userId
-             or #authorization.expression('hasRole(''ADMIN'')'))}">
+             th:if="${ #authorization.expression('isAuthenticated()')
+              and ( (#authentication?.principal?.userId) == post.writerId
+                    or #authorization.expression('hasRole(''ADMIN'')') ) }">
             <button id="btn-edit-post"  class="btn-action">수정</button>
             <button id="btn-delete-post" class="btn-action btn-danger">삭제</button>
         </div>
-
 
         <div class="post-footer">
             <div class="metrics">
@@ -82,13 +80,11 @@
             <hr class="meta-divider" />
         </div>
 
-
         <section class="comments-section">
             <div class="comments">
                 <div class="comments__title">
                     <span>댓글</span>
                     <span class="comments__badge">
-                        <!-- ✅ 중첩 ${} 제거 -->
                         <span id="comment-count"
                               th:text="${comments != null ? #lists.size(comments) : 0}">0</span>개
                     </span>

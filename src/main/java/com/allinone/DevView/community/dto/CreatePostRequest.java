@@ -1,17 +1,39 @@
 package com.allinone.DevView.community.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
-public record CreatePostRequest(
-        @NotBlank @Size(max = 50) String title,
-        @NotBlank String content,
-        @NotBlank String interviewType,
-        @NotBlank String grade,
-        @Size(max = 50)  String techTag,
-        @Size(max = 255) String level,
-        @Size(max = 255) String category,
-        @Size(max = 255) String type,
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreatePostRequest {
 
-        Integer score  // optional
-) {}
+    @NotBlank
+    @Size(max = 50)
+    private String title;
+
+    @NotBlank
+    private String content;
+
+    @NotBlank
+    private String interviewType;
+
+    @NotBlank
+    private String grade;
+
+    @Size(max = 50)
+    private String techTag;
+
+    @Size(max = 255)
+    private String level;
+
+    @Size(max = 255)
+    private String category;
+
+    @Size(max = 255)
+    private String type;
+
+    @Min(0) @Max(100)
+    private Integer score;
+}

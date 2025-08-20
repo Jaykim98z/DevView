@@ -10,11 +10,12 @@ function __getCsrf__() {
 }
 function __secureHeaders__(json = true) {
   const { header, token } = __getCsrf__();
-  const h = { 'X-Requested-With': 'XMLHttpRequest' };
+  const h = { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' };
   if (json) h['Content-Type'] = 'application/json';
   if (header && token) h[header] = token;
   return h;
 }
+
 async function fetchJson(url, opts = {}) {
   const res = await fetch(url, opts);
   if (!res.ok) {
@@ -50,7 +51,7 @@ function initLikeScrap() {
         });
         const active = !!data.active;
         btn.classList.toggle('is-active', active);
-        toggleIconSolid(btn.querySelector('i'), true);
+        toggleIconSolid(btn.querySelector('i'), active);
         const countEl = btn.querySelector('.count');
         if (typeof data.count === 'number') countEl.textContent = String(data.count);
       } catch {

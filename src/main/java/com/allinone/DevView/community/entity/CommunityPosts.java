@@ -3,6 +3,7 @@ package com.allinone.DevView.community.entity;
 import com.allinone.DevView.common.enums.Grade;
 import com.allinone.DevView.user.entity.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -119,5 +120,9 @@ public class CommunityPosts {
 
     public void softDelete() {
         this.deleted = true;
+    }
+
+    public void setLevelTag(@Size(max = 255) String level) {
+
     }
 }
