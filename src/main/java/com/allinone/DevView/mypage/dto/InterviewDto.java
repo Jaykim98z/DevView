@@ -44,10 +44,10 @@ public class InterviewDto {
         Grade commonGrade = result.getGrade();
         InterviewType commonType = i.getInterviewType();
 
-        JobPosition jobEnum = JobPosition.fromString(i.getJobPosition());
+        JobPosition jobEnum = JobPosition.fromString(i.getJobPosition().toString());
         String jobDisplay = (jobEnum != null) ? jobEnum.getDisplayName() : "기타";
 
-        CareerLevel levelEnum = CareerLevel.fromString(i.getCareerLevel());
+        CareerLevel levelEnum = CareerLevel.fromString(i.getCareerLevel().toString());
 
         return InterviewDto.builder()
                 .interviewId(i.getId())
