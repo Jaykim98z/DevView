@@ -22,7 +22,6 @@
 
 <div th:replace="~{fragments/header :: header}"></div>
 
-
 <main class="main-container">
     <div class="post-detail-card" th:attr="data-post-id=${post.id}">
 
@@ -42,21 +41,46 @@
         <div class="badges">
             <span class="badge badge-tech" th:text="${post.interviewType}">PRACTICE</span>
             <span class="score" th:text="${post.score} + ' 점'">0 점</span>
-            <span class="grade" th:text="|• ${post.grade} 등급|">• C 등급</span>
+            <span class="grade" th:text="${post.grade != null ? '• ' + post.grade + ' 등급' : ''}">• C 등급</span>
         </div>
 
-        <div class="post-content" th:text="${post.summary}">
-            게시글 요약/내용
+        <div class="post-content" th:text="${post.summary}">게시글 요약/내용</div>
+
+        <div class="post-extra" th:if="${post.interviewResultId != null}">
+            <hr class="meta-divider" />
+            <div class="extra-row">
+                <strong>인터뷰 결과 ID</strong>
+                <span th:text="${post.interviewResultId}">123</span>
+            </div>
+        </div>
+
+        <div class="post-extra" th:if="${post.score != null or post.grade != null}">
+            <div class="extra-row">
+                <strong>결과</strong>
+                <span class="score" th:if="${post.score != null}" th:text="${post.score} + ' 점'">0 점</span>
+                <span class="grade" th:if="${post.grade != null}" th:text="${post.grade + ' 등급'}">C 등급</span>
+            </div>
+        </div>
+
+        <div class="post-extra"
+             th:if="${post.interviewFeedback != null and !#strings.isEmpty(post.interviewFeedback)}">
+            <h3 class="extra-title">상세 피드백</h3>
+            <div class="extra-body"
+                 th:utext="${#strings.replace(post.interviewFeedback, '\n', '<br/>')}"></div>
+        </div>
+
+        <div class="post-extra"
+             th:if="${post.content != null and !#strings.isEmpty(post.content)}">
+            <h3 class="extra-title">추가 메모</h3>
+            <div class="extra-body"
+                 th:utext="${#strings.replace(post.content, '\n', '<br/>')}"></div>
         </div>
 
         <div class="post-actions"
-             th:if="${#authorization.expression('isAuthenticated()')
-        and (post.writerId == #authentication.principal.userId
-             or #authorization.expression('hasRole(''ADMIN'')'))}">
+             th:if="${#authorization.expression('isAuthenticated()')}">
             <button id="btn-edit-post"  class="btn-action">수정</button>
             <button id="btn-delete-post" class="btn-action btn-danger">삭제</button>
         </div>
-
 
         <div class="post-footer">
             <div class="metrics">
@@ -82,13 +106,11 @@
             <hr class="meta-divider" />
         </div>
 
-
         <section class="comments-section">
             <div class="comments">
                 <div class="comments__title">
                     <span>댓글</span>
                     <span class="comments__badge">
-                        <!-- ✅ 중첩 ${} 제거 -->
                         <span id="comment-count"
                               th:text="${comments != null ? #lists.size(comments) : 0}">0</span>개
                     </span>
@@ -124,7 +146,6 @@
     })();
 </script>
 
-<script th:src="@{/js/post-detail-comments.js(v=${#dates.createNow().time})}" defer></script>
-
+<script th:src="@{/js/post-detail-comments.js}" defer></script>
 </body>
 </html>

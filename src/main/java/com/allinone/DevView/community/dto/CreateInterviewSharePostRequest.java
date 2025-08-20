@@ -1,8 +1,8 @@
 package com.allinone.DevView.community.dto;
 
 import com.allinone.DevView.common.enums.Grade;
+import com.allinone.DevView.common.enums.InterviewType;
 import jakarta.validation.constraints.*;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,4 +32,5 @@ public class CreateInterviewSharePostRequest {
     @NotBlank(message = "interviewFeedback은 필수입니다.")
     private String interviewFeedback;
 
+    private InterviewType interviewType;
 }
