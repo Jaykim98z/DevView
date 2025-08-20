@@ -72,8 +72,8 @@ public class InterviewService {
                 .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
 
         List<String> questionTexts = gemini.getQuestionFromAi(
-                interview.getJobPosition(),
-                interview.getCareerLevel(),
+                interview.getJobPosition().toString(),
+                interview.getCareerLevel().toString(),
                 interview.getQuestionCount(),
                 interview.getInterviewType()
         );
@@ -82,7 +82,7 @@ public class InterviewService {
                 .map(text -> InterviewQuestion.builder()
                         .interview(interview)
                         .text(text)
-                        .category(interview.getJobPosition())
+                        .category(interview.getJobPosition().toString())
                         .build())
                 .collect(Collectors.toList());
 
@@ -98,7 +98,7 @@ public class InterviewService {
         InterviewQuestion newQuestion = InterviewQuestion.builder()
                 .interview(interview)
                 .text(questionText)
-                .category(interview.getJobPosition())
+                .category(interview.getJobPosition().toString())
                 .build();
 
         InterviewQuestion savedQuestion = interviewQuestionRepository.save(newQuestion);
