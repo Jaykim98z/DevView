@@ -31,6 +31,11 @@
 }
 
 .option-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     padding: 1rem;
     border: 2px solid #e9ecef;
     border-radius: 8px;
@@ -52,7 +57,12 @@
     font-weight: 600;
 }
 
-.start-btn {
+.btn-icon {
+    width: 24px;
+    height: 24px;
+}
+
+.interview-submit-btn {
     display: block;
     width: 100%;
     padding: 1rem;
@@ -66,6 +76,38 @@
     transition: background-color 0.2s;
 }
 
-.start-btn:hover {
+.interview-submit-btn:hover {
     background-color: #495057;
+}
+
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    margin-bottom: 2.5rem;
+}
+
+.select-wrapper::after {
+    content: '▼';
+    font-size: 0.8rem;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.form-select {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    background: transparent;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    font-size: 1rem;
+    cursor: pointer;
 }
