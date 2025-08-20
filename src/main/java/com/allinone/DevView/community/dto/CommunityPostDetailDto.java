@@ -14,7 +14,6 @@ public class CommunityPostDetailDto {
     private String summary;
     private String username;
     private Long writerId;
-    private String content;
     private int score;
     private String grade;
     private int viewCount;
@@ -46,7 +45,6 @@ public class CommunityPostDetailDto {
                 .summary(summary)
                 .username(username)
                 .writerId(post.getUser() != null ? post.getUser().getUserId() : null)
-                .content(post.getContent())
                 .score(post.getScore())
                 .grade(post.getGrade() != null ? post.getGrade().name() : null)
                 .viewCount(post.getViewCount())

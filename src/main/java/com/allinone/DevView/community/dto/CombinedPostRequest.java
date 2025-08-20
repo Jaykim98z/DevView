@@ -8,22 +8,31 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CombinedPostRequest {
 
     @Valid
     @NotNull
-    private CreateInterviewSharePostRequest interviewShare = new CreateInterviewSharePostRequest();
+    private CreateInterviewSharePostRequest interviewShare;
 
     @Valid
     @NotNull
-    private CreatePostRequest freePost = new CreatePostRequest();
+    private CreatePostRequest freePost;
 
     public static CombinedPostRequest empty() {
-        CombinedPostRequest form = new CombinedPostRequest();
-
-        form.getFreePost().setInterviewType("PRACTICE");
-        form.getFreePost().setGrade("C");
-        return form;
+        return CombinedPostRequest.builder()
+                .interviewShare(new CreateInterviewSharePostRequest())
+                .freePost(new CreatePostRequest(
+                        "", "",
+                        "PRACTICE",
+                        "C",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                ))
+                .build();
     }
 
     public CreateInterviewSharePostRequest toInterviewShareRequest() {
