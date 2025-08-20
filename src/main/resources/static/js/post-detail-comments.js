@@ -8,27 +8,20 @@ function __getCsrf__() {
   if (m) return { header: 'X-XSRF-TOKEN', token: decodeURIComponent(m[1]) };
   return { header: null, token: null };
 }
-function __secureHeaders__(json = true, baseHeaders = {}) {
+function __secureHeaders__(json = true) {
   const { header, token } = __getCsrf__();
-  const h = { 'X-Requested-With': 'XMLHttpRequest', ...baseHeaders };
+  const h = { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' };
   if (json) h['Content-Type'] = 'application/json';
   if (header && token) h[header] = token;
   return h;
 }
+
 async function fetchJson(url, opts = {}) {
-  const hasBody = !!opts.body || !!opts.bodyObj;
-  const headers = __secureHeaders__(hasBody, opts.headers || {});
-  const res = await fetch(url, {
-    method: opts.method || 'GET',
-    headers,
-    credentials: opts.credentials || 'same-origin',
-    body: opts.bodyObj ? JSON.stringify(opts.bodyObj) : opts.body
-  });
-  if (res.status === 401) throw new Error('UNAUTHORIZED');
+  const res = await fetch(url, opts);
   if (!res.ok) {
     let msg = `HTTP ${res.status}`;
     try { msg = await res.text(); } catch {}
-    throw new Error(msg || 'REQUEST_FAILED');
+    throw new Error(msg);
   }
   const ct = res.headers.get('content-type') || '';
   if (ct.includes('application/json')) return res.json();
@@ -46,6 +39,48 @@ function toggleIconSolid(iconEl, makeSolid) {
   iconEl.classList.toggle('fa-regular', !makeSolid);
 }
 
+function initLikeScrap() {
+  document.querySelectorAll('.btn-like').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.url || `/api/community/posts/${getPostId()}/like`;
+      try {
+        const data = await fetchJson(url, {
+          method: 'POST',
+          headers: __secureHeaders__(),
+          body: JSON.stringify({})
+        });
+        const active = !!data.active;
+        btn.classList.toggle('is-active', active);
+        toggleIconSolid(btn.querySelector('i'), active);
+        const countEl = btn.querySelector('.count');
+        if (typeof data.count === 'number') countEl.textContent = String(data.count);
+      } catch {
+        alert('좋아요 처리에 실패했습니다.');
+      }
+    });
+  });
+
+  document.querySelectorAll('.btn-scrap').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const url = btn.dataset.url || `/api/community/posts/${getPostId()}/scrap`;
+      try {
+        const data = await fetchJson(url, {
+          method: 'POST',
+          headers: __secureHeaders__(),
+          body: JSON.stringify({})
+        });
+        const active = !!data.active;
+        btn.classList.toggle('is-active', active);
+        toggleIconSolid(btn.querySelector('i'), active); // 활성=solid, 비활성=regular
+        const countEl = btn.querySelector('.count');
+        if (typeof data.count === 'number') countEl.textContent = String(data.count);
+      } catch {
+        alert('스크랩 처리에 실패했습니다.');
+      }
+    });
+  });
+}
+
 function buildActionsHTML() {
   return `
     <button id="btn-edit-post"  class="btn-action">수정</button>
@@ -57,62 +92,6 @@ function buildEditActionsHTML() {
     <button id="btn-save-post"   class="btn-submit">저장</button>
     <button id="btn-cancel-edit" class="btn-action">취소</button>
   `;
-}
-
-function initLikeScrap() {
-  const postId = getPostId();
-  if (!postId) return;
-
-  const likeAddUrl  = `/api/community/posts/${postId}/likes`;
-  const likeDelUrl  = `/api/community/posts/${postId}/likes`;
-  const scrapAddUrl = `/api/community/posts/${postId}/scraps`;
-  const scrapDelUrl = `/api/community/posts/${postId}/scraps`;
-
-  document.querySelectorAll('.btn-like').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const willActivate = !btn.classList.contains('is-active');
-      const url   = willActivate ? likeAddUrl : likeDelUrl;
-      const method = willActivate ? 'POST' : 'DELETE';
-
-      try {
-        const data = await fetchJson(url, { method });
-        const active = data?.active ?? willActivate;
-
-        btn.classList.toggle('is-active', active);
-        btn.setAttribute('aria-pressed', String(active));
-        toggleIconSolid(btn.querySelector('i'), active);
-
-        const countEl = btn.querySelector('.count');
-        if (countEl && typeof data?.count === 'number') countEl.textContent = String(data.count);
-      } catch (e) {
-        if (e.message === 'UNAUTHORIZED') alert('로그인이 필요합니다.');
-        else alert('좋아요 처리에 실패했습니다.');
-      }
-    });
-  });
-
-  document.querySelectorAll('.btn-scrap').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const willActivate = !btn.classList.contains('is-active');
-      const url   = willActivate ? scrapAddUrl : scrapDelUrl;
-      const method = willActivate ? 'POST' : 'DELETE';
-
-      try {
-        const data = await fetchJson(url, { method });
-        const active = data?.active ?? willActivate;
-
-        btn.classList.toggle('is-active', active);
-        btn.setAttribute('aria-pressed', String(active));
-        toggleIconSolid(btn.querySelector('i'), active);
-
-        const countEl = btn.querySelector('.count');
-        if (countEl && typeof data?.count === 'number') countEl.textContent = String(data.count);
-      } catch (e) {
-        if (e.message === 'UNAUTHORIZED') alert('로그인이 필요합니다.');
-        else alert('스크랩 처리에 실패했습니다.');
-      }
-    });
-  });
 }
 
 function enterEditMode() {
@@ -175,23 +154,37 @@ function enterEditMode() {
 }
 
 async function tryUpdatePost(postId, payload) {
+  const headers = __secureHeaders__();
 
-  const url = `/api/community/posts/${postId}`;
-  try {
-    return await fetchJson(url, {
-      method: 'PATCH',
-      bodyObj: { title: payload.title, content: payload.content }
-    });
-  } catch {
-    return await fetchJson(url, {
-      method: 'PATCH',
-      bodyObj: { title: payload.title, summary: payload.content }
-    });
+  const bodies = [
+    JSON.stringify({ title: payload.title, content: payload.content }), // case1
+    JSON.stringify({ title: payload.title, summary: payload.content })  // case2
+  ];
+
+  for (const body of bodies) {
+    try {
+      return await fetchJson(`/api/community/posts/${postId}`, {
+        method: 'PATCH',
+        headers,
+        body
+      });
+    } catch {  }
   }
+
+  return await fetchJson(`/api/community/posts/${postId}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({ id: postId, title: payload.title, summary: payload.content })
+  });
 }
 
 async function tryDeletePost(postId) {
-  await fetchJson(`/api/community/posts/${postId}`, { method: 'DELETE' });
+  const headers = __secureHeaders__();
+  try {
+    await fetchJson(`/api/community/posts/${postId}/soft`, { method: 'DELETE', headers });
+    return;
+  } catch {}
+  await fetchJson(`/api/community/posts/${postId}`, { method: 'DELETE', headers });
 }
 
 function initEditDelete() {
@@ -240,8 +233,7 @@ function initEditDelete() {
         await tryDeletePost(postId);
         alert('삭제되었습니다.');
         window.location.href = '/community';
-      } catch (e) {
-        console.error(e);
+      } catch {
         alert('삭제에 실패했습니다.');
       }
     });

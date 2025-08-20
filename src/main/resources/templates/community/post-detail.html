@@ -49,9 +49,9 @@
         </div>
 
         <div class="post-actions"
-             th:if="${#authorization.expression('isAuthenticated()')
-        and (post.writerId == #authentication.principal.userId
-             or #authorization.expression('hasRole(''ADMIN'')'))}">
+             th:if="${ #authorization.expression('isAuthenticated()')
+              and ( (#authentication?.principal?.userId) == post.writerId
+                    or #authorization.expression('hasRole(''ADMIN'')') ) }">
             <button id="btn-edit-post"  class="btn-action">수정</button>
             <button id="btn-delete-post" class="btn-action btn-danger">삭제</button>
         </div>
@@ -65,14 +65,14 @@
 
                 <button type="button" class="btn-icon btn-like"
                         data-post-id="[[${post.id}]]"
-                        th:data-url="@{/api/community/posts/{id}/likes(id=${post.id})}">
+                        th:data-url="@{/api/community/posts/{id}/like(id=${post.id})}">
                     <i class="fa-solid fa-heart" aria-hidden="true"></i>
                     <span class="count" th:text="${post.likeCount}">0</span>
                 </button>
 
                 <button type="button" class="btn-icon btn-scrap"
                         data-post-id="[[${post.id}]]"
-                        th:data-url="@{/api/community/posts/{id}/scraps(id=${post.id})}">
+                        th:data-url="@{/api/community/posts/{id}/scrap(id=${post.id})}">
                     <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
                     <span class="count" th:text="${post.scrapCount}">0</span>
                 </button>
@@ -120,9 +120,7 @@
     })();
 </script>
 
-
 <script th:src="@{/js/post-detail-comments.js(v=${#dates.createNow().time})}" defer></script>
-<script th:src="@{/js/community.js(v=${#dates.createNow().time})}" defer></script>
 
 </body>
 </html>
