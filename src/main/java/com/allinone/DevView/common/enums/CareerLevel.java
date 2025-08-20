@@ -14,7 +14,6 @@ public enum CareerLevel {
     MANAGER("MANAGER"),;
 
     private final String displayName;
-
     public static CareerLevel fromString(String value) {
         if (value == null) return null;
         try {
