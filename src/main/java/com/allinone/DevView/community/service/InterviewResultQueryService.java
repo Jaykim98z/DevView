@@ -15,7 +15,6 @@ public class InterviewResultQueryService {
 
     private final InterviewResultRepository repo;
 
-    /** 로그인 유저의 최신 결과 */
     @Transactional(readOnly = true)
     public InterviewResultResponse findLatestByUserId(Long userId) {
         InterviewResult r = repo.findTopByInterview_User_UserIdOrderByInterview_CreatedAtDesc(userId)
@@ -23,10 +22,16 @@ public class InterviewResultQueryService {
         return InterviewResultResponse.fromEntity(r);
     }
 
-    /** 특정 resultId를 해당 유저 권한으로 조회 */
     @Transactional(readOnly = true)
     public InterviewResultResponse findByIdForUser(Long resultId, Long userId) {
         InterviewResult r = repo.findByIdAndInterview_User_UserId(resultId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
+        return InterviewResultResponse.fromEntity(r);
+    }
+
+    @Transactional(readOnly = true)
+    public InterviewResultResponse getDetail(Long resultId) {
+        InterviewResult r = repo.findById(resultId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
         return InterviewResultResponse.fromEntity(r);
     }

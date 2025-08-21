@@ -30,67 +30,14 @@
             <label for="interviewResultId">인터뷰 결과 ID</label>
             <div class="inline">
                 <input type="number" id="interviewResultId" name="interviewResultId"
-                       placeholder="예: 1024" inputmode="numeric" min="1" step="1" />
-                <small class="hint">ID를 입력하고 포커스를 옮기면 자동으로 결과를 불러옵니다. (없으면 최신 결과 시도)</small>
+                       placeholder="예: 1024" inputmode="numeric" min="1" step="1" required />
             </div>
-        </section>
-
-        <section class="grid-2">
-            <div class="field">
-                <label for="grade">등급</label>
-                <select id="grade" name="grade" required>
-                    <option value="" selected disabled>등급 선택</option>
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                    <option value="D">D</option>
-                    <option value="E">E</option>
-                    <option value="F">F</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label for="score">점수</label>
-                <input type="number" id="score" name="score"
-                       placeholder="0 ~ 100" min="0" max="100" step="1" required />
-            </div>
-        </section>
-
-        <section class="field">
-            <label for="interviewFeedback">상세 피드백</label>
-            <textarea id="interviewFeedback" name="interviewFeedback"
-                      placeholder="면접 결과 상세 피드백을 입력하세요."
-                      rows="6" required></textarea>
         </section>
 
         <section class="field">
             <label for="title">제목</label>
             <input type="text" id="title" name="title"
-                   placeholder="[면접결과] A 87점" maxlength="120" required />
-        </section>
-
-        <section class="grid-2">
-            <div class="field">
-                <label for="fpType">인터뷰 유형</label>
-                <select id="fpType" name="fpType" required>
-                    <option value="" disabled selected>유형 선택</option>
-                    <option value="COMPREHENSIVE">COMPREHENSIVE</option>
-                    <option value="BEHAVIORAL">BEHAVIORAL</option>
-                    <option value="PRACTICAL">PRACTICAL</option>
-                    <option value="TECHNICAL">TECHNICAL</option>
-                    </select>
-            </div>
-            <div class="field">
-                <label for="fpGrade">자유게시 등급</label>
-                <select id="fpGrade" name="fpGrade">
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C" selected>C</option>
-                    <option value="D">D</option>
-                    <option value="E">E</option>
-                    <option value="F">F</option>
-                </select>
-            </div>
+                   placeholder="[면접결과] A 87점" maxlength="150" required />
         </section>
 
         <section class="field">
@@ -109,8 +56,6 @@
         </section>
     </form>
 </main>
-
-<!--<div th:replace="~{fragments/footer :: footer}"></div>-->
 
 <script defer th:src="@{/js/post-write.js(v=${#dates.createNow().time})}"></script>
 </body>

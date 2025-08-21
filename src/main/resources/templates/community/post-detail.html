@@ -8,6 +8,7 @@
 
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/post-detail.css" />
+    <link rel="stylesheet" href="/css/interview-result.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <meta name="_csrf" th:content="${_csrf.token}">
@@ -38,14 +39,6 @@
 
         <h2 class="post-title" th:text="${post.title}">게시글 제목</h2>
 
-        <div class="badges">
-            <span class="badge badge-tech" th:text="${post.interviewType}">PRACTICE</span>
-            <span class="score" th:text="${post.score} + ' 점'">0 점</span>
-            <span class="grade" th:text="${post.grade != null ? '• ' + post.grade + ' 등급' : ''}">• C 등급</span>
-        </div>
-
-        <div class="post-content" th:text="${post.summary}">게시글 요약/내용</div>
-
         <div class="post-extra" th:if="${post.interviewResultId != null}">
             <hr class="meta-divider" />
             <div class="extra-row">
@@ -54,27 +47,24 @@
             </div>
         </div>
 
-        <div class="post-extra" th:if="${post.score != null or post.grade != null}">
-            <div class="extra-row">
-                <strong>결과</strong>
-                <span class="score" th:if="${post.score != null}" th:text="${post.score} + ' 점'">0 점</span>
-                <span class="grade" th:if="${post.grade != null}" th:text="${post.grade + ' 등급'}">C 등급</span>
-            </div>
-        </div>
+        <section class="interview-result-area" th:if="${post.interviewResultId != null}">
+            <div th:replace="~{fragments/result-card :: resultCard(
+      resultId=${post.interviewResultId},
+      feedback=${post.interviewFeedback},
+      summary=${post.summary},
+      score=${post.score},
+      grade=${post.grade},
+      interviewTypeLabel=${post.interviewTypeLabel}
+  )}"></div>
+        </section>
 
-        <div class="post-extra"
-             th:if="${post.interviewFeedback != null and !#strings.isEmpty(post.interviewFeedback)}">
-            <h3 class="extra-title">상세 피드백</h3>
-            <div class="extra-body"
-                 th:utext="${#strings.replace(post.interviewFeedback, '\n', '<br/>')}"></div>
-        </div>
-
-        <div class="post-extra"
-             th:if="${post.content != null and !#strings.isEmpty(post.content)}">
+        <section class="extra-memo">
             <h3 class="extra-title">추가 메모</h3>
-            <div class="extra-body"
-                 th:utext="${#strings.replace(post.content, '\n', '<br/>')}"></div>
-        </div>
+            <div class="extra-body">
+                <div class="post-content"
+                     th:text="${#strings.defaultString(post.content, '')}"></div>
+            </div>
+        </section>
 
         <div class="post-actions"
              th:if="${#authorization.expression('isAuthenticated()')}">

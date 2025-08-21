@@ -1,0 +1,26 @@
+<div xmlns:th="http://www.thymeleaf.org"
+     th:fragment="resultCard(resultId, feedback, summary, score, grade, interviewTypeLabel)">
+  <section class="result-card">
+    <div class="score-summary">
+      <h2><span th:text="${score != null ? score : '--'}">--</span>/100</h2>
+      <div class="grade-badge"
+           th:text="${'Grade ' + (grade != null ? grade : '--')}">Grade --</div>
+    </div>
+
+    <h3 class="section-title">상세 피드백</h3>
+    <div class="feedback-details"
+         th:text="${feedback != null ? feedback : '피드백 없음'}">피드백 없음</div>
+
+    <h3 class="section-title">종합 평가</h3>
+    <div class="summary-details"
+         th:text="${summary != null ? summary : '요약 없음'}">요약 없음</div>
+
+    <div class="result-footer">
+      <span class="type" th:text="${interviewTypeLabel != null ? interviewTypeLabel : '-'}">-</span>
+      <a th:if="${resultId}"
+         th:href="@{/interview/result/{id}(id=${resultId})}">
+        상세 결과 보기
+      </a>
+    </div>
+  </section>
+</div>
