@@ -3,7 +3,6 @@ package com.allinone.DevView.interview.service;
 import com.allinone.DevView.common.enums.Grade;
 import com.allinone.DevView.common.exception.CustomException;
 import com.allinone.DevView.common.exception.ErrorCode;
-import com.allinone.DevView.interview.dto.alan.AlanRecommendationDto;
 import com.allinone.DevView.interview.dto.gemini.GeminiAnalysisResponseDto;
 import com.allinone.DevView.interview.dto.request.StartInterviewRequest;
 import com.allinone.DevView.interview.dto.request.SubmitAnswerRequest;
@@ -41,6 +40,7 @@ public class InterviewService {
     private final ExternalAiApiService gemini;
     private final ExternalAiApiService alan;
     private final InterviewResultRepository interviewResultRepository;
+    private final RecommendationGenerationService recommendationGenerationService;
     private final ObjectMapper objectMapper;
     // 🆕 랭킹 서비스 연동 (순환 의존성 해결을 위해 @Lazy 사용)
     @Lazy
@@ -147,8 +147,6 @@ public class InterviewService {
         try {
             GeminiAnalysisResponseDto analysis = objectMapper.readValue(cleanedJson, GeminiAnalysisResponseDto.class);
 
-            String recommendationsHtml = getRecommendationsFromAlan(analysis.keywords());
-
             interview.endInterviewSession();
 
             InterviewResult result = InterviewResult.builder()
@@ -156,10 +154,12 @@ public class InterviewService {
                     .totalScore(analysis.totalScore())
                     .grade(calculateGrade(analysis.totalScore()))
                     .feedback(cleanedJson)
-                    .recommendedResource(recommendationsHtml)
+                    .recommendedResource("결과를 생성하는 중입니다. 잠시만 기다려주세요...")
                     .build();
 
             InterviewResult savedResult = interviewResultRepository.save(result);
+
+            recommendationGenerationService.generateAndSaveRecommendations(savedResult.getId(), analysis.keywords());
 
             // 면접 완료 후 랭킹 업데이트
             try {
@@ -214,30 +214,6 @@ public class InterviewService {
                 "'techScore' (0-100), 'problemScore' (0-100), 'commScore' (0-100), 'attitudeScore' (0-100), " +
                 "and 'keywords' (an array of 1-7 relevant technical string KR keywords. If no specific keywords can be found in the answers, use general keywords related to the job position).\n\n" +
                 "Here is the transcript:\n" + transcript;
-    }
-
-    private String getRecommendationsFromAlan(List<String> keywords) {
-        if (alan instanceof AlanApiService && keywords != null && !keywords.isEmpty()) {
-            try {
-                String combinedKeywords = String.join(", ", keywords);
-                String alanJson = ((AlanApiService) alan).getRecommendations(combinedKeywords);
-                String cleanedAlanJson = alanJson.trim().replace("```json", "").replace("```", "").trim();
-
-                AlanRecommendationDto alanResponse = objectMapper.readValue(cleanedAlanJson, AlanRecommendationDto.class);
-
-                if (alanResponse != null && alanResponse.recommendations() != null) {
-                    return alanResponse.recommendations().stream()
-                            .map(item -> {
-                                String safeTitle = item.title().replace("<", "&lt;").replace(">", "&gt;");
-                                return "<li><a href=\"" + item.url() + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + safeTitle + "</a></li>";
-                            })
-                            .collect(Collectors.joining("", "<ul>", "</ul>"));
-                }
-            } catch (Exception e) {
-                log.error("Failed to get or process recommendations from Alan API", e);
-            }
-        }
-        return "추천 학습 자료가 없습니다.";
     }
 
     private Grade calculateGrade(int score) {
