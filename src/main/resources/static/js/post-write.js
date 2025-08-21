@@ -6,6 +6,41 @@
   const isBlank = (v) => v == null || String(v).trim() === '';
   const toNum   = (v) => Number(v ?? NaN);
 
+  // ✅ CSRF 토큰 초기화
+  let csrfToken = null;
+  let csrfHeader = null;
+
+  function initCsrfToken() {
+    const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+
+    csrfToken = csrfTokenMeta ? csrfTokenMeta.content : null;
+    csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.content : null;
+
+    if (!csrfToken || !csrfHeader) {
+      console.warn('CSRF 토큰이 페이지에 없습니다.');
+    }
+  }
+
+  // ✅ 보안 헤더를 포함한 fetch 함수
+  function buildSecureHeaders(includeContentType = true) {
+    const headers = {
+      'X-Requested-With': 'XMLHttpRequest',
+      'Accept': 'application/json'
+    };
+
+    if (includeContentType) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    // CSRF 토큰 헤더 추가
+    if (csrfToken && csrfHeader) {
+      headers[csrfHeader] = csrfToken;
+    }
+
+    return headers;
+  }
+
   function getForm() {
     return (
       document.getElementById('community-post-form') ||
@@ -25,25 +60,58 @@
     };
   }
 
-  function getCsrf() {
-    const token  = document.querySelector('meta[name="_csrf"]')?.content;
-    const header = document.querySelector('meta[name="_csrf_header"]')?.content;
-    return { token, header };
+  async function fetchJson(url, init = {}) {
+    const headers = buildSecureHeaders(init.method !== 'GET');
+
+    try {
+      const res = await fetch(url, {
+        credentials: 'same-origin',
+        ...init,
+        headers: { ...headers, ...init.headers }
+      });
+
+      if (res.status === 403) {
+        console.error('CSRF 토큰 오류 또는 권한 없음');
+        alert('보안 토큰이 만료되었습니다. 페이지를 새로고침 해주세요.');
+        location.reload();
+        return null;
+      }
+
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('text/html')) {
+        throw new Error('AUTH_REDIRECT');
+      }
+
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try {
+          msg = await res.text();
+        } catch {}
+        throw new Error(msg);
+      }
+
+      const text = await res.text().catch(() => '');
+      try {
+        return text ? JSON.parse(text) : null;
+      } catch {
+        return null;
+      }
+    } catch (error) {
+      if (error.message === 'AUTH_REDIRECT') {
+        window.location.href = '/user/login';
+        return null;
+      }
+      throw error;
+    }
   }
 
-  async function fetchJson(url, init) {
-    const res = await fetch(url, {
-      credentials: 'same-origin',
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      ...init,
-    });
-    const text = await res.text().catch(() => '');
-    if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
-    try { return text ? JSON.parse(text) : null; } catch { return null; }
+  async function fetchResultById(resultId)  {
+    return fetchJson(API_BY_ID(resultId));
   }
 
-  async function fetchResultById(resultId)  { return fetchJson(API_BY_ID(resultId)); }
-  async function fetchLatestResult()        { return fetchJson(API_LATEST); }
+  async function fetchLatestResult() {
+    return fetchJson(API_LATEST);
+  }
 
   function updateMemoCounter(el) {
     if (!el.memo || !el.memoCounter) return;
@@ -73,90 +141,74 @@
 
   (async function bootPrefill() {
     try {
+      // 페이지 로드 시 CSRF 토큰 초기화
+      initCsrfToken();
+
       const params = new URLSearchParams(location.search);
       const rid = params.get('interviewResultId');
       let data = null;
       if (rid && !isBlank(rid)) data = await fetchResultById(rid);
       else data = await fetchLatestResult();
       fillFormFromResult(data);
-    } catch (e) {}
+    } catch (e) {
+      console.error('프리필 오류:', e);
+    }
   })();
 
   function buildPayload() {
     const el = $els();
     const interviewResultId =
-      el.resultId && !isBlank(el.resultId.value) ? Number(el.resultId.value) : null;
+      el.resultId && !isBlank(el.resultId.value) ?
+        toNum(el.resultId.value) : null;
+    const title = el.title?.value?.trim() || '';
+    const content = el.memo?.value?.trim() || '';
 
-    return {
-      category: 'INTERVIEW_SHARE',
-      interviewShare: {
-        interviewResultId,
-        title: (el.title?.value ?? '').trim(),
-        content: el.memo?.value ?? ''
-      }
-    };
-  }
-
-  async function createPost(payload) {
-    const { token, header } = getCsrf();
-    const headers = { 'Content-Type': 'application/json' };
-    if (token && header) headers[header] = token;
-
-    return fetchJson(API_COMPOSE, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload)
-    });
-  }
-
-  function bindOnceWhenFormReady() {
-    const el = $els();
-    if (!el.form) return false;
-
-    el.resultId?.addEventListener('blur', async () => {
-      if (!el.resultId || isBlank(el.resultId.value)) return;
-      try { fillFormFromResult(await fetchResultById(el.resultId.value)); } catch {}
-    });
-
-    el.memo?.addEventListener('input', () => updateMemoCounter(el));
-    updateMemoCounter(el);
-
-    el.title?.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') ev.preventDefault(); });
-
-    el.form.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      if (el.submit) el.submit.disabled = true;
-
-      try {
-        const payload = buildPayload();
-        if (!payload.interviewShare?.interviewResultId) { alert('인터뷰 결과 ID를 입력하세요.'); return; }
-        if (isBlank(payload.interviewShare?.title)) { alert('제목을 입력해주세요.'); return; }
-
-        const res = await createPost(payload);
-        const pid = res?.id ?? res?.postId;
-        if (pid) location.href = `/community/posts/${pid}`;
-        else     location.href = '/community';
-      } catch (e) {
-        alert(`등록 실패: ${e.message ?? e}`);
-      } finally {
-        if (el.submit) el.submit.disabled = false;
-      }
-    }, { once: true });
-
-    return true;
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      if (!bindOnceWhenFormReady()) {
-        const mo = new MutationObserver(() => { if (bindOnceWhenFormReady()) mo.disconnect(); });
-        mo.observe(document.body, { childList: true, subtree: true });
-      }
-    });
-  } else {
-    if (!bindOnceWhenFormReady()) {
-      const mo = new MutationObserver(() => { if (bindOnceWhenFormReady()) mo.disconnect(); });
-      mo.observe(document.body, { childList: true, subtree: true });
+    if (isBlank(title)) throw new Error('제목을 입력해주세요.');
+    if (interviewResultId == null || Number.isNaN(interviewResultId)) {
+      throw new Error('면접 결과를 선택해주세요.');
     }
+
+    return { interviewResultId, title, content };
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const el = $els();
+
+    // 글자 수 카운터
+    if (el.memo) {
+      el.memo.addEventListener('input', () => updateMemoCounter(el));
+      updateMemoCounter(el);
+    }
+
+    // 폼 제출
+    if (el.form) {
+      el.form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        try {
+          const payload = buildPayload();
+
+          if (el.submit) el.submit.disabled = true;
+
+          // ✅ 보안 헤더를 포함한 글 작성 요청
+          const result = await fetchJson(API_COMPOSE, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+
+          if (result && result.postId) {
+            alert('글이 성공적으로 작성되었습니다.');
+            window.location.href = `/community/posts/${result.postId}/detail`;
+          } else {
+            throw new Error('글 작성에 실패했습니다.');
+          }
+        } catch (err) {
+          console.error('글 작성 오류:', err);
+          alert(err.message || '글 작성 중 오류가 발생했습니다.');
+        } finally {
+          if (el.submit) el.submit.disabled = false;
+        }
+      });
+    }
+  });
 })();

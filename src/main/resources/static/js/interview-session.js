@@ -15,13 +15,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const timerEl = document.getElementById('timer');
     const charCounterEl = document.getElementById('char-counter');
 
+    // CSRF 토큰 초기화
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
     function initializeInterview() {
         interviewId = localStorage.getItem('interviewId');
         const storedQuestions = localStorage.getItem('questions');
         const durationMinutes = localStorage.getItem('durationMinutes');
 
         if (!interviewId || !storedQuestions) {
-            alert('Interview data not found.');
+            alert('Interview data not found. Redirecting to settings.');
             window.location.href = '/interview/settings';
             return;
         }
@@ -116,16 +120,25 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         try {
+            // CSRF 토큰 포함한 headers
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+
             const submitResponse = await fetch('/api/v1/interviews/answers', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
+                credentials: 'same-origin',
                 body: JSON.stringify(submitRequest)
             });
 
             if (!submitResponse.ok) throw new Error('Failed to submit answers.');
 
             const endResponse = await fetch(`/api/v1/interviews/${interviewId}/end`, {
-                method: 'POST'
+                method: 'POST',
+                headers: headers,
+                credentials: 'same-origin'
             });
 
             if (!endResponse.ok) throw new Error('Failed to end interview.');
@@ -157,9 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentQuestionIndex < questions.length) {
             displayCurrentQuestion();
         } else {
-            if (confirm("답변을 제출하고 면접을 완료하시겠습니까?")) {
-                await endInterview();
-            }
+            await endInterview();
         }
     });
 
