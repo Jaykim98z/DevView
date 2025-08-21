@@ -50,8 +50,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const feedbackItem = document.createElement('div');
                 feedbackItem.className = 'feedback-item';
 
-                const questionElement = document.createElement('strong');
-                questionElement.textContent = `Q: ${item.question}`;
+                const questionHeader = document.createElement('div');
+                questionHeader.className = 'feedback-question';
+                questionHeader.textContent = `Q: ${item.question}`;
+
+                const content = document.createElement('div');
+                content.className = 'feedback-content';
 
                 const answerElement = document.createElement('p');
                 answerElement.textContent = `A: ${item.answer}`;
@@ -59,10 +63,23 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const feedbackElement = document.createElement('p');
                 feedbackElement.textContent = `Feedback: ${item.feedback}`;
 
-                feedbackItem.appendChild(questionElement);
-                feedbackItem.appendChild(answerElement);
-                feedbackItem.appendChild(feedbackElement);
+                content.appendChild(answerElement);
+                content.appendChild(feedbackElement);
+
+                feedbackItem.appendChild(questionHeader);
+                feedbackItem.appendChild(content);
                 feedbackContainer.appendChild(feedbackItem);
+
+                questionHeader.addEventListener('click', () => {
+                    questionHeader.classList.toggle('active');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        content.style.padding = '0 1.5rem';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        content.style.padding = '1rem 1.5rem';
+                    }
+                });
             });
         } else {
             feedbackContainer.textContent = "No detailed feedback available.";
