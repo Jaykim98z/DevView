@@ -33,7 +33,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     spinner.show();
 
     try {
-        const response = await fetch(`/api/v1/interviews/${interviewId}/results`);
+        const response = await fetch(`/api/v1/interviews/${interviewId}/results`, {
+            credentials: 'same-origin'
+        });
         if (!response.ok) {
             throw new Error('Failed to fetch interview results.');
         }
@@ -43,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         scoreEl.textContent = analysis.totalScore;
         gradeEl.textContent = `Grade ${result.grade}`;
         summaryEl.textContent = analysis.summary;
+        recommendationsEl.innerHTML = result.recommendedResource;
         feedbackContainer.innerHTML = '';
         if (analysis.detailedFeedback && analysis.detailedFeedback.length > 0) {
             analysis.detailedFeedback.forEach(item => {
@@ -83,10 +86,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         } else {
             feedbackContainer.textContent = "No detailed feedback available.";
         }
-        recommendationsEl.innerHTML = result.recommendedResource;
-        if (result.recommendedResource && result.recommendedResource.includes("생성하는 중")) {
-            startPollingForRecommendations(interviewId);
-        }
 
         setProgress(skillTechProgress, skillTechScore, analysis.techScore);
         setProgress(skillProblemProgress, skillProblemScore, analysis.problemScore);
@@ -98,37 +97,5 @@ document.addEventListener('DOMContentLoaded', async function() {
         feedbackContainer.textContent = 'Failed to load results. Please try again later.';
     } finally {
         spinner.hide();
-    }
-
-    function startPollingForRecommendations(interviewId) {
-        let attempts = 0;
-        const maxAttempts = 12;
-        const pollInterval = 10000;
-
-        const intervalId = setInterval(async () => {
-            if (attempts >= maxAttempts) {
-                clearInterval(intervalId);
-                document.getElementById('recommendations-text').textContent = "추천 자료 생성에 실패했습니다. 나중에 다시 시도해주세요.";
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/v1/interviews/${interviewId}/results`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch interview results.');
-                }
-                const result = await response.json();
-
-                if (result.recommendedResource && !result.recommendedResource.includes("생성하는 중")) {
-                    document.getElementById('recommendations-text').innerHTML = result.recommendedResource;
-                    clearInterval(intervalId);
-                }
-            } catch (error) {
-                console.error("Polling failed:", error);
-                clearInterval(intervalId);
-            }
-
-            attempts++;
-        }, pollInterval);
     }
 });
