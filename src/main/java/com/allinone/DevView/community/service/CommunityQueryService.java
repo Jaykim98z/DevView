@@ -9,6 +9,7 @@ import com.allinone.DevView.community.repository.CommunityPostsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -31,14 +32,12 @@ public class CommunityQueryService {
             "createdAt"
     );
 
-    /* 게시글 목록 */
+    @Transactional(readOnly = true)
     public Page<PostListDto> getPosts(Pageable pageable) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, POST_SORT_WHITELIST);
-        return postsRepository.findAll(safe)
-                .map(this::toPostListDto);
+        return postsRepository.findByDeletedFalse(safe).map(this::toPostListDto);
     }
 
-    /* 특정 게시글의 댓글 목록 */
     public Page<CommentsDto> getComments(Long postId, Pageable pageable) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, COMMENT_SORT_WHITELIST);
         return commentsRepository.findByPostIdAndDeletedFalse(postId, safe)

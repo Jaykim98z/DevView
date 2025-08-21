@@ -5,6 +5,7 @@ import com.allinone.DevView.community.entity.*;
 import com.allinone.DevView.community.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,16 @@ public class CommunityController {
             Pageable pageable
     ) {
         return ResponseEntity.ok(communityQueryService.getPosts(pageable));
+    }
+
+    @GetMapping("/posts/dto")
+    public ResponseEntity<Page<CommunityPostsDto>> listPostsAsDto(
+            @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        Page<PostListDto> page = communityQueryService.getPosts(pageable);
+        Page<CommunityPostsDto> converted = page.map(this::toCommunityPostsDto);
+        return ResponseEntity.ok(converted);
     }
 
     @GetMapping("/posts/legacy")
@@ -134,5 +145,12 @@ public class CommunityController {
             case FREE -> communityService.createFreePost(req.getFreePost(), userId);
         };
         return ResponseEntity.ok(Map.of("postId", postId));
+    }
+
+    private CommunityPostsDto toCommunityPostsDto(PostListDto src) {
+        if (src == null) return null;
+        CommunityPostsDto dst = new CommunityPostsDto();
+        BeanUtils.copyProperties(src, dst);
+        return dst;
     }
 }

@@ -23,7 +23,7 @@
     <h1 class="page-title">커뮤니티 글쓰기</h1>
 
     <form id="community-post-form"
-          th:action="@{/community/posts/interview}"
+          th:action="@{/api/community/posts/compose}"
           method="post">
 
         <section class="field">
@@ -72,10 +72,13 @@
         <section class="grid-2">
             <div class="field">
                 <label for="fpType">인터뷰 유형</label>
-                <select id="fpType" name="fpType">
-                    <option value="PRACTICE" selected>PRACTICE</option>
-                    <option value="REAL">REAL</option>
-                </select>
+                <select id="fpType" name="fpType" required>
+                    <option value="" disabled selected>유형 선택</option>
+                    <option value="COMPREHENSIVE">COMPREHENSIVE</option>
+                    <option value="BEHAVIORAL">BEHAVIORAL</option>
+                    <option value="PRACTICAL">PRACTICAL</option>
+                    <option value="TECHNICAL">TECHNICAL</option>
+                    </select>
             </div>
             <div class="field">
                 <label for="fpGrade">자유게시 등급</label>
@@ -100,7 +103,6 @@
                       rows="10" maxlength="1000"></textarea>
         </section>
 
-
         <section class="actions">
             <button type="submit" id="submitBtn" class="btn btn-primary">등록</button>
             <a class="btn btn-secondary" th:href="@{/community}">목록으로</a>
@@ -108,8 +110,7 @@
     </form>
 </main>
 
-
-<div th:replace="~{fragments/footer :: footer}"></div>
+<!--<div th:replace="~{fragments/footer :: footer}"></div>-->
 
 <script defer th:src="@{/js/post-write.js(v=${#dates.createNow().time})}"></script>
 </body>

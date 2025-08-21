@@ -1,8 +1,7 @@
 (function () {
   const API_LATEST = '/api/community/interview-results/latest';
   const API_BY_ID  = (id) => `/api/community/interview-results/${encodeURIComponent(id)}`;
-  const API_CREATE_FREE  = '/community/posts';
-  const API_CREATE_SHARE = '/community/posts/interview-share';
+  const API_COMPOSE = '/api/community/posts/compose';
 
   const isBlank = (v) => v == null || String(v).trim() === '';
   const toNum   = (v) => Number(v ?? NaN);
@@ -128,29 +127,30 @@
     };
 
     if (category === 'INTERVIEW_SHARE') {
-      const payload = {
+      const interviewShare = {
         ...common,
         interviewResultId: interviewResultId ?? 0,
         grade: el.grade?.value ?? '',
         score: Number.isFinite(scoreNum) ? scoreNum : 0,
-        interviewFeedback: el.feedback?.value ?? ''
+        interviewFeedback: el.feedback?.value ?? '',
+        interviewType: el.fpType?.value ?? ''
       };
-      if (!isBlank(el.fpType?.value)) payload.interviewType = el.fpType.value;
-      return { endpoint: API_CREATE_SHARE, payload };
+      return {
+        endpoint: API_COMPOSE,
+        payload: { category: 'INTERVIEW_SHARE', interviewShare }
+      };
     }
 
-    const payload = {
+    const freePost = {
       ...common,
       interviewType: el.fpType?.value ?? '',
       grade: el.grade?.value ?? '',
       techTag: el.techTag?.value ?? '',
       level: el.fpGrade?.value ?? '',
-      category: 'FREE',
       type: el.type?.value ?? '',
       score: Number.isFinite(scoreNum) ? scoreNum : null
     };
-
-    return { endpoint: API_CREATE_FREE, payload };
+    return { endpoint: API_COMPOSE, payload: { category: 'FREE', freePost } };
   }
 
   async function createPost(endpoint, payload) {
@@ -192,15 +192,17 @@
 
       try {
         const { endpoint, payload } = buildPayloadAndEndpoint();
-        if (isBlank(payload.title)) { alert('제목을 입력해주세요.'); return; }
+        if (isBlank(payload?.interviewShare?.title ?? payload?.freePost?.title ?? el.title?.value)) { alert('제목을 입력해주세요.'); return; }
 
-        if (endpoint === API_CREATE_SHARE) {
-          if (!payload.interviewResultId) { alert('interviewResultId가 필요합니다.'); return; }
-          if (isBlank(payload.grade)) { alert('grade를 선택해주세요.'); return; }
-          if (isBlank(payload.interviewFeedback)) { alert('interviewFeedback을 입력해주세요.'); return; }
+        if (payload.category === 'INTERVIEW_SHARE') {
+          const p = payload.interviewShare;
+          if (!p.interviewResultId) { alert('interviewResultId가 필요합니다.'); return; }
+          if (isBlank(p.grade)) { alert('grade를 선택해주세요.'); return; }
+          if (isBlank(p.interviewFeedback)) { alert('interviewFeedback을 입력해주세요.'); return; }
         } else {
-          if (isBlank(payload.grade)) { alert('grade를 선택해주세요.'); return; }
-          if (isBlank(payload.interviewType)) { alert('interviewType을 선택해주세요.'); return; }
+          const p = payload.freePost;
+          if (isBlank(p.grade)) { alert('grade를 선택해주세요.'); return; }
+          if (isBlank(p.interviewType)) { alert('interviewType을 선택해주세요.'); return; }
         }
 
         const res = await createPost(endpoint, payload);

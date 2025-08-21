@@ -14,15 +14,12 @@ import java.util.Optional;
 @Repository
 public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, Long> {
 
-    // ✅ 목록에서 삭제글 제외
     @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user WHERE p.deleted = false ORDER BY p.createdAt DESC")
     List<CommunityPosts> findAllWithUser();
 
-    // ✅ 상세에서 삭제글 제외
     @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user WHERE p.postId = :postId AND p.deleted = false")
     Optional<CommunityPosts> findByIdWithUser(@Param("postId") Long postId);
 
-    // 필요 시 필터에도 deleted 제외를 고려
     List<CommunityPosts> findByCategoryAndLevel(String category, String level);
     List<CommunityPosts> findByCategory(String category);
     List<CommunityPosts> findByGradeOrderByCreatedAtDesc(Grade grade);
@@ -69,7 +66,6 @@ public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, 
     List<CommunityPosts> findByTypeAndContentContainingIgnoreCase(String type, String keyword);
     List<CommunityPosts> findTop10ByTypeOrderByScoreDesc(String type);
 
-    // 카운트 업데이트
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update CommunityPosts p set p.viewCount = p.viewCount + 1 where p.postId = :postId")
     int incrementViewCount(@Param("postId") Long postId);
@@ -98,12 +94,11 @@ public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, 
        """)
     int decrementScrapCount(@Param("postId") Long postId);
 
+    @EntityGraph(attributePaths = {"user"})
     Page<CommunityPosts> findByDeletedFalse(Pageable pageable);
 
     Optional<CommunityPosts> findByPostIdAndDeletedFalse(Long postId);
 
     @Query("select p from CommunityPosts p where p.postId = :postId and p.deleted = false")
     Optional<CommunityPosts> findActiveByPostId(@Param("postId") Long postId);
-
-
 }
