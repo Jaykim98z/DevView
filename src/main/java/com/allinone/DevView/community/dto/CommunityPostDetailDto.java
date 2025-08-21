@@ -21,6 +21,9 @@ public class CommunityPostDetailDto {
     private int scrapCount;
     private LocalDateTime createdAt;
     private String interviewType;
+    private Long interviewResultId;
+    private String interviewFeedback;
+    private String content;
 
     public static CommunityPostDetailDto from(CommunityPosts post) {
         if (post == null) {
@@ -52,6 +55,12 @@ public class CommunityPostDetailDto {
                 .scrapCount(post.getScrapCount())
                 .createdAt(post.getCreatedAt())
                 .interviewType(post.getInterviewType())
+
+
+                .interviewResultId(post.getInterviewResultId())
+                .interviewFeedback(post.getInterviewFeedback())
+                .content(post.getContent())
+
                 .build();
     }
 
