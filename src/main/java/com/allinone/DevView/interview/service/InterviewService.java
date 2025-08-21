@@ -147,27 +147,7 @@ public class InterviewService {
         try {
             GeminiAnalysisResponseDto analysis = objectMapper.readValue(cleanedJson, GeminiAnalysisResponseDto.class);
 
-            String recommendationsHtml = "추천 학습 자료가 없습니다.";
-            if (alan instanceof AlanApiService && analysis.keywords() != null && !analysis.keywords().isEmpty()) {
-                try {
-                    String combinedKeywords = String.join(", ", analysis.keywords());
-                    String alanJson = ((AlanApiService) alan).getRecommendations(combinedKeywords);
-                    String cleanedAlanJson = alanJson.trim().replace("```json", "").replace("```", "").trim();
-
-                    AlanRecommendationDto alanResponse = objectMapper.readValue(cleanedAlanJson, AlanRecommendationDto.class);
-
-                    if (alanResponse != null && alanResponse.recommendations() != null) {
-                        recommendationsHtml = alanResponse.recommendations().stream()
-                                .map(item -> {
-                                    String safeTitle = item.title().replace("<", "&lt;").replace(">", "&gt;");
-                                    return "<li><a href=\"" + item.url() + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + safeTitle + "</a></li>";
-                                })
-                                .collect(Collectors.joining("", "<ul>", "</ul>"));
-                    }
-                } catch (Exception e) {
-                    log.error("Failed to get or process recommendations from Alan API", e);
-                }
-            }
+            String recommendationsHtml = getRecommendationsFromAlan(analysis.keywords());
 
             interview.endInterviewSession();
 
@@ -230,21 +210,40 @@ public class InterviewService {
                 interview.getJobPosition() + " role. Your response MUST be a single, valid JSON object with no extra text. " +
                 "The JSON object must have these exact keys: 'totalScore' (must be the calculated average of the four category scores), " +
                 "'detailedFeedback' (an array of objects, where each object has three keys: 'question' (the original question), 'answer' (the user's answer), and 'feedback' (your feedback for that answer in KR)), " +
-                "'summary' (string in KR), " +
+                "'summary' (a rich and detailed overall evaluation in Korean, including the candidate's strengths, weaknesses, and suggestions for improvement), " +
                 "'techScore' (0-100), 'problemScore' (0-100), 'commScore' (0-100), 'attitudeScore' (0-100), " +
                 "and 'keywords' (an array of 1-7 relevant technical string KR keywords. If no specific keywords can be found in the answers, use general keywords related to the job position).\n\n" +
                 "Here is the transcript:\n" + transcript;
     }
 
-    private String getRecommendationsFromAlan(String jobPosition) {
-        try {
-            if (alan instanceof AlanApiService) {
-                return ((AlanApiService) alan).getRecommendations(jobPosition);
-            }
-        } catch (Exception e) {
-            log.error("Failed to get recommendations from Alan API", e);
+    private String getRecommendationsFromAlan(List<String> keywords) {
+        if (alan instanceof AlanApiService && keywords != null && !keywords.isEmpty()) {
+            StringBuilder finalHtml = new StringBuilder();
+            keywords.forEach(keyword -> {
+                try {
+                    String alanJson = ((AlanApiService) alan).getRecommendations(keyword);
+                    String cleanedAlanJson = alanJson.trim().replace("```json", "").replace("```", "").trim();
+                    AlanRecommendationDto alanResponse = objectMapper.readValue(cleanedAlanJson, AlanRecommendationDto.class);
+
+                    if (alanResponse != null && alanResponse.recommendations() != null && !alanResponse.recommendations().isEmpty()) {
+                        finalHtml.append("<h3>").append(keyword).append("</h3>");
+
+                        String listHtml = alanResponse.recommendations().stream()
+                                .map(item -> {
+                                    String safeTitle = item.title().replace("<", "&lt;").replace(">", "&gt;");
+                                    return "<li><a href=\"" + item.url() + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + safeTitle + "</a></li>";
+                                })
+                                .collect(Collectors.joining("", "<ul>", "</ul>"));
+
+                        finalHtml.append(listHtml);
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to process recommendation for keyword '{}': {}", keyword, e.getMessage());
+                }
+            });
+            return finalHtml.length() > 0 ? finalHtml.toString() : "추천 학습 자료가 없습니다.";
         }
-        return "No recommendations available.";
+        return "추천 학습 자료가 없습니다.";
     }
 
     private Grade calculateGrade(int score) {
