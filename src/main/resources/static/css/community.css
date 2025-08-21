@@ -332,3 +332,62 @@ html, body {
 .comment-item .meta { font-size: 0.9rem; color: #6b7280; display:flex; gap:8px; }
 .comment-item .content { margin-top: 6px; white-space: pre-wrap; }
 .comment-item .actions { margin-top: 8px; display:flex; gap:8px; }
+
+
+#pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 28px 0 0;
+}
+
+#pagination .page-btn {
+  min-width: 40px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #d9e0e8;
+  border-radius: 10px;
+  background: #fff;
+  color: #334155;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 38px;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s, transform .05s, background .15s, color .15s;
+  box-shadow: 0 4px 12px rgba(27,39,51,.06);
+}
+
+#pagination .page-btn:hover {
+  border-color: #b8c6d9;
+  box-shadow: 0 6px 16px rgba(27,39,51,.09);
+}
+
+#pagination .page-btn:active {
+  transform: translateY(1px);
+}
+
+#pagination .page-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .25);
+}
+
+#pagination .page-btn.active {
+  background: #334155;
+  border-color: #334155;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(51,65,85,.25);
+}
+
+#pagination .page-btn[disabled] {
+  background: #f4f6f8;
+  border-color: #e5ebf2;
+  color: #9aa7b5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+#pagination .page-btn[data-page="prev"],
+#pagination .page-btn[data-page="next"] {
+  padding: 0 14px;
+}

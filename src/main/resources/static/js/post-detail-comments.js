@@ -233,7 +233,10 @@ function formatKoreanDate(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return String(iso);
-  return d.toLocaleString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  return d
+    .toLocaleString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    .replace(/\s*\n+\s*/g, ' ')
+    .trim();
 }
 
 function commentCountEl() {
@@ -241,40 +244,50 @@ function commentCountEl() {
 }
 
 function buildCommentItem(c) {
-  const id = c.id ?? c.commentId ?? c.commentID ?? null;
-  const author = c.writerName ?? c.username ?? c.userName ?? c.author ?? '익명';
-  const content = c.content ?? c.text ?? '';
-  const createdAt = c.createdAt ?? c.created_at ?? c.createdAtIso ?? null;
-  const uid = c.userId ?? c.writerId ?? null;
-  const isMine = c.mine ?? c.ownedByMe ?? (uid != null && window.CURRENT_USER_ID != null && Number(uid) === Number(window.CURRENT_USER_ID));
+  const id       = c.id ?? c.commentId ?? c.commentID ?? null;
+  const author   = c.writerName ?? c.username ?? c.userName ?? c.author ?? '익명';
+  const content  = c.content ?? c.text ?? '';
+  const created  = c.createdAt ?? c.created_at ?? c.createdAtIso ?? null;
+  const uid      = c.userId ?? c.writerId ?? null;
+
+  const meId    = window.CURRENT_USER_ID;
+  const meName  = window.CURRENT_USERNAME;
+  const meEmail = window.CURRENT_USER_EMAIL;
+  const cEmail  = c.userEmail ?? c.email ?? null;
+
+  const isMine = (c.mine ?? c.ownedByMe) ??
+    ((uid != null && meId != null && Number(uid) === Number(meId)) ||
+     (!!cEmail && !!meEmail && cEmail === meEmail) ||
+     (!!author && !!meName && author === meName));
 
   const li = document.createElement('li');
   li.className = 'comment-item';
   if (id != null) li.dataset.commentId = String(id);
 
   li.innerHTML = `
-    <div class="comment__header">
-      <span class="comment__author">${author}</span>
-      <span class="comment__date">${formatKoreanDate(createdAt)}</span>
-    </div>
-    <div class="comment__content"></div>
-    <div class="comment__actions" style="display:${isMine ? 'flex' : 'none'}; gap:8px; margin-top:6px;">
-      <button class="comment__edit btn-action" type="button">수정</button>
-      <button class="comment__delete btn-action btn-danger" type="button">삭제</button>
+    <img class="comment-item__avatar" src="/img/profile-default.svg" alt="" />
+    <div>
+      <div class="comment-item__head">
+        <span class="comment-item__author">${escapeHtml(author)}</span>
+        <span class="comment-item__meta">${escapeHtml(formatKoreanDate(created))}</span>
+      </div>
+      <div class="comment-item__body"></div>
+      <div class="comment-item__actions" style="display:${isMine ? 'flex' : 'none'}">
+        <button class="comment-action btn-action comment__edit" type="button">수정</button>
+        <button class="comment-action comment-action--danger btn-action btn-danger comment__delete" type="button">삭제</button>
+      </div>
     </div>
   `;
-  li.querySelector('.comment__content').textContent = content;
+
+  li.querySelector('.comment-item__body').textContent = content;
 
   if (isMine) {
-    const delBtn = li.querySelector('.comment__delete');
-    delBtn?.addEventListener('click', () => onDeleteComment(id, li));
-
-    const editBtn = li.querySelector('.comment__edit');
-    editBtn?.addEventListener('click', () => onEditComment(id, li, content));
+    li.querySelector('.comment__delete')?.addEventListener('click', () => onDeleteComment(id, li));
+    li.querySelector('.comment__edit')?.addEventListener('click', () => onEditComment(id, li, content));
   }
-
   return li;
 }
+
 
 function updateCommentCount(delta) {
   const el = commentCountEl();

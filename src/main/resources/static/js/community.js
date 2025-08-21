@@ -81,9 +81,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const params = new URLSearchParams();
     params.set("page", String(currentPage));
     params.set("size", String(pageSize));
-    if (currentSort)    params.append("sort", currentSort);
-    if (currentKeyword) params.set("query", currentKeyword);
-    if (currentCategory) params.set("category", currentCategory);
+    if (currentSort)    params.set("sort", currentSort);
+    if (currentKeyword) { params.set("query", currentKeyword); params.set("keyword", currentKeyword); }
+    if (currentCategory) { params.set("category", currentCategory); params.set("tech", currentCategory); }
     if (currentLevel)    params.set("level", currentLevel);
 
     const url = `/api/community/posts?${params.toString()}`;
@@ -112,8 +112,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     cardListEl.innerHTML = items.map(p => {
       const postId     = p.postId ?? p.id;
-      const writerName = p.writerName ?? "익명";
-      const levelTag   = p.level ?? "";
+      const writerName = p.username ?? "익명";
+      const levelTag   = p.levelTag ?? "";
       const techTag    = p.techTag ?? "";
       const createdAt  = formatDate(p.createdAt);
 

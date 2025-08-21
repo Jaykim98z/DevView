@@ -75,6 +75,11 @@ public class CommunityQueryService {
     }
 
     private PostListDto toPostListDto(CommunityPosts p) {
+        int likeCount  = p.getLikeCount();
+        int scrapCount = p.getScrapCount();
+        int viewCount  = p.getViewCount();
+        int score      = (p.getScore() == null) ? 0 : p.getScore();
+
         return new PostListDto(
                 p.getPostId(),
                 p.getTitle(),
@@ -84,13 +89,15 @@ public class CommunityQueryService {
                 p.getGrade(),
                 p.getLevel(),
                 p.getTechTag(),
-                p.getLikeCount(),
-                p.getScrapCount(),
-                p.getViewCount(),
-                p.getScore(),
+                likeCount,
+                scrapCount,
+                viewCount,
+                score,
                 p.getCreatedAt()
         );
     }
+
+
 
     private CommentsDto toCommentDto(Comments c) {
         return new CommentsDto(

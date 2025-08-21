@@ -17,9 +17,15 @@
 
 <body data-page="detail"
       th:attr="data-post-id=${post.id}"
-      th:data-current-user-id="${#authentication?.principal?.userId}"
-      th:data-current-username="${#authentication?.name}"
-      th:data-current-user-email="${#authorization.expression('isAuthenticated()') ? #authentication.principal.username : null}">
+      th:data-current-user-id="${#authorization.expression('isAuthenticated()')
+          ? #authentication?.principal?.userId
+          : null}"
+      th:data-current-username="${#authorization.expression('isAuthenticated()')
+          ? #authentication?.name
+          : null}"
+      th:data-current-user-email="${#authorization.expression('isAuthenticated()')
+          ? #authentication?.name
+          : null}">
 
 <div th:replace="~{fragments/header :: header}"></div>
 
@@ -47,16 +53,64 @@
             </div>
         </div>
 
-        <section class="interview-result-area" th:if="${post.interviewResultId != null}">
-            <div th:replace="~{fragments/result-card :: resultCard(
-      resultId=${post.interviewResultId},
-      feedback=${post.interviewFeedback},
-      summary=${post.summary},
-      score=${post.score},
-      grade=${post.grade},
-      interviewTypeLabel=${post.interviewTypeLabel}
-  )}"></div>
+        <section class="result-container"
+                 id="interview-result-embed"
+                 th:if="${post.interviewResultId != null}"
+                 th:attr="data-interview-id=${post.interviewResultId}">
+            <div class="result-header">
+                <h1>면접이 완료되었습니다!</h1>
+                <p>수고하셨습니다. 면접 결과를 확인해보세요.</p>
+            </div>
+
+            <div class="result-card">
+                <div class="score-summary">
+                    <h2><span id="total-score">--</span>/100</h2>
+                    <div id="grade" class="grade-badge">Grade --</div>
+                </div>
+
+                <div class="skill-scores">
+                    <div class="skill-item">
+                        <div class="label"><span>기술적 지식</span><span id="skill-tech-score">0%</span></div>
+                        <div class="progress-bar"><div class="progress" id="skill-tech-progress"></div></div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="label"><span>문제 해결 능력</span><span id="skill-problem-score">0%</span></div>
+                        <div class="progress-bar"><div class="progress" id="skill-problem-progress"></div></div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="label"><span>의사소통 능력</span><span id="skill-comm-score">0%</span></div>
+                        <div class="progress-bar"><div class="progress" id="skill-comm-progress"></div></div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="label"><span>태도 & 열정</span><span id="skill-attitude-score">0%</span></div>
+                        <div class="progress-bar"><div class="progress" id="skill-attitude-progress"></div></div>
+                    </div>
+                </div>
+
+                <h3 class="section-title">상세 피드백</h3>
+                <div id="feedback-text" class="feedback-details">Loading...</div>
+
+                <h3 class="section-title">종합 평가</h3>
+                <div id="summary-text" class="summary-details">Loading...</div>
+            </div>
         </section>
+
+        <script th:if="${post.interviewResultId != null}" th:inline="javascript">
+            window.INTERVIEW_RESULT_ID = [[${post.interviewResultId}]];
+        </script>
+
+        <script th:if="${post.interviewResultId != null}" th:inline="javascript">
+            (function () {
+              var id = [[${post.interviewResultId}]];
+              var parts = window.location.pathname.split('/');
+              var last = parts[parts.length - 1];
+              if (!/^\d+$/.test(last)) {
+                history.replaceState(null, '', window.location.pathname.replace(/\/$/, '') + '/' + id);
+              }
+            })();
+        </script>
+
+        <script th:if="${post.interviewResultId != null}" th:src="@{/js/interview-result.js}"></script>
 
         <section class="extra-memo">
             <h3 class="extra-title">추가 메모</h3>
@@ -79,14 +133,20 @@
                     <span id="view-count" class="count" th:text="${post.viewCount}">0</span>
                 </div>
 
-                <button type="button" class="btn-icon btn-like"
+                <!-- 좋아요 버튼 -->
+                <button type="button"
+                        class="btn-icon btn-like"
+                        th:classappend="${post.liked} ? ' is-active' : ''"
                         data-post-id="[[${post.id}]]"
                         th:data-url="@{/api/community/posts/{id}/like(id=${post.id})}">
                     <i class="fa-solid fa-heart" aria-hidden="true"></i>
                     <span class="count" th:text="${post.likeCount}">0</span>
                 </button>
 
-                <button type="button" class="btn-icon btn-scrap"
+                <!-- 스크랩 버튼 -->
+                <button type="button"
+                        class="btn-icon btn-scrap"
+                        th:classappend="${post.bookmarked} ? ' is-active' : ''"
                         data-post-id="[[${post.id}]]"
                         th:data-url="@{/api/community/posts/{id}/scrap(id=${post.id})}">
                     <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
@@ -96,6 +156,7 @@
             <hr class="meta-divider" />
         </div>
 
+        <!-- 댓글 -->
         <section class="comments-section">
             <div class="comments">
                 <div class="comments__title">
@@ -126,6 +187,9 @@
     </div>
 </main>
 
+<script src="/js/spinner.js"></script>
+<div th:replace="~{fragments/loading-spinner :: spinner}"></div>
+
 <script>
     (function(){
       const d = document.body.dataset;
@@ -135,6 +199,8 @@
       window.CURRENT_USER_EMAIL = d.currentUserEmail || null;
     })();
 </script>
+
+<div id="recommendations-text" style="display:none"></div>
 
 <script th:src="@{/js/post-detail-comments.js}" defer></script>
 </body>
