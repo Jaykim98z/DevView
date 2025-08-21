@@ -22,6 +22,10 @@ public class CommentsService {
     private final CommentsRepository commentsRepository;
     private final UserRepository userRepository;
 
+    private boolean isOwner(Long writerId, Long meUserId) {
+        return writerId != null && Objects.equals(writerId, meUserId);
+    }
+
     @Transactional
     public CommentsDto.Res create(Long postId, Long userId, String writerName, CommentsDto.CreateReq req) {
         User user = userRepository.findById(userId)
@@ -67,6 +71,7 @@ public class CommentsService {
         List<CommentsDto.Res> resList = items.stream()
                 .map(c -> {
                     String username = usernameMap.getOrDefault(c.getUserId(), c.getWriterName());
+                    boolean mine = isOwner(c.getUserId(), meUserId);
                     return new CommentsDto.Res(
                             c.getId(),
                             c.getUserId(),

@@ -44,7 +44,8 @@ public class CommunityQueryService {
         return getPosts(pageable);
     }
 
-    public Page<CommentsDto> getComments(Long postId, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<CommentsDto.Res> getComments(Long postId, Pageable pageable) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, COMMENT_SORT_WHITELIST);
         return commentsRepository.findByPostIdAndDeletedFalse(postId, safe)
                 .map(this::toCommentDto);
@@ -106,11 +107,13 @@ public class CommunityQueryService {
         );
     }
 
-    private CommentsDto toCommentDto(Comments c) {
-        return new CommentsDto(
+    private CommentsDto.Res toCommentDto(Comments c) {
+        String username = StringUtils.hasText(c.getWriterName()) ? c.getWriterName() : "익명";
+        return new CommentsDto.Res(
                 c.getId(),
-                c.getPostId(),
                 c.getUserId(),
+                username,
+                username,
                 c.getContent(),
                 c.getCreatedAt()
         );
