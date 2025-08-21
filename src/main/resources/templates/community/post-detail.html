@@ -17,9 +17,10 @@
 
 <body data-page="detail"
       th:attr="data-post-id=${post.id},
-               data-current-user-id=${#authorization.expression('isAuthenticated()') ? #authentication?.principal?.userId : null},
-               data-current-username=${#authorization.expression('isAuthenticated()') ? #authentication?.name : null},
-               data-current-user-email=${#authorization.expression('isAuthenticated()') ? #authentication?.name : ''}">
+               data-current-user-id=${#authorization.expression('isAuthenticated()') ? #authentication.principal.userId : null},
+               data-current-username=${#authorization.expression('isAuthenticated()') ? #authentication.name : null},
+               data-current-user-email=${#authorization.expression('isAuthenticated()') ? #authentication.name : ''}">
+
 
 <div th:replace="~{fragments/header :: header}"></div>
 
@@ -115,7 +116,7 @@
         </section>
 
         <div class="post-actions"
-             th:if="${#authorization.expression('isAuthenticated()')}">
+             th:if="${#authorization.expression('isAuthenticated()') and post.userId == #authentication?.principal?.userId}">
             <button id="btn-edit-post"  class="btn-action">수정</button>
             <button id="btn-delete-post" class="btn-action btn-danger">삭제</button>
         </div>

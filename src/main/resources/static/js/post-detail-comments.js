@@ -28,7 +28,6 @@ function __secureHeaders__(json = true) {
 async function fetchJson(url, opts = {}) {
   const res = await fetch(url, opts);
   const ct = res.headers.get('content-type') || '';
-
   if (ct.includes('text/html')) {
     throw new Error('AUTH_REDIRECT');
   }
@@ -277,45 +276,43 @@ function commentCountEl() {
 }
 
 function buildCommentItem(c) {
-  const rawAuthor = c.username ?? '익명';
+  const rawAuthor = c.username ?? c.writerName ?? c.author ?? '익명';
   const displayAuthor = (typeof rawAuthor === 'string' && rawAuthor.includes('@'))
    ? rawAuthor.split('@')[0]
    : rawAuthor;
 
   const content  = c.content ?? c.text ?? '';
   const created  = c.createdAt ?? c.created_at ?? c.createdAtIso ?? null;
-  const uid      = c.userId ?? c.writerId ?? null;
-
-  const cEmail  = c.userEmail ?? c.email ?? null;
-
-  const id = (
-    c.id ?? c.commentId ?? c.commentID ?? c.comment_id ?? c['comment-id'] ?? null
-  );
+  const uid      = c.userId ?? c.writerId ?? c.authorId ?? null;
+  const id = (c.id ?? c.commentId ?? c.commentID ?? c.comment_id ?? c['comment-id'] ?? null);
 
   const me = getCurrentUser();
   const authorNorm = normName(rawAuthor);
-  const isMine = (c.mine ?? c.ownedByMe) ??
+  const isOwnerFallback =
     (
       (uid != null && me.id != null && Number(uid) === Number(me.id)) ||
       (authorNorm != null && me.usernameNorm != null && authorNorm === me.usernameNorm) ||
       (authorNorm != null && me.emailNorm    != null && authorNorm === me.emailNorm)
     );
 
+  const canEdit = !!(c.canEdit ?? c.mine ?? c.ownedByMe ?? isOwnerFallback);
+  const canDelete = !!(c.canDelete ?? c.mine ?? c.ownedByMe ?? isOwnerFallback);
+  const showActions = canEdit || canDelete;
+
   const li = document.createElement('li');
   li.className = 'comment-item';
   if (id != null) li.dataset.commentId = String(id);
-
-  if (isMine) li.classList.add('is-owner');
+  if (showActions) li.classList.add('is-owner');
 
   li.innerHTML = `
     <img class="comment-item__avatar" src="/img/profile-default.svg" alt="" />
     <div>
       <div class="comment-item__head">
-        <span class="comment-item__author">${escapeHtml(authorNorm ?? String(rawAuthor))}</span>
+        <span class="comment-item__author">${escapeHtml(displayAuthor)}</span>
         <span class="comment-item__meta">${escapeHtml(formatKoreanDate(created))}</span>
       </div>
       <div class="comment-item__body comment__content"></div>
-      <div class="comment-item__actions comment__actions" style="display:${isMine ? 'flex' : 'none'}">
+      <div class="comment-item__actions comment__actions" style="display:${showActions ? 'flex' : 'none'}">
         <button class="comment-action btn-action comment__edit" type="button">수정</button>
         <button class="comment-action comment-action--danger btn-action btn-danger comment__delete" type="button">삭제</button>
       </div>
@@ -324,7 +321,7 @@ function buildCommentItem(c) {
 
   li.querySelector('.comment-item__body').textContent = content;
 
-  if (isMine) {
+  if (showActions) {
     li.querySelector('.comment__delete')?.addEventListener('click', () => onDeleteComment(id, li));
     li.querySelector('.comment__edit')?.addEventListener('click', () => onEditComment(id, li, content));
   } else {
@@ -370,7 +367,7 @@ async function loadComments(reset = false) {
       if (cc) cc.textContent = String(data.totalElements);
     }
   } catch (e) {
-    if (String(e.message).startsWith('AUTH_REDIRECT')) {  }
+    if (String(e.message).startsWith('AUTH_REDIRECT')) { }
     console.error('댓글 로딩 실패', e);
   } finally {
     CMT.loading = false;
@@ -480,12 +477,23 @@ function initComments() {
       const ul = document.getElementById('comment-list');
 
       const me = getCurrentUser();
+      if (created && typeof created === 'object') {
+        created.mine = true;
+        created.canEdit = true;
+        created.canDelete = true;
+        if (me.id != null) created.userId = me.id;
+        if (!created.username && me.username) created.username = me.username;
+        if (!created.createdAt) created.createdAt = new Date().toISOString();
+      }
       const li = buildCommentItem(created ?? {
-        id: created?.id ?? created?.commentId,
+        id: undefined,
         content,
-        writerName: (me.usernameNorm ?? '익명'),
+        username: (me.username ?? me.usernameNorm ?? '익명'),
+        userId: me.id ?? null,
         createdAt: new Date().toISOString(),
-        mine: true
+        mine: true,
+        canEdit: true,
+        canDelete: true
       });
 
       ul.prepend(li);
@@ -501,11 +509,33 @@ function initComments() {
   });
 }
 
+async function bumpViewCount() {
+  const postId = getPostId();
+  if (postId == null) return;
+  try {
+    const res = await fetchJson(`/api/community/posts/${postId}/view`, {
+      method: 'POST',
+      headers: __secureHeaders__(true),
+      body: JSON.stringify({})
+    });
+    if (res && typeof res.viewCount === 'number') {
+      const vc = document.getElementById('view-count');
+      if (vc) vc.textContent = String(res.viewCount);
+    } else {
+      const vc = document.getElementById('view-count');
+      if (vc) vc.textContent = String((Number(vc.textContent || '0') || 0) + 1);
+    }
+  } catch (e) {
+    console.warn('조회수 증가 실패', e);
+  }
+}
+
 (function () {
   const start = () => {
     initLikeScrap();
     initEditDelete();
     initComments();
+    bumpViewCount();
   };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start, { once: true });

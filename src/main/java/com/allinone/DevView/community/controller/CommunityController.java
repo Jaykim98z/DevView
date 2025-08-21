@@ -25,17 +25,30 @@ public class CommunityController {
     @GetMapping("/posts")
     public ResponseEntity<Page<PostListDto>> listPosts(
             @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String level
     ) {
-        return ResponseEntity.ok(communityQueryService.getPosts(pageable));
+        boolean noFilter = (category == null || category.isBlank() || "전체".equals(category))
+                && (level == null || level.isBlank() || "전체".equals(level));
+        if (noFilter) {
+            return ResponseEntity.ok(communityQueryService.getPosts(pageable));
+        }
+        return ResponseEntity.ok(communityQueryService.getPosts(pageable, category, level));
     }
 
     @GetMapping("/posts/dto")
     public ResponseEntity<Page<CommunityPostsDto>> listPostsAsDto(
             @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String level
     ) {
-        Page<PostListDto> page = communityQueryService.getPosts(pageable);
+        boolean noFilter = (category == null || category.isBlank() || "전체".equals(category))
+                && (level == null || level.isBlank() || "전체".equals(level));
+        Page<PostListDto> page = noFilter
+                ? communityQueryService.getPosts(pageable)
+                : communityQueryService.getPosts(pageable, category, level);
         Page<CommunityPostsDto> converted = page.map(this::toCommunityPostsDto);
         return ResponseEntity.ok(converted);
     }
@@ -87,6 +100,7 @@ public class CommunityController {
         communityService.removeLike(userId, postId);
         return ResponseEntity.noContent().build();
     }
+
 
     @PostMapping("/posts/{postId}/scraps")
     public Scraps addScrap(@PathVariable Long postId, @RequestBody Scraps scrap) {
@@ -151,6 +165,9 @@ public class CommunityController {
         if (src == null) return null;
         CommunityPostsDto dst = new CommunityPostsDto();
         BeanUtils.copyProperties(src, dst);
+        dst.setScore(src.score());
+        dst.setGrade(src.grade() == null ? "--" : src.grade().toString());
         return dst;
     }
+
 }
