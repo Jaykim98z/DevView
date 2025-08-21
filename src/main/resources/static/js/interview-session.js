@@ -74,6 +74,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCharCounter() {
         const textLength = answerTextareaEl.value.length;
         charCounterEl.textContent = `${textLength}/500 글자`;
+
+        if (textLength > 500) {
+            charCounterEl.classList.add('error');
+            submitAnswerBtnEl.disabled = true;
+        } else {
+            charCounterEl.classList.remove('error');
+            submitAnswerBtnEl.disabled = false;
+        }
     }
 
     function startTimer(durationInSeconds) {
