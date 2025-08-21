@@ -3,6 +3,7 @@ package com.allinone.DevView.community.controller;
 import com.allinone.DevView.community.dto.CombinedPostRequest;
 import com.allinone.DevView.community.dto.CommunityPostsDto;
 import com.allinone.DevView.community.service.CommunityService;
+import com.allinone.DevView.community.service.InterviewResultQueryService;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -28,6 +29,7 @@ public class CommunityViewController {
 
     private final CommunityService communityService;
     private final UserRepository userRepository;
+    private final InterviewResultQueryService interviewResultQueryService;
 
     @GetMapping
     public String getCommunityMain(Model model) {
@@ -52,6 +54,12 @@ public class CommunityViewController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다.");
         }
         model.addAttribute("post", post);
+
+        if (post.getInterviewResultId() != null) {
+            Object interviewResult = interviewResultQueryService.getDetail(post.getInterviewResultId());
+            model.addAttribute("interviewResult", interviewResult);
+        }
+
         return "community/post-detail";
     }
 
@@ -90,15 +98,21 @@ public class CommunityViewController {
 
         Long userId = user.getUserId();
 
-        Long interviewPostId = communityService.createInterviewSharePost(
-                form.getInterviewShare(), userId
-        );
+        Long postId;
+        CombinedPostRequest.PostCategory category = form.getCategory();
+        if (category == null) {
+            category = (form.getInterviewShare() != null)
+                    ? CombinedPostRequest.PostCategory.INTERVIEW_SHARE
+                    : CombinedPostRequest.PostCategory.FREE;
+        }
 
-        communityService.createFreePost(  // ✅ createPost → createFreePost 로 변경
-                form.getFreePost(), userId
-        );
+        if (category == CombinedPostRequest.PostCategory.INTERVIEW_SHARE) {
+            postId = communityService.createInterviewSharePost(form.getInterviewShare(), userId);
+        } else {
+            postId = communityService.createFreePost(form.getFreePost(), userId);
+        }
 
-        return "redirect:/community/posts/" + interviewPostId + "/detail";
+        return "redirect:/community/posts/" + postId + "/detail";
     }
 
     @GetMapping("/posts/interview/new")

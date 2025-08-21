@@ -75,22 +75,32 @@ public class CommunityQueryService {
     }
 
     private PostListDto toPostListDto(CommunityPosts p) {
+        int likeCount  = p.getLikeCount();
+        int scrapCount = p.getScrapCount();
+        int viewCount  = p.getViewCount();
+        int score      = (p.getScore() == null) ? 0 : p.getScore();
+
+        String displayName = (p.getUser() != null && StringUtils.hasText(p.getUser().getUsername()))
+                ? p.getUser().getUsername()
+                : "익명";
+
         return new PostListDto(
                 p.getPostId(),
                 p.getTitle(),
-                (StringUtils.hasText(p.getWriterName()) ? p.getWriterName()
-                        : (p.getUser() != null ? p.getUser().getUsername() : null)),
+                displayName,
                 p.getCategory(),
                 p.getGrade(),
                 p.getLevel(),
                 p.getTechTag(),
-                p.getLikeCount(),
-                p.getScrapCount(),
-                p.getViewCount(),
-                p.getScore(),
+                likeCount,
+                scrapCount,
+                viewCount,
+                score,
                 p.getCreatedAt()
         );
     }
+
+
 
     private CommentsDto toCommentDto(Comments c) {
         return new CommentsDto(
