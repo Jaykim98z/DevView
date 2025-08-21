@@ -2,6 +2,7 @@ package com.allinone.DevView.community.service;
 
 import com.allinone.DevView.community.dto.CommentsDto;
 import com.allinone.DevView.community.dto.PostListDto;
+import com.allinone.DevView.community.dto.CommunityPostsDto;
 import com.allinone.DevView.community.entity.Comments;
 import com.allinone.DevView.community.entity.CommunityPosts;
 import com.allinone.DevView.community.repository.CommentsRepository;
@@ -35,10 +36,16 @@ public class CommunityQueryService {
     @Transactional(readOnly = true)
     public Page<PostListDto> getPosts(Pageable pageable) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, POST_SORT_WHITELIST);
-        return postsRepository.findByDeletedFalse(safe).map(this::toPostListDto);
+        return postsRepository.findAll(safe).map(this::toPostListDto);
     }
 
-    public Page<CommentsDto> getComments(Long postId, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public Page<PostListDto> getPosts(Pageable pageable, String category, String level) {
+        return getPosts(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<CommentsDto.Res> getComments(Long postId, Pageable pageable) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, COMMENT_SORT_WHITELIST);
         return commentsRepository.findByPostIdAndDeletedFalse(postId, safe)
                 .map(this::toCommentDto);
@@ -75,28 +82,38 @@ public class CommunityQueryService {
     }
 
     private PostListDto toPostListDto(CommunityPosts p) {
+        int likeCount  = p.getLikeCount();
+        int scrapCount = p.getScrapCount();
+        int viewCount  = p.getViewCount();
+        int score      = (p.getScore() == null) ? 0 : p.getScore();
+
+        String displayName = (p.getUser() != null && StringUtils.hasText(p.getUser().getUsername()))
+                ? p.getUser().getUsername()
+                : "익명";
+
         return new PostListDto(
                 p.getPostId(),
                 p.getTitle(),
-                (StringUtils.hasText(p.getWriterName()) ? p.getWriterName()
-                        : (p.getUser() != null ? p.getUser().getUsername() : null)),
+                displayName,
                 p.getCategory(),
                 p.getGrade(),
                 p.getLevel(),
                 p.getTechTag(),
-                p.getLikeCount(),
-                p.getScrapCount(),
-                p.getViewCount(),
-                p.getScore(),
+                likeCount,
+                scrapCount,
+                viewCount,
+                score,
                 p.getCreatedAt()
         );
     }
 
-    private CommentsDto toCommentDto(Comments c) {
-        return new CommentsDto(
+    private CommentsDto.Res toCommentDto(Comments c) {
+        String username = StringUtils.hasText(c.getWriterName()) ? c.getWriterName() : "익명";
+        return new CommentsDto.Res(
                 c.getId(),
-                c.getPostId(),
                 c.getUserId(),
+                username,
+                username,
                 c.getContent(),
                 c.getCreatedAt()
         );

@@ -2,17 +2,23 @@ package com.allinone.DevView.community.repository;
 
 import com.allinone.DevView.community.entity.CommunityPosts;
 import com.allinone.DevView.common.enums.Grade;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 
+
+
 @Repository
-public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, Long> {
+public interface CommunityPostsRepository
+        extends JpaRepository<CommunityPosts, Long>, JpaSpecificationExecutor<CommunityPosts> {
 
     @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user WHERE p.deleted = false ORDER BY p.createdAt DESC")
     List<CommunityPosts> findAllWithUser();
@@ -95,7 +101,7 @@ public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, 
     int decrementScrapCount(@Param("postId") Long postId);
 
     @EntityGraph(attributePaths = {"user"})
-    Page<CommunityPosts> findByDeletedFalse(Pageable pageable);
+    Page<CommunityPosts> findAllByDeletedFalse(Pageable pageable);
 
     Optional<CommunityPosts> findByPostIdAndDeletedFalse(Long postId);
 

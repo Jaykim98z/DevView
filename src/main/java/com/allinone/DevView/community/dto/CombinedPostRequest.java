@@ -33,7 +33,6 @@ public class CombinedPostRequest {
         if (category == PostCategory.FREE) {
             return freePost != null;
         }
-
         boolean hasInterviewShare = (interviewShare != null);
         boolean hasFreePost = (freePost != null);
         return hasInterviewShare ^ hasFreePost;
