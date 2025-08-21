@@ -350,3 +350,9 @@ html, body {
   .post-detail-card{ padding-bottom: 104px; }
   .post-actions{ right:12px; bottom:12px; }
 }
+.comment-item__actions { display: none; }
+
+.comment-item.is-owner .comment-item__actions {
+  display: flex !important;
+  gap: 8px;
+}

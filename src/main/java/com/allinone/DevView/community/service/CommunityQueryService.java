@@ -80,11 +80,14 @@ public class CommunityQueryService {
         int viewCount  = p.getViewCount();
         int score      = (p.getScore() == null) ? 0 : p.getScore();
 
+        String displayName = (p.getUser() != null && StringUtils.hasText(p.getUser().getUsername()))
+                ? p.getUser().getUsername()
+                : "익명";
+
         return new PostListDto(
                 p.getPostId(),
                 p.getTitle(),
-                (StringUtils.hasText(p.getWriterName()) ? p.getWriterName()
-                        : (p.getUser() != null ? p.getUser().getUsername() : null)),
+                displayName,
                 p.getCategory(),
                 p.getGrade(),
                 p.getLevel(),

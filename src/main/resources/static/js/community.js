@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     cardListEl.innerHTML = items.map(p => {
       const postId     = p.postId ?? p.id;
-      const writerName = p.username ?? "익명";
+      const writerName = p.writerName ?? p.username ?? "익명";
       const levelTag   = p.levelTag ?? "";
       const techTag    = p.techTag ?? "";
       const createdAt  = formatDate(p.createdAt);

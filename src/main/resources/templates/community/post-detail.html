@@ -16,16 +16,10 @@
 </head>
 
 <body data-page="detail"
-      th:attr="data-post-id=${post.id}"
-      th:data-current-user-id="${#authorization.expression('isAuthenticated()')
-          ? #authentication?.principal?.userId
-          : null}"
-      th:data-current-username="${#authorization.expression('isAuthenticated()')
-          ? #authentication?.name
-          : null}"
-      th:data-current-user-email="${#authorization.expression('isAuthenticated()')
-          ? #authentication?.name
-          : null}">
+      th:attr="data-post-id=${post.id},
+               data-current-user-id=${#authorization.expression('isAuthenticated()') ? #authentication?.principal?.userId : null},
+               data-current-username=${#authorization.expression('isAuthenticated()') ? #authentication?.name : null},
+               data-current-user-email=${#authorization.expression('isAuthenticated()') ? #authentication?.name : ''}">
 
 <div th:replace="~{fragments/header :: header}"></div>
 
@@ -133,7 +127,6 @@
                     <span id="view-count" class="count" th:text="${post.viewCount}">0</span>
                 </div>
 
-                <!-- 좋아요 버튼 -->
                 <button type="button"
                         class="btn-icon btn-like"
                         th:classappend="${post.liked} ? ' is-active' : ''"
@@ -143,7 +136,6 @@
                     <span class="count" th:text="${post.likeCount}">0</span>
                 </button>
 
-                <!-- 스크랩 버튼 -->
                 <button type="button"
                         class="btn-icon btn-scrap"
                         th:classappend="${post.bookmarked} ? ' is-active' : ''"
@@ -156,7 +148,6 @@
             <hr class="meta-divider" />
         </div>
 
-        <!-- 댓글 -->
         <section class="comments-section">
             <div class="comments">
                 <div class="comments__title">
@@ -201,6 +192,18 @@
 </script>
 
 <div id="recommendations-text" style="display:none"></div>
+
+<script>
+    window.escapeHtml = function (s) {
+      if (s == null) return '';
+      return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    };
+</script>
 
 <script th:src="@{/js/post-detail-comments.js}" defer></script>
 </body>

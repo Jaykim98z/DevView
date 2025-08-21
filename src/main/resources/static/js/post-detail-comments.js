@@ -1,5 +1,15 @@
 'use strict';
 
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
 function __getCsrf__() {
   const t = document.querySelector('meta[name="_csrf"]')?.content;
   const h = document.querySelector('meta[name="_csrf_header"]')?.content;
@@ -40,6 +50,29 @@ function getPostId() {
   const fromBody = document.body.dataset.postId;
   if (fromBody && fromBody !== 'null' && fromBody !== 'undefined') return Number(fromBody);
   return null;
+}
+
+function emailLocal(s) {
+  return (typeof s === 'string' && s.includes('@')) ? s.split('@')[0] : null;
+}
+function normName(s) {
+  return emailLocal(s) ?? (s != null ? String(s) : null);
+}
+
+function getCurrentUser() {
+  const b = document.body?.dataset || {};
+  const id = b.currentUserId ?? window.CURRENT_USER_ID;
+  const username = b.currentUsername ?? window.CURRENT_USERNAME;
+  const email = b.currentUserEmail ?? window.CURRENT_USER_EMAIL;
+  const usernameNorm = normName(username);
+  const emailNorm = normName(email);
+  return {
+    id: id != null && id !== 'null' && id !== 'undefined' ? Number(id) : null,
+    username,
+    email,
+    usernameNorm,
+    emailNorm
+  };
 }
 
 function toggleIconSolid(iconEl, makeSolid) {
@@ -244,35 +277,45 @@ function commentCountEl() {
 }
 
 function buildCommentItem(c) {
-  const id       = c.id ?? c.commentId ?? c.commentID ?? null;
-  const author   = c.writerName ?? c.username ?? c.userName ?? c.author ?? '익명';
+  const rawAuthor = c.username ?? '익명';
+  const displayAuthor = (typeof rawAuthor === 'string' && rawAuthor.includes('@'))
+   ? rawAuthor.split('@')[0]
+   : rawAuthor;
+
   const content  = c.content ?? c.text ?? '';
   const created  = c.createdAt ?? c.created_at ?? c.createdAtIso ?? null;
   const uid      = c.userId ?? c.writerId ?? null;
 
-  const meId    = window.CURRENT_USER_ID;
-  const meName  = window.CURRENT_USERNAME;
-  const meEmail = window.CURRENT_USER_EMAIL;
   const cEmail  = c.userEmail ?? c.email ?? null;
 
+  const id = (
+    c.id ?? c.commentId ?? c.commentID ?? c.comment_id ?? c['comment-id'] ?? null
+  );
+
+  const me = getCurrentUser();
+  const authorNorm = normName(rawAuthor);
   const isMine = (c.mine ?? c.ownedByMe) ??
-    ((uid != null && meId != null && Number(uid) === Number(meId)) ||
-     (!!cEmail && !!meEmail && cEmail === meEmail) ||
-     (!!author && !!meName && author === meName));
+    (
+      (uid != null && me.id != null && Number(uid) === Number(me.id)) ||
+      (authorNorm != null && me.usernameNorm != null && authorNorm === me.usernameNorm) ||
+      (authorNorm != null && me.emailNorm    != null && authorNorm === me.emailNorm)
+    );
 
   const li = document.createElement('li');
   li.className = 'comment-item';
   if (id != null) li.dataset.commentId = String(id);
 
+  if (isMine) li.classList.add('is-owner');
+
   li.innerHTML = `
     <img class="comment-item__avatar" src="/img/profile-default.svg" alt="" />
     <div>
       <div class="comment-item__head">
-        <span class="comment-item__author">${escapeHtml(author)}</span>
+        <span class="comment-item__author">${escapeHtml(authorNorm ?? String(rawAuthor))}</span>
         <span class="comment-item__meta">${escapeHtml(formatKoreanDate(created))}</span>
       </div>
-      <div class="comment-item__body"></div>
-      <div class="comment-item__actions" style="display:${isMine ? 'flex' : 'none'}">
+      <div class="comment-item__body comment__content"></div>
+      <div class="comment-item__actions comment__actions" style="display:${isMine ? 'flex' : 'none'}">
         <button class="comment-action btn-action comment__edit" type="button">수정</button>
         <button class="comment-action comment-action--danger btn-action btn-danger comment__delete" type="button">삭제</button>
       </div>
@@ -284,10 +327,12 @@ function buildCommentItem(c) {
   if (isMine) {
     li.querySelector('.comment__delete')?.addEventListener('click', () => onDeleteComment(id, li));
     li.querySelector('.comment__edit')?.addEventListener('click', () => onEditComment(id, li, content));
+  } else {
+    li.querySelector('.comment-item__actions').style.display = 'none';
   }
+
   return li;
 }
-
 
 function updateCommentCount(delta) {
   const el = commentCountEl();
@@ -433,12 +478,24 @@ function initComments() {
 
       input.value = '';
       const ul = document.getElementById('comment-list');
-      const li = buildCommentItem(created ?? { content, writerName: window.CURRENT_USERNAME ?? '익명', createdAt: new Date().toISOString(), mine: true });
+
+      const me = getCurrentUser();
+      const li = buildCommentItem(created ?? {
+        id: created?.id ?? created?.commentId,
+        content,
+        writerName: (me.usernameNorm ?? '익명'),
+        createdAt: new Date().toISOString(),
+        mine: true
+      });
+
       ul.prepend(li);
       updateCommentCount(1);
-
     } catch (e) {
-      if (String(e.message).startsWith('AUTH_REDIRECT')) { alert('로그인이 필요합니다.'); location.href = '/login'; return; }
+      if (String(e.message).startsWith('AUTH_REDIRECT')) {
+        alert('로그인이 필요합니다.');
+        location.href = '/login';
+        return;
+      }
       alert('댓글 등록에 실패했습니다.');
     }
   });
