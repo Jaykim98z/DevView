@@ -1,9 +1,6 @@
 package com.allinone.DevView.community.dto;
 
 import com.allinone.DevView.common.enums.Grade;
-
-import java.time.LocalDateTime;
-
 import java.time.LocalDateTime;
 
 public record PostListDto(
