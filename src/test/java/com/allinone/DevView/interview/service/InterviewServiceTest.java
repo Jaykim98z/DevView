@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class InterviewServiceTest {
@@ -59,6 +59,9 @@ public class InterviewServiceTest {
     private ExternalAiApiService gemini;
 
     @Mock
+    private RecommendationGenerationService recommendationGenerationService;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     @InjectMocks
@@ -68,7 +71,6 @@ public class InterviewServiceTest {
     @DisplayName("면접 시작 - 성공")
     void startInterview_success() {
         // given
-        // 1. 실제 요청(Request) 객체 생성
         StartInterviewRequest request = new StartInterviewRequest();
         ReflectionTestUtils.setField(request, "userId", 1L);
         ReflectionTestUtils.setField(request, "interviewType", InterviewType.TECHNICAL);
@@ -77,7 +79,6 @@ public class InterviewServiceTest {
         ReflectionTestUtils.setField(request, "questionCount", 5);
         ReflectionTestUtils.setField(request, "durationMinutes", 15);
 
-        // 2. 테스트용 User, Interview 객체를 빌더로 생성
         User user = User.builder().username("testuser").build();
         Interview savedInterview = Interview.builder()
                 .user(user)
@@ -85,9 +86,8 @@ public class InterviewServiceTest {
                 .jobPosition(request.getJobPosition())
                 .careerLevel(request.getCareerLevel())
                 .build();
-        ReflectionTestUtils.setField(savedInterview, "id", 10L); // 저장 후 ID가 부여된 상황을 가정
+        ReflectionTestUtils.setField(savedInterview, "id", 10L);
 
-        // 3. Mock 객체들의 행동 정의
         given(userRepository.findById(any(Long.class))).willReturn(Optional.of(user));
         given(interviewRepository.save(any(Interview.class))).willReturn(savedInterview);
 
@@ -135,7 +135,6 @@ public class InterviewServiceTest {
     @DisplayName("여러 답변 제출 - 성공")
     void submitAnswers_success() {
         // given
-        // 1. 여러 개의 답변 항목을 포함하는 요청 DTO를 생성합니다.
         SubmitAnswerRequest.AnswerItem item1 = new SubmitAnswerRequest.AnswerItem();
         ReflectionTestUtils.setField(item1, "questionId", 1L);
         ReflectionTestUtils.setField(item1, "answerText", "Answer 1");
@@ -147,22 +146,19 @@ public class InterviewServiceTest {
         SubmitAnswerRequest request = new SubmitAnswerRequest();
         ReflectionTestUtils.setField(request, "answers", List.of(item1, item2));
 
-        // 2. Repository가 질문을 찾을 수 있도록 설정합니다.
         InterviewQuestion question1 = InterviewQuestion.builder().id(1L).build();
         InterviewQuestion question2 = InterviewQuestion.builder().id(2L).build();
         given(interviewQuestionRepository.findAllById(List.of(1L, 2L))).willReturn(List.of(question1, question2));
 
         // when
-        // 새로운 서비스 메서드인 submitAnswers를 호출합니다.
         interviewService.submitAnswers(request);
 
         // then
-        // 3. saveAll 메서드가 올바른 데이터와 함께 호출되었는지 검증합니다.
         ArgumentCaptor<List<InterviewAnswer>> captor = ArgumentCaptor.forClass(List.class);
         verify(interviewAnswerRepository).saveAll(captor.capture());
 
         List<InterviewAnswer> savedAnswers = captor.getValue();
-        assertThat(savedAnswers).hasSize(2); // 2개의 답변이 저장되었는지 확인
+        assertThat(savedAnswers).hasSize(2);
         assertThat(savedAnswers.get(0).getAnswerText()).isEqualTo("Answer 1");
         assertThat(savedAnswers.get(1).getQuestion().getId()).isEqualTo(2L);
     }
@@ -185,9 +181,7 @@ public class InterviewServiceTest {
         GeminiAnalysisResponseDto mockAnalysis = new GeminiAnalysisResponseDto(
                 85, "Summary", 90, 80, 88, 92, List.of("Java"), mockFeedbackItems
         );
-
-        ObjectMapper realObjectMapper = new ObjectMapper();
-        String fakeAiResponseJson = realObjectMapper.writeValueAsString(mockAnalysis);
+        String fakeAiResponseJson = new ObjectMapper().writeValueAsString(mockAnalysis);
 
         InterviewResult mockResult = InterviewResult.builder()
                 .id(1L)
@@ -201,6 +195,7 @@ public class InterviewServiceTest {
         given(gemini.generateContent(any(String.class))).willReturn(fakeAiResponseJson);
         given(objectMapper.readValue(any(String.class), eq(GeminiAnalysisResponseDto.class))).willReturn(mockAnalysis);
         given(interviewResultRepository.save(any(InterviewResult.class))).willReturn(mockResult);
+        doNothing().when(recommendationGenerationService).generateAndSaveRecommendations(any(Long.class), any(List.class));
 
         // when
         InterviewResultResponse response = interviewService.endInterview(interviewId);
@@ -208,6 +203,8 @@ public class InterviewServiceTest {
         // then
         assertThat(response).isNotNull();
         assertThat(response.getFeedback()).isEqualTo(fakeAiResponseJson);
+
+        verify(recommendationGenerationService, times(1)).generateAndSaveRecommendations(mockResult.getId(), mockAnalysis.keywords());
     }
 
     @Test
@@ -221,7 +218,7 @@ public class InterviewServiceTest {
                 .interview(mockInterview)
                 .totalScore(85)
                 .grade(Grade.B)
-                .feedback("Good job.")
+                .feedback("{\"summary\":\"Great job!\"}")
                 .build();
 
         given(interviewResultRepository.findByInterviewId(interviewId)).willReturn(Optional.of(mockResult));

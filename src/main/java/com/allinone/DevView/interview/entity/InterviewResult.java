@@ -7,6 +7,7 @@ import lombok.*;
 @Entity
 @Table(name = "interview_results")
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
