@@ -82,5 +82,6 @@ public class CommentsController {
         } catch (SecurityException se) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, se.getMessage());
         }
+
     }
 }

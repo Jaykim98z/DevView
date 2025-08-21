@@ -17,3 +17,4 @@ public record PostListDto(
         int score,
         LocalDateTime createdAt
 ) {}
+

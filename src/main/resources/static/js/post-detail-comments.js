@@ -277,14 +277,14 @@ function commentCountEl() {
 }
 
 function buildCommentItem(c) {
-  const rawAuthor = c.username ?? '익명';
+  const rawAuthor = c.username ?? c.writerName ?? c.author ?? '익명';
   const displayAuthor = (typeof rawAuthor === 'string' && rawAuthor.includes('@'))
    ? rawAuthor.split('@')[0]
    : rawAuthor;
 
   const content  = c.content ?? c.text ?? '';
   const created  = c.createdAt ?? c.created_at ?? c.createdAtIso ?? null;
-  const uid      = c.userId ?? c.writerId ?? null;
+  const uid      = c.userId ?? c.writerId ?? c.authorId ?? null;
 
   const cEmail  = c.userEmail ?? c.email ?? null;
 
@@ -480,10 +480,17 @@ function initComments() {
       const ul = document.getElementById('comment-list');
 
       const me = getCurrentUser();
+      if (created && typeof created === 'object') {
+        created.mine = true;
+        if (me.id != null) created.userId = me.id;
+        if (!created.username && me.username) created.username = me.username;
+        if (!created.createdAt) created.createdAt = new Date().toISOString();
+      }
       const li = buildCommentItem(created ?? {
-        id: created?.id ?? created?.commentId,
+        id: undefined,
         content,
-        writerName: (me.usernameNorm ?? '익명'),
+        username: (me.username ?? me.usernameNorm ?? '익명'),
+        userId: me.id ?? null,
         createdAt: new Date().toISOString(),
         mine: true
       });

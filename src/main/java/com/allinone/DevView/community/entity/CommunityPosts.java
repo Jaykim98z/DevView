@@ -75,8 +75,12 @@ public class CommunityPosts {
     @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
 
+    //@Column(name = "interview_type", length = 20)
+    //private String interviewType;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "interview_type", length = 20)
-    private String interviewType;
+    private com.allinone.DevView.common.enums.InterviewType interviewType;
 
     @Column(name = "writer_name", length = 255)
     private String writerName;

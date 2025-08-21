@@ -74,9 +74,7 @@ public class CommentsDto {
         }
 
         public static Res of(com.allinone.DevView.community.entity.Comments c, String username) {
-            String display = (username != null && !username.isBlank())
-                    ? username
-                    : c.getWriterName();
+            String display = (username != null && !username.isBlank()) ? username : c.getWriterName();
             return new Res(
                     c.getId(),
                     c.getUserId(),
@@ -85,6 +83,12 @@ public class CommentsDto {
                     c.getContent(),
                     c.getCreatedAt()
             );
+        }
+
+        public static Res of(com.allinone.DevView.community.entity.Comments c, String username, Long viewerId, boolean isAdmin) {
+            Res r = of(c, username);
+            r.setMine(isAdmin || (viewerId != null && viewerId.equals(c.getUserId())));
+            return r;
         }
     }
 }

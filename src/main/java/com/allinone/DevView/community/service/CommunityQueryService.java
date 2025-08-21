@@ -2,6 +2,7 @@ package com.allinone.DevView.community.service;
 
 import com.allinone.DevView.community.dto.CommentsDto;
 import com.allinone.DevView.community.dto.PostListDto;
+import com.allinone.DevView.community.dto.CommunityPostsDto;
 import com.allinone.DevView.community.entity.Comments;
 import com.allinone.DevView.community.entity.CommunityPosts;
 import com.allinone.DevView.community.repository.CommentsRepository;
@@ -35,7 +36,12 @@ public class CommunityQueryService {
     @Transactional(readOnly = true)
     public Page<PostListDto> getPosts(Pageable pageable) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, POST_SORT_WHITELIST);
-        return postsRepository.findByDeletedFalse(safe).map(this::toPostListDto);
+        return postsRepository.findAll(safe).map(this::toPostListDto);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PostListDto> getPosts(Pageable pageable, String category, String level) {
+        return getPosts(pageable);
     }
 
     public Page<CommentsDto> getComments(Long postId, Pageable pageable) {
@@ -99,8 +105,6 @@ public class CommunityQueryService {
                 p.getCreatedAt()
         );
     }
-
-
 
     private CommentsDto toCommentDto(Comments c) {
         return new CommentsDto(
