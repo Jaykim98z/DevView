@@ -147,7 +147,7 @@ public class InterviewService {
         try {
             GeminiAnalysisResponseDto analysis = objectMapper.readValue(cleanedJson, GeminiAnalysisResponseDto.class);
 
-            String recommendationsHtml = "No specific recommendations available.";
+            String recommendationsHtml = "추천 학습 자료가 없습니다.";
             if (alan instanceof AlanApiService && analysis.keywords() != null && !analysis.keywords().isEmpty()) {
                 try {
                     String combinedKeywords = String.join(", ", analysis.keywords());
@@ -229,10 +229,10 @@ public class InterviewService {
                 "Evaluate the following interview transcript for a " +
                 interview.getJobPosition() + " role. Your response MUST be a single, valid JSON object with no extra text. " +
                 "The JSON object must have these exact keys: 'totalScore' (must be the calculated average of the four category scores), " +
-                "'feedback' (a detailed, multi-line string in KR with feedback for each question[included each question in feedback] separated by a newline character '\\n'), " +
+                "'detailedFeedback' (an array of objects, where each object has three keys: 'question' (the original question), 'answer' (the user's answer), and 'feedback' (your feedback for that answer in KR)), " +
                 "'summary' (string in KR), " +
                 "'techScore' (0-100), 'problemScore' (0-100), 'commScore' (0-100), 'attitudeScore' (0-100), " +
-                "and 'keywords' (an array of 3-5 relevant technical string KR keywords from the transcript).\n\n" +
+                "and 'keywords' (an array of 1-7 relevant technical string KR keywords. If no specific keywords can be found in the answers, use general keywords related to the job position).\n\n" +
                 "Here is the transcript:\n" + transcript;
     }
 

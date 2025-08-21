@@ -45,21 +45,28 @@ document.addEventListener('DOMContentLoaded', async function() {
         summaryEl.textContent = analysis.summary;
         recommendationsEl.innerHTML = result.recommendedResource;
         feedbackContainer.innerHTML = '';
+        if (analysis.detailedFeedback && analysis.detailedFeedback.length > 0) {
+            analysis.detailedFeedback.forEach(item => {
+                const feedbackItem = document.createElement('div');
+                feedbackItem.className = 'feedback-item';
 
-        const feedbackItems = analysis.feedback.split('\n').filter(line => line.trim() !== '');
-        feedbackItems.forEach(itemText => {
-            const feedbackItem = document.createElement('div');
-            feedbackItem.className = 'feedback-item';
-
-            if (itemText.startsWith('Q:')) {
                 const questionElement = document.createElement('strong');
-                questionElement.textContent = itemText;
+                questionElement.textContent = `Q: ${item.question}`;
+
+                const answerElement = document.createElement('p');
+                answerElement.textContent = `A: ${item.answer}`;
+
+                const feedbackElement = document.createElement('p');
+                feedbackElement.textContent = `Feedback: ${item.feedback}`;
+
                 feedbackItem.appendChild(questionElement);
-            } else {
-                feedbackItem.textContent = itemText;
-            }
-            feedbackContainer.appendChild(feedbackItem);
-        });
+                feedbackItem.appendChild(answerElement);
+                feedbackItem.appendChild(feedbackElement);
+                feedbackContainer.appendChild(feedbackItem);
+            });
+        } else {
+            feedbackContainer.textContent = "No detailed feedback available.";
+        }
 
         setProgress(skillTechProgress, skillTechScore, analysis.techScore);
         setProgress(skillProblemProgress, skillProblemScore, analysis.problemScore);
