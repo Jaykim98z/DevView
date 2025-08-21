@@ -218,30 +218,24 @@ public class InterviewService {
 
     private String getRecommendationsFromAlan(List<String> keywords) {
         if (alan instanceof AlanApiService && keywords != null && !keywords.isEmpty()) {
-            StringBuilder finalHtml = new StringBuilder();
-            keywords.forEach(keyword -> {
-                try {
-                    String alanJson = ((AlanApiService) alan).getRecommendations(keyword);
-                    String cleanedAlanJson = alanJson.trim().replace("```json", "").replace("```", "").trim();
-                    AlanRecommendationDto alanResponse = objectMapper.readValue(cleanedAlanJson, AlanRecommendationDto.class);
+            try {
+                String combinedKeywords = String.join(", ", keywords);
+                String alanJson = ((AlanApiService) alan).getRecommendations(combinedKeywords);
+                String cleanedAlanJson = alanJson.trim().replace("```json", "").replace("```", "").trim();
 
-                    if (alanResponse != null && alanResponse.recommendations() != null && !alanResponse.recommendations().isEmpty()) {
-                        finalHtml.append("<h3>").append(keyword).append("</h3>");
+                AlanRecommendationDto alanResponse = objectMapper.readValue(cleanedAlanJson, AlanRecommendationDto.class);
 
-                        String listHtml = alanResponse.recommendations().stream()
-                                .map(item -> {
-                                    String safeTitle = item.title().replace("<", "&lt;").replace(">", "&gt;");
-                                    return "<li><a href=\"" + item.url() + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + safeTitle + "</a></li>";
-                                })
-                                .collect(Collectors.joining("", "<ul>", "</ul>"));
-
-                        finalHtml.append(listHtml);
-                    }
-                } catch (Exception e) {
-                    log.warn("Failed to process recommendation for keyword '{}': {}", keyword, e.getMessage());
+                if (alanResponse != null && alanResponse.recommendations() != null) {
+                    return alanResponse.recommendations().stream()
+                            .map(item -> {
+                                String safeTitle = item.title().replace("<", "&lt;").replace(">", "&gt;");
+                                return "<li><a href=\"" + item.url() + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + safeTitle + "</a></li>";
+                            })
+                            .collect(Collectors.joining("", "<ul>", "</ul>"));
                 }
-            });
-            return finalHtml.length() > 0 ? finalHtml.toString() : "추천 학습 자료가 없습니다.";
+            } catch (Exception e) {
+                log.error("Failed to get or process recommendations from Alan API", e);
+            }
         }
         return "추천 학습 자료가 없습니다.";
     }
