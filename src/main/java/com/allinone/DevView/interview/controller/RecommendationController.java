@@ -20,4 +20,10 @@ public class RecommendationController {
 
         return ResponseEntity.ok(recommendations);
     }
+
+    @GetMapping("/single")
+    public ResponseEntity<String> getSingleRecommendation(@RequestParam String keyword) {
+        String recommendationHtml = recommendationService.getSingleRecommendationHtml(keyword);
+        return ResponseEntity.ok(recommendationHtml);
+    }
 }

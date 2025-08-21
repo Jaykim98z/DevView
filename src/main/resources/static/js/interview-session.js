@@ -157,7 +157,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentQuestionIndex < questions.length) {
             displayCurrentQuestion();
         } else {
-            await endInterview();
+            if (confirm("답변을 제출하고 면접을 완료하시겠습니까?")) {
+                await endInterview();
+            }
         }
     });
 
