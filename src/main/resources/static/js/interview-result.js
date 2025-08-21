@@ -45,21 +45,45 @@ document.addEventListener('DOMContentLoaded', async function() {
         summaryEl.textContent = analysis.summary;
         recommendationsEl.innerHTML = result.recommendedResource;
         feedbackContainer.innerHTML = '';
+        if (analysis.detailedFeedback && analysis.detailedFeedback.length > 0) {
+            analysis.detailedFeedback.forEach(item => {
+                const feedbackItem = document.createElement('div');
+                feedbackItem.className = 'feedback-item';
 
-        const feedbackItems = analysis.feedback.split('\n').filter(line => line.trim() !== '');
-        feedbackItems.forEach(itemText => {
-            const feedbackItem = document.createElement('div');
-            feedbackItem.className = 'feedback-item';
+                const questionHeader = document.createElement('div');
+                questionHeader.className = 'feedback-question';
+                questionHeader.textContent = `Q: ${item.question}`;
 
-            if (itemText.startsWith('Q:')) {
-                const questionElement = document.createElement('strong');
-                questionElement.textContent = itemText;
-                feedbackItem.appendChild(questionElement);
-            } else {
-                feedbackItem.textContent = itemText;
-            }
-            feedbackContainer.appendChild(feedbackItem);
-        });
+                const content = document.createElement('div');
+                content.className = 'feedback-content';
+
+                const answerElement = document.createElement('p');
+                answerElement.textContent = `A: ${item.answer}`;
+
+                const feedbackElement = document.createElement('p');
+                feedbackElement.textContent = `Feedback: ${item.feedback}`;
+
+                content.appendChild(answerElement);
+                content.appendChild(feedbackElement);
+
+                feedbackItem.appendChild(questionHeader);
+                feedbackItem.appendChild(content);
+                feedbackContainer.appendChild(feedbackItem);
+
+                questionHeader.addEventListener('click', () => {
+                    questionHeader.classList.toggle('active');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        content.style.padding = '0 1.5rem';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        content.style.padding = '1rem 1.5rem';
+                    }
+                });
+            });
+        } else {
+            feedbackContainer.textContent = "No detailed feedback available.";
+        }
 
         setProgress(skillTechProgress, skillTechScore, analysis.techScore);
         setProgress(skillProblemProgress, skillProblemScore, analysis.problemScore);

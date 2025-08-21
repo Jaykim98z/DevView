@@ -77,13 +77,36 @@
 }
 
 .feedback-item {
-    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    overflow: hidden;
 }
 
-.feedback-item strong {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #343a40;
+.feedback-question {
+    padding: 1rem 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.feedback-question::after {
+    content: '▼';
+    transition: transform 0.2s;
+}
+
+.feedback-question.active::after {
+    transform: rotate(180deg);
+}
+
+.feedback-content {
+    padding: 0 1.5rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
 }
 
 .feedback-details, .summary-details {
@@ -92,6 +115,10 @@
     border-radius: 8px;
     margin-bottom: 2rem;
     line-height: 1.6;
+}
+
+.feedback-content p {
+    margin: 1rem 0;
 }
 
 .action-buttons {

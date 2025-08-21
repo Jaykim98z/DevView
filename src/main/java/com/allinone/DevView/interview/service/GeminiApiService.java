@@ -26,7 +26,11 @@ public class GeminiApiService implements ExternalAiApiService {
     public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount, InterviewType interviewType) {
         String prompt = String.format(
                 "You are an interviewer. Please generate exactly %d distinct '%s' questions for a %s position targeting a %s developer. " +
-                        "Each question must be on a new line. Do not number them or add any other text. " +
+                        "CRITICAL: Your response must only contain the questions. Each question must be on a new line. " +
+                        "Do NOT include any numbers, bullet points, markdown formatting, or any extra text. " +
+                        "For example, a valid response for 2 questions would be:\n" +
+                        "What is the difference between a class and an object?\n" +
+                        "Explain the concept of RESTful APIs.\n\n" +
                         "Please generate the questions in Korean.",
                 questionCount, interviewType.toString(), jobPosition, careerLevel
         );
@@ -34,6 +38,7 @@ public class GeminiApiService implements ExternalAiApiService {
         String rawResponse = generateContent(prompt);
 
         return Arrays.stream(rawResponse.split("\n"))
+                .map(line -> line.replaceAll("^\\s*[-*]?\\s*\\d*\\.\\s*", "").trim())
                 .filter(line -> !line.trim().isEmpty())
                 .collect(Collectors.toList());
     }
