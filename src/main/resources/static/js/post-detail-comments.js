@@ -508,11 +508,33 @@ function initComments() {
   });
 }
 
+async function bumpViewCount() {
+  const postId = getPostId();
+  if (postId == null) return;
+  try {
+    const res = await fetchJson(`/api/community/posts/${postId}/view`, {
+      method: 'POST',
+      headers: __secureHeaders__(true),
+      body: JSON.stringify({})
+    });
+    if (res && typeof res.viewCount === 'number') {
+      const vc = document.getElementById('view-count');
+      if (vc) vc.textContent = String(res.viewCount);
+    } else {
+      const vc = document.getElementById('view-count');
+      if (vc) vc.textContent = String((Number(vc.textContent || '0') || 0) + 1);
+    }
+  } catch (e) {
+    console.warn('조회수 증가 실패', e);
+  }
+}
+
 (function () {
   const start = () => {
     initLikeScrap();
     initEditDelete();
     initComments();
+    bumpViewCount();
   };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', start, { once: true });
