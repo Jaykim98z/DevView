@@ -1,7 +1,6 @@
 package com.allinone.DevView.community.controller;
 
 import com.allinone.DevView.community.dto.CombinedPostRequest;
-import com.allinone.DevView.community.dto.CommunityPostDetailDto;
 import com.allinone.DevView.community.dto.CommunityPostsDto;
 import com.allinone.DevView.community.service.CommunityService;
 import com.allinone.DevView.user.entity.User;
@@ -39,18 +38,26 @@ public class CommunityViewController {
             log.error("Failed to load community posts", e);
             posts = Collections.emptyList();
         }
+        if (posts == null) {
+            posts = Collections.emptyList();
+        }
         model.addAttribute("posts", posts);
         return "community/community";
     }
 
     @GetMapping("/posts/{id}/detail")
     public String getPostDetail(@PathVariable Long id, Model model) {
-        CommunityPostDetailDto post = communityService.getPostDetailDto(id);
+        CommunityPostsDto post = communityService.getPostDetail(id);
         if (post == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다.");
         }
         model.addAttribute("post", post);
         return "community/post-detail";
+    }
+
+    @GetMapping("/posts/{id}")
+    public String getPostDetailFallback(@PathVariable Long id) {
+        return "redirect:/community/posts/" + id + "/detail";
     }
 
     @GetMapping("/posts/new")
@@ -59,7 +66,7 @@ public class CommunityViewController {
             return "redirect:/user/login?redirect=/community/posts/new";
         }
         model.addAttribute("form", CombinedPostRequest.empty());
-        return "community/post-new";
+        return "community/post-write";
     }
 
     @PostMapping("/posts/interview")
@@ -70,7 +77,7 @@ public class CommunityViewController {
             Principal principal
     ) {
         if (bindingResult.hasErrors()) {
-            return "community/post-new";
+            return "community/post-write";
         }
         if (principal == null) {
             return "redirect:/user/login?redirect=/community/posts/new";
@@ -87,7 +94,7 @@ public class CommunityViewController {
                 form.getInterviewShare(), userId
         );
 
-        communityService.createPost(
+        communityService.createFreePost(  // ✅ createPost → createFreePost 로 변경
                 form.getFreePost(), userId
         );
 

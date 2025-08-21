@@ -42,8 +42,8 @@ public class CommunityPostsDto {
 
     private int commentCount;
 
-    private Long interviewResultId;     // 인터뷰 결과 ID
-    private String interviewFeedback;   // 상세 피드백
+    private Long interviewResultId;
+    private String interviewFeedback;
 
     public CommunityPostsDto(
             Long id,
@@ -111,7 +111,6 @@ public class CommunityPostsDto {
             boolean bookmarked,
             Object scrapId,
             LocalDateTime createdAt,
-            // ✚ 추가
             Long interviewResultId,
             String interviewFeedback
     ) {
