@@ -17,6 +17,9 @@ import com.allinone.DevView.interview.repository.InterviewResultRepository;
 import com.allinone.DevView.ranking.service.RankingService;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
+// ✅ 추가: UserProfile 관련 import
+import com.allinone.DevView.mypage.entity.UserProfile;
+import com.allinone.DevView.mypage.repository.UserProfileRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +38,8 @@ import java.util.stream.Collectors;
 public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final UserRepository userRepository;
+    // ✅ 추가: UserProfile 조회를 위한 Repository
+    private final UserProfileRepository userProfileRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final ExternalAiApiService gemini;
@@ -46,7 +51,6 @@ public class InterviewService {
     @Lazy
     @Autowired
     private RankingService rankingService;
-
 
     @Transactional
     public InterviewResponse startInterview(StartInterviewRequest request) {
@@ -71,18 +75,25 @@ public class InterviewService {
         Interview interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
 
+        // ✅ 사용자 자기소개 조회
+        String selfIntroduction = userProfileRepository.findByUserUserId(interview.getUser().getUserId())
+                .map(UserProfile::getSelfIntroduction)
+                .filter(intro -> intro != null && !intro.trim().isEmpty())
+                .orElse(null);
+
         List<String> questionTexts = gemini.getQuestionFromAi(
                 interview.getJobPosition().toString(),
                 interview.getCareerLevel().toString(),
                 interview.getQuestionCount(),
-                interview.getInterviewType()
+                interview.getInterviewType(),
+                selfIntroduction
         );
 
         List<InterviewQuestion> newQuestions = questionTexts.stream()
                 .map(text -> InterviewQuestion.builder()
                         .interview(interview)
                         .text(text)
-                        .category(interview.getJobPosition().toString())
+                        .category(interview.getInterviewType().toString())
                         .build())
                 .collect(Collectors.toList());
 
@@ -94,25 +105,11 @@ public class InterviewService {
     }
 
     @Transactional
-    public QuestionResponse saveQuestion(Interview interview, String questionText) {
-        InterviewQuestion newQuestion = InterviewQuestion.builder()
-                .interview(interview)
-                .text(questionText)
-                .category(interview.getJobPosition().toString())
-                .build();
-
-        InterviewQuestion savedQuestion = interviewQuestionRepository.save(newQuestion);
-
-        return QuestionResponse.fromEntity(savedQuestion);
-    }
-
-    @Transactional
     public void submitAnswers(SubmitAnswerRequest request) {
-        List<Long> questionIds = request.getAnswers().stream()
-                .map(SubmitAnswerRequest.AnswerItem::getQuestionId)
-                .collect(Collectors.toList());
+        Interview interview = interviewRepository.findById(request.getInterviewId())
+                .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
 
-        Map<Long, InterviewQuestion> questionMap = interviewQuestionRepository.findAllById(questionIds).stream()
+        Map<Long, InterviewQuestion> questionMap = interview.getQuestions().stream()
                 .collect(Collectors.toMap(InterviewQuestion::getId, q -> q));
 
         List<InterviewAnswer> newAnswers = request.getAnswers().stream()

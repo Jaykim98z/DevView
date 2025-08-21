@@ -23,9 +23,11 @@ public class GeminiApiService implements ExternalAiApiService {
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
     @Override
-    public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount, InterviewType interviewType) {
+    public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount, InterviewType interviewType, String selfIntroduction) {
         String prompt = String.format(
                 "You are an interviewer. Please generate exactly %d distinct '%s' questions for a %s position targeting a %s developer. " +
+                        (selfIntroduction != null && !selfIntroduction.trim().isEmpty() ?
+                                "The candidate has this background: \"" + selfIntroduction + "\". Please consider their experience when generating questions. " : "") +
                         "CRITICAL: Your response must only contain the questions. Each question must be on a new line. " +
                         "Do NOT include any numbers, bullet points, markdown formatting, or any extra text. " +
                         "For example, a valid response for 2 questions would be:\n" +
