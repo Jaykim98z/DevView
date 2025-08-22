@@ -5,6 +5,7 @@ import com.allinone.DevView.common.exception.ErrorCode;
 import com.allinone.DevView.interview.dto.alan.AlanRecommendationDto;
 import com.allinone.DevView.interview.entity.InterviewResult;
 import com.allinone.DevView.interview.repository.InterviewResultRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,16 +48,25 @@ public class RecommendationGenerationService {
                 String alanJson = ((AlanApiService) alan).getRecommendations(combinedKeywords);
                 String cleanedAlanJson = alanJson.trim().replace("```json", "").replace("```", "").trim();
 
-                AlanRecommendationDto alanResponse = objectMapper.readValue(cleanedAlanJson, AlanRecommendationDto.class);
+                Map<String, List<AlanRecommendationDto.RecommendationItem>> groupedResults = objectMapper.readValue(
+                        cleanedAlanJson,
+                        new TypeReference<>() {}
+                );
 
-                if (alanResponse != null && alanResponse.recommendations() != null) {
-                    return alanResponse.recommendations().stream()
+                StringBuilder finalHtml = new StringBuilder();
+                groupedResults.forEach((keyword, recommendations) -> {
+                    finalHtml.append("<h3>").append(keyword).append("</h3>");
+                    String listHtml = recommendations.stream()
                             .map(item -> {
                                 String safeTitle = item.title().replace("<", "&lt;").replace(">", "&gt;");
-                                return "<li><a href=\"" + item.url() + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + safeTitle + "</a></li>";
+                                return "<li><a href=\"" + item.url() + "\" target=\"_blank\">" + safeTitle + "</a></li>";
                             })
                             .collect(Collectors.joining("", "<ul>", "</ul>"));
-                }
+                    finalHtml.append(listHtml);
+                });
+
+                return finalHtml.toString();
+
             } catch (Exception e) {
                 log.error("Failed to get or process recommendations from Alan API", e);
             }
