@@ -13,6 +13,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * An implementation of the ExternalAiApiService that communicates with the Google Gemini AI.
+ * This service is responsible for generating interview questions and analyzing results.
+ * It is registered with the qualifier "gemini".
+ */
 @Slf4j
 @Service("gemini")
 @RequiredArgsConstructor
@@ -24,6 +29,16 @@ public class GeminiApiService implements ExternalAiApiService {
 
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
+    /**
+     * Generates a list of interview questions tailored to the user's profile and settings.
+     * It dynamically adjusts the prompt based on the user's self-introduction.
+     * @param jobPosition The job position for the interview.
+     * @param careerLevel The candidate's career level.
+     * @param questionCount The number of questions to generate.
+     * @param interviewType The type of interview.
+     * @param selfIntroduction The user's self-introduction text (can be null or empty).
+     * @return A list of generated question strings, with a greeting added to the first question.
+     */
     @Override
     public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount, InterviewType interviewType, String selfIntroduction) {
         String prompt = String.format(
@@ -55,6 +70,11 @@ public class GeminiApiService implements ExternalAiApiService {
         return questions;
     }
 
+    /**
+     * Sends a generic prompt to the Gemini API and returns the AI's raw text response.
+     * @param prompt The full prompt to send to the AI.
+     * @return The AI's generated text content.
+     */
     public String generateContent(String prompt) {
         GeminiRequestDto requestDto = GeminiRequestDto.from(prompt);
         String urlWithKey = API_URL + "?key=" + apiKey;
@@ -66,6 +86,7 @@ public class GeminiApiService implements ExternalAiApiService {
 
     /**
      * ✅ 랜덤 인사말 선택
+     * @return
      */
     private String getRandomGreeting() {
         String[] greetings = {

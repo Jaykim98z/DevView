@@ -11,6 +11,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 면접 정보 엔티티
+ */
 @Entity
 @Table(name = "interviews")
 @Getter
@@ -59,6 +62,9 @@ public class Interview {
         this.createdAt = LocalDateTime.now();
     }
 
+    /**
+     * 면접 세션 종료
+     */
     public void endInterviewSession() {
         if (this.endedAt == null) {
             this.endedAt = LocalDateTime.now();

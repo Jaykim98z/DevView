@@ -11,11 +11,14 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+/**
+ * A comprehensive DTO representing a completed interview result.
+ * This class serves a dual purpose: providing full details for the result page
+ * and providing summary information for list views like My Page.
+ */
 @Getter
 @Builder
 public class InterviewResultResponse {
-
-    // 기존 필드
     private final Long resultId;
     private final Long interviewId;
     private final int totalScore;

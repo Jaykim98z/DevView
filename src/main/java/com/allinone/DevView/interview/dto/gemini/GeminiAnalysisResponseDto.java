@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
+/**
+ * DTO for mapping the structured JSON analysis response from the Gemini API.
+ */
 public record GeminiAnalysisResponseDto(
         @JsonProperty("totalScore") int totalScore,
         @JsonProperty("summary") String summary,
@@ -14,6 +17,9 @@ public record GeminiAnalysisResponseDto(
         @JsonProperty("keywords") List<String> keywords,
         @JsonProperty("detailedFeedback") List<DetailedFeedbackItem> detailedFeedback
 ) {
+    /**
+     * Represents a single item of detailed feedback for a specific question.
+     */
     public static record DetailedFeedbackItem(
             @JsonProperty("question") String question,
             @JsonProperty("answer") String answer,

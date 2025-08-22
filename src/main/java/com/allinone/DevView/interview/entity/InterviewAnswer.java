@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * 면접 답변 엔티티
+ */
 @Entity
 @Table(name = "interview_answers")
 @Getter
