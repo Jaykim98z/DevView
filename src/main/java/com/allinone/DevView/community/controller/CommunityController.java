@@ -5,6 +5,7 @@ import com.allinone.DevView.community.entity.*;
 import com.allinone.DevView.community.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +25,32 @@ public class CommunityController {
     @GetMapping("/posts")
     public ResponseEntity<Page<PostListDto>> listPosts(
             @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable
+            Pageable pageable,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String level
     ) {
-        return ResponseEntity.ok(communityQueryService.getPosts(pageable));
+        boolean noFilter = (category == null || category.isBlank() || "전체".equals(category))
+                && (level == null || level.isBlank() || "전체".equals(level));
+        if (noFilter) {
+            return ResponseEntity.ok(communityQueryService.getPosts(pageable));
+        }
+        return ResponseEntity.ok(communityQueryService.getPosts(pageable, category, level));
+    }
+
+    @GetMapping("/posts/dto")
+    public ResponseEntity<Page<CommunityPostsDto>> listPostsAsDto(
+            @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String level
+    ) {
+        boolean noFilter = (category == null || category.isBlank() || "전체".equals(category))
+                && (level == null || level.isBlank() || "전체".equals(level));
+        Page<PostListDto> page = noFilter
+                ? communityQueryService.getPosts(pageable)
+                : communityQueryService.getPosts(pageable, category, level);
+        Page<CommunityPostsDto> converted = page.map(this::toCommunityPostsDto);
+        return ResponseEntity.ok(converted);
     }
 
     @GetMapping("/posts/legacy")
@@ -55,13 +79,11 @@ public class CommunityController {
         return ResponseEntity.ok(Map.of("postId", postId));
     }
 
-    // (레거시) 전체 교체 업데이트 - 기존 호출부 유지
     @PutMapping("/posts/{id}")
     public CommunityPosts updatePost(@PathVariable Long id, @RequestBody CommunityPosts post) {
         return communityService.updatePost(id, post);
     }
 
-    // (레거시) 하드 삭제 - 기존 호출부 유지
     @DeleteMapping("/posts/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         communityService.deletePost(id);
@@ -78,6 +100,7 @@ public class CommunityController {
         communityService.removeLike(userId, postId);
         return ResponseEntity.noContent().build();
     }
+
 
     @PostMapping("/posts/{postId}/scraps")
     public Scraps addScrap(@PathVariable Long postId, @RequestBody Scraps scrap) {
@@ -97,7 +120,6 @@ public class CommunityController {
         return Map.of("viewCount", cnt);
     }
 
-    /** 게시글 부분 수정 (본인/관리자만) */
     @PatchMapping("/posts/{postId}")
     public ResponseEntity<?> patchUpdatePost(
             @PathVariable Long postId,
@@ -108,7 +130,6 @@ public class CommunityController {
         return ResponseEntity.ok(id);
     }
 
-    /** 게시글 삭제 (Soft Delete, 본인/관리자만) */
     @DeleteMapping("/posts/{postId}/soft")
     public ResponseEntity<?> softDeletePost(
             @PathVariable Long postId,
@@ -117,4 +138,36 @@ public class CommunityController {
         communityService.deletePost(postId, user.getUserId());
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/posts/compose")
+    public ResponseEntity<Map<String, Long>> createComposedPost(
+            @Valid @RequestBody CombinedPostRequest req,
+            @AuthenticationPrincipal CustomUserDetails user
+    ) {
+        Long userId = user == null ? null : user.getUserId();
+        if (userId == null) return ResponseEntity.status(401).body(Map.of("message", -1L));
+
+        CombinedPostRequest.PostCategory category = req.getCategory();
+        if (category == null) {
+            category = (req.getInterviewShare() != null)
+                    ? CombinedPostRequest.PostCategory.INTERVIEW_SHARE
+                    : CombinedPostRequest.PostCategory.FREE;
+        }
+
+        Long postId = switch (category) {
+            case INTERVIEW_SHARE -> communityService.createInterviewSharePost(req.getInterviewShare(), userId);
+            case FREE -> communityService.createFreePost(req.getFreePost(), userId);
+        };
+        return ResponseEntity.ok(Map.of("postId", postId));
+    }
+
+    private CommunityPostsDto toCommunityPostsDto(PostListDto src) {
+        if (src == null) return null;
+        CommunityPostsDto dst = new CommunityPostsDto();
+        BeanUtils.copyProperties(src, dst);
+        dst.setScore(src.score());
+        dst.setGrade(src.grade() == null ? "--" : src.grade().toString());
+        return dst;
+    }
+
 }

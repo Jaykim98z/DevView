@@ -9,7 +9,7 @@ import com.allinone.DevView.user.dto.response.UserResponse;
 import com.allinone.DevView.user.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;  // 추가
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +21,7 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/mypage")
-@Slf4j  // 추가
+@Slf4j
 public class MypageController {
 
     private final MypageService mypageService;
@@ -68,10 +68,7 @@ public class MypageController {
         return "mypage/mypage-edit";
     }
 
-    /**
-     * 회원탈퇴 처리
-     * POST /mypage/delete
-     */
+    /*** 회원탈퇴 처리* POST /mypage/delete*/
     @PostMapping("/delete")
     public String deleteUser(HttpSession session) {
         log.info("회원탈퇴 요청");

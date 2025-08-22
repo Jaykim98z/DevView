@@ -2,6 +2,10 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <!-- ✅ CSRF Token Meta Tags 추가 -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
     <title>Interview Settings - DevView</title>
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/loading-spinner.css}">
@@ -20,6 +24,9 @@
         <p>Configure your AI interview settings to match your needs.</p>
 
         <form id="interview-form">
+            <!-- ✅ CSRF 토큰을 폼에 포함 (일반 폼 제출용 백업) -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
             <h2>경력 수준</h2>
             <div class="options-group" id="career-group">
                 <button type="button" class="option-btn" data-value="JUNIOR">
@@ -54,7 +61,7 @@
                     <img th:src="@{/img/devops-icon.svg}" alt="DevOps Icon" class="btn-icon">
                     <span>DevOps</span>
                 </button>
-                <button type="button" class="option-btn" data-value="DATA_SCIENCE">
+                <button type="button" class="option-btn" data-value="DATA_AI">
                     <img th:src="@{/img/data-ai-icon.svg}" alt="Data / AI Icon" class="btn-icon">
                     <span>Data / AI</span>
                 </button>

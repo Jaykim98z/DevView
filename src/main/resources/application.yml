@@ -40,6 +40,7 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope:
+              - openid
               - email
               - profile
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
@@ -106,3 +107,19 @@ spring:
       hibernate:
         format_sql: false
         show_sql: false
+
+# AWS S3 설정
+aws:
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
+  s3:
+    bucket: devview-allinone
+    region: ap-northeast-2  # 서울 리전
+  region:
+    static: ap-northeast-2
+
+# 앱 설정
+app:
+  upload-dir: uploads  # 기존 설정 유지 (백업용)
+  use-s3: true  # S3 사용 여부 플래그
