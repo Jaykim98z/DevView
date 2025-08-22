@@ -16,6 +16,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Service dedicated to generating and saving learning recommendations asynchronously.
+ * This decouples the slow, external Alan API calls from the main interview completion flow,
+ * improving user experience.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -24,6 +29,13 @@ public class RecommendationGenerationService {
     private final InterviewResultRepository interviewResultRepository;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Asynchronously generates learning recommendations based on keywords and saves them to an InterviewResult.
+     * This method is triggered by the main InterviewService and runs in a separate thread.
+     *
+     * @param resultId The ID of the InterviewResult entity to update.
+     * @param keywords A list of keywords extracted from the AI's analysis to use for recommendations.
+     */
     @Async
     public void generateAndSaveRecommendations(Long resultId, List<String> keywords) {
         log.info("Starting async recommendation generation for resultId: {}", resultId);
@@ -41,6 +53,12 @@ public class RecommendationGenerationService {
         }
     }
 
+    /**
+     * Fetches recommendations from the Alan API for a list of keywords and formats them into an HTML string.
+     *
+     * @param keywords The list of keywords to search for.
+     * @return A single HTML string containing the grouped and formatted recommendations.
+     */
     private String getRecommendationsFromAlan(List<String> keywords) {
         if (alan instanceof AlanApiService && keywords != null && !keywords.isEmpty()) {
             try {

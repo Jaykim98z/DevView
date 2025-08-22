@@ -7,6 +7,9 @@ import com.allinone.DevView.interview.entity.Interview;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * DTO for responding with the initial details of a newly created interview session.
+ */
 @Getter
 @Builder
 public class InterviewResponse {
@@ -15,6 +18,11 @@ public class InterviewResponse {
     private JobPosition jobPosition;
     private CareerLevel careerLevel;
 
+    /**
+     * Creates an InterviewResponse DTO from an Interview entity.
+     * @param interview The entity to convert.
+     * @return A new InterviewResponse instance.
+     */
     public static InterviewResponse fromEntity(Interview interview) {
         return InterviewResponse.builder()
                 .interviewId(interview.getId())

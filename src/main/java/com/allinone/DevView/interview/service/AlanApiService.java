@@ -11,6 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * An implementation of the ExternalAiApiService that communicates with the Alan AI.
+ * This service is specifically used for generating learning resource recommendations.
+ * It is registered with the qualifier "alan".
+ */
 @Service("alan")
 @RequiredArgsConstructor
 public class AlanApiService implements ExternalAiApiService {
@@ -21,9 +26,12 @@ public class AlanApiService implements ExternalAiApiService {
 
     private static final String API_URL = "https://kdt-api-function.azurewebsites.net/api/v1/question";
 
+    /**
+     * This method is not implemented for Alan, as question generation is handled by the Gemini service.
+     * @return null.
+     */
     @Override
     public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount, InterviewType interviewType, String selfIntroduction) {
-        // 이 메서드는 Gemini가 담당하므로 여기서는 간단히 구현
         return null;
     }
 

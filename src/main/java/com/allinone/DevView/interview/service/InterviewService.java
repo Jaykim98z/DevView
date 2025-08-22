@@ -32,9 +32,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for handling interview-related operations.
+ * This class is responsible for managing the interview process, including starting an interview,
+ * asking questions, submitting answers, and analyzing results.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final UserRepository userRepository;
@@ -52,6 +58,12 @@ public class InterviewService {
     @Autowired
     private RankingService rankingService;
 
+    /**
+     * 사용자가 선택한 옵션을 바탕으로 새로운 면접 세션을 생성하고 시작합니다.
+     * @param request 사용자가 설정 페이지에서 선택한 면접 옵션 DTO
+     * @return 생성된 면접의 기본 정보를 담은 DTO
+     * @throws CustomException 사용자를 찾을 수 없을 때
+     */
     @Transactional
     public InterviewResponse startInterview(StartInterviewRequest request) {
         User user = userRepository.findById(request.getUserId())
@@ -71,6 +83,14 @@ public class InterviewService {
         return InterviewResponse.fromEntity(savedInterview);
     }
 
+    /**
+     * 지정된 면접에 대한 AI 생성 질문 목록을 요청하고 데이터베이스에 저장합니다.
+     * 사용자의 자기소개서 내용을 참고하여 맞춤형 질문을 생성합니다.
+     * @param interviewId 질문을 생성할 면접의 ID
+     * @return 생성되고 저장된 질문 목록 DTO
+     * @throws CustomException 면접을 찾을 수 없을 때
+     */
+    @Transactional
     public List<QuestionResponse> askAndSaveQuestions(Long interviewId) {
         Interview interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
@@ -104,6 +124,11 @@ public class InterviewService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 사용자가 제출한 여러 개의 답변을 데이터베이스에 일괄 저장합니다.
+     * @param request 면접 ID와 답변 목록을 포함하는 DTO
+     * @throws CustomException 면접 또는 질문을 찾을 수 없을 때
+     */
     @Transactional
     public void submitAnswers(SubmitAnswerRequest request) {
         Interview interview = interviewRepository.findById(request.getInterviewId())
@@ -128,6 +153,13 @@ public class InterviewService {
         interviewAnswerRepository.saveAll(newAnswers);
     }
 
+    /**
+     * 진행 중인 면접을 종료하고, 대화록을 바탕으로 AI에게 종합 분석을 요청합니다.
+     * 분석이 완료되면 결과를 저장하고, 추천 자료 생성 작업을 비동기적으로 호출합니다.
+     * @param interviewId 종료할 면접의 ID
+     * @return AI가 분석한 종합 결과 DTO
+     * @throws CustomException 면접을 찾을 수 없거나 AI 응답 파싱에 실패했을 때
+     */
     @Transactional
     public InterviewResultResponse endInterview(Long interviewId) {
         Interview interview = interviewRepository.findByIdWithQuestions(interviewId)
@@ -178,7 +210,12 @@ public class InterviewService {
         }
     }
 
-    @Transactional(readOnly = true)
+    /**
+     * 완료된 면접의 결과 정보를 조회합니다.
+     * @param interviewId 조회할 면접의 ID
+     * @return 면접 결과의 상세 정보를 담은 DTO
+     * @throws CustomException 면접 결과를 찾을 수 없을 때
+     */
     public InterviewResultResponse getInterviewResult(Long interviewId) {
         InterviewResult result = interviewResultRepository.findByInterviewId(interviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
@@ -186,6 +223,12 @@ public class InterviewService {
         return InterviewResultResponse.fromEntity(result);
     }
 
+    /**
+     * 질문과 답변 목록을 바탕으로 AI 분석을 위한 전체 대화록 스크립트를 생성합니다.
+     * @param questions 면접 질문 엔티티 목록
+     * @param answers 사용자의 답변 엔티티 목록
+     * @return "Q: ... A: ..." 형식으로 조합된 전체 대화록 문자열
+     */
     private String createTranscript(List<InterviewQuestion> questions, List<InterviewAnswer> answers) {
         return questions.stream()
                 .map(q -> {
@@ -199,6 +242,12 @@ public class InterviewService {
                 .collect(Collectors.joining("\n\n"));
     }
 
+    /**
+     * 면접 정보와 대화록을 바탕으로 Gemini 분석 API에 보낼 프롬프트를 생성합니다.
+     * @param interview 현재 면접 엔티티
+     * @param transcript 전체 대화록
+     * @return Gemini API 요청에 사용될 최종 프롬프트 문자열
+     */
     private String createAnalysisPrompt(Interview interview, String transcript) {
         return "You are a fair and impartial technical interviewer AI. Your primary role is to objectively " +
                 "evaluate a candidate's response based on technical accuracy and clarity. " +
@@ -213,6 +262,11 @@ public class InterviewService {
                 "Here is the transcript:\n" + transcript;
     }
 
+    /**
+     * 점수를 바탕으로 A-F 등급을 계산합니다.
+     * @param score 종합 점수
+     * @return Grade Enum 타입의 등급
+     */
     private Grade calculateGrade(int score) {
         if (score >= 90) return Grade.A;
         if (score >= 80) return Grade.B;

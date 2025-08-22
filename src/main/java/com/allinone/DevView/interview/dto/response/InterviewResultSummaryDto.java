@@ -7,6 +7,10 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * A compact DTO for displaying a summary of an interview result,
+ * typically used in lists or on a user's dashboard.
+ */
 @Getter
 @Builder
 @NoArgsConstructor

@@ -4,10 +4,13 @@ import com.allinone.DevView.common.enums.Grade;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * 면접 결과 엔티티
+ */
 @Entity
 @Table(name = "interview_results")
 @Getter
-@Setter
+@Setter // 비동기식 서비스에서 setRecommendedResource를 위해 사용
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
