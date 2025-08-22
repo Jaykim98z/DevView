@@ -48,6 +48,9 @@ public class CommunityService {
         if (post.getUser() == null || post.getUser().getUserId() == null) throw new IllegalArgumentException("user가 필요합니다.");
         if (isBlank(post.getTitle())) throw new IllegalArgumentException("제목을 입력해주세요.");
         if (post.getInterviewResultId() == null) throw new IllegalArgumentException("인터뷰 결과 ID가 필요합니다.");
+
+        assertMyResult(post.getInterviewResultId(), post.getUser().getUserId());
+
         return postsRepository.save(post);
     }
 
@@ -58,6 +61,8 @@ public class CommunityService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        assertMyResult(dto.getInterviewResultId(), userId);
 
         InterviewResult r = interviewResultRepository.findById(dto.getInterviewResultId())
                 .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과를 찾을 수 없습니다. id=" + dto.getInterviewResultId()));
@@ -94,6 +99,9 @@ public class CommunityService {
         if (!isBlank(src.getTitle())) post.setTitle(src.getTitle());
         if (!isBlank(src.getContent())) post.setContent(src.getContent());
         if (src.getInterviewResultId() != null && !src.getInterviewResultId().equals(post.getInterviewResultId())) {
+
+            assertMyResult(src.getInterviewResultId(), post.getUser().getUserId());
+
             InterviewResult r = interviewResultRepository.findById(src.getInterviewResultId())
                     .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과를 찾을 수 없습니다. id=" + src.getInterviewResultId()));
             post.setInterviewResultId(r.getId());
@@ -166,6 +174,13 @@ public class CommunityService {
         }
     }
 
+    private void assertMyResult(Long resultId, Long userId) {
+        if (resultId == null) return;
+        boolean mine = interviewResultRepository.existsByIdAndInterview_User_UserId(resultId, userId);
+        if (!mine) {
+            throw new IllegalArgumentException("본인의 면접 결과만 선택할 수 있습니다.");
+        }
+    }
 
     @Transactional(readOnly = true)
     public CommunityPostsDto getPostDetail(Long postId) {

@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class InterviewResultQueryService {
@@ -35,4 +37,19 @@ public class InterviewResultQueryService {
                 .orElseThrow(() -> new CustomException(ErrorCode.INTERVIEW_NOT_FOUND));
         return InterviewResultResponse.fromEntity(r);
     }
+
+    @Transactional(readOnly = true)
+    public List<ResultOptionDto> findOptionsByUserId(Long userId) {
+        return repo.findByUserId(userId).stream()
+                .map(ir -> new ResultOptionDto(ir.getId(), defaultTitle(ir)))
+                .toList();
+    }
+
+    private String defaultTitle(InterviewResult ir) {
+        // 예: if (ir.getTitle() != null && !ir.getTitle().isBlank()) return ir.getTitle();
+        return "#" + ir.getId();
+    }
+
+    public record ResultOptionDto(Long id, String title) {}
 }
+

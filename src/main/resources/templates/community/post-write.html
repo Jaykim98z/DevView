@@ -23,20 +23,24 @@
     <h1 class="page-title">커뮤니티 글쓰기</h1>
 
     <form id="community-post-form"
-          th:action="@{/api/community/posts/compose}"
+          th:action="@{/community/posts/interview}"
           method="post">
 
+        <input type="hidden" name="category" value="INTERVIEW_SHARE" />
+
         <section class="field">
-            <label for="interviewResultId">인터뷰 결과 ID</label>
-            <div class="inline">
-                <input type="number" id="interviewResultId" name="interviewResultId"
-                       placeholder="예: 1024" inputmode="numeric" min="1" step="1" required />
-            </div>
+            <label for="interviewResultId">인터뷰 결과</label>
+            <select id="interviewResultId" name="interviewShare.interviewResultId" required>
+                <option value="">선택하세요</option>
+                <option th:each="o : ${resultOptions}"
+                        th:value="${o.id}"
+                        th:text="${o.title}">내 결과</option>
+            </select>
         </section>
 
         <section class="field">
             <label for="title">제목</label>
-            <input type="text" id="title" name="title"
+            <input type="text" id="title" name="interviewShare.title"
                    placeholder="[면접결과] A 87점" maxlength="150" required />
         </section>
 
@@ -45,7 +49,7 @@
                 <label for="content">추가 메모</label>
                 <small><span id="memo-counter">0</span> / 1000</small>
             </div>
-            <textarea id="content" name="content"
+            <textarea id="content" name="interviewShare.content"
                       placeholder="추천 자료, 링크, 메모 등을 적어주세요. (최대 1000자)"
                       rows="10" maxlength="1000"></textarea>
         </section>

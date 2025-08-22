@@ -74,6 +74,14 @@ public class CommunityViewController {
             return "redirect:/user/login?redirect=/community/posts/new";
         }
         model.addAttribute("form", CombinedPostRequest.empty());
+
+        String email = principal.getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자 정보를 찾을 수 없습니다."));
+        Long userId = user.getUserId();
+
+        model.addAttribute("resultOptions", interviewResultQueryService.findOptionsByUserId(userId));
+
         return "community/post-write";
     }
 
@@ -82,9 +90,17 @@ public class CommunityViewController {
     public String createCombinedByForm(
             @Valid @ModelAttribute("form") CombinedPostRequest form,
             BindingResult bindingResult,
+            Model model,
             Principal principal
     ) {
         if (bindingResult.hasErrors()) {
+            if (principal != null) {
+                String email = principal.getName();
+                User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자 정보를 찾을 수 없습니다."));
+                Long userId = user.getUserId();
+                model.addAttribute("resultOptions", interviewResultQueryService.findOptionsByUserId(userId));
+            }
             return "community/post-write";
         }
         if (principal == null) {
