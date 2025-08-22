@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.allinone.DevView.common.enums.InterviewType;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,9 +78,26 @@ public class CommunityService {
         post.setGrade(r.getGrade());
         post.setInterviewFeedback(r.getFeedback());
 
+        post.setType("INTERVIEW_SHARE");
+
+        String rawCategory = coalesceFirstString(dto, "getCategoryCode", "getCategory", "getJobCategory", "getJobCategoryCode");
+        String rawLevel    = coalesceFirstString(dto, "getLevelCode", "getLevel", "getCareerLevel", "getCareerLevelCode");
+        String techTag     = coalesceFirstString(dto, "getTechTag", "techTag");
+        String summary     = coalesceFirstString(dto, "getSummary", "summary");
+
+        if (!isBlank(techTag)) post.setTechTag(techTag);
+        if (!isBlank(summary)) post.setSummary(summary);
+
+        String mappedCategory = mapCategory(rawCategory);
+        String mappedLevel    = mapLevel(rawLevel);
+
+        if (!isBlank(mappedCategory)) post.setCategory(mappedCategory);
+        if (!isBlank(mappedLevel))    post.setLevel(mappedLevel);
+
         postsRepository.save(post);
         return post.getPostId();
     }
+
     public Long createFreePost(CreatePostRequest dto, Long userId) {
         if (dto == null) throw new IllegalArgumentException("자유 글 데이터가 비었습니다.");
         if (isBlank(dto.title())) throw new IllegalArgumentException("제목을 입력해주세요.");
@@ -90,6 +108,23 @@ public class CommunityService {
         post.setUser(user);
         post.setTitle(dto.title());
         post.setContent(nvl(dto.content()));
+
+        post.setType("POST");
+
+        String rawCategory = coalesceFirstString(dto, "category", "categoryCode", "jobCategory", "jobCategoryCode");
+        String rawLevel    = coalesceFirstString(dto, "level", "levelCode", "careerLevel", "careerLevelCode");
+        String techTag     = coalesceFirstString(dto, "techTag", "getTechTag");
+        String summary     = coalesceFirstString(dto, "summary", "getSummary");
+
+        if (!isBlank(techTag)) post.setTechTag(techTag);
+        if (!isBlank(summary)) post.setSummary(summary);
+
+        String mappedCategory = mapCategory(rawCategory);
+        String mappedLevel    = mapLevel(rawLevel);
+
+        if (!isBlank(mappedCategory)) post.setCategory(mappedCategory);
+        if (!isBlank(mappedLevel))    post.setLevel(mappedLevel);
+
         postsRepository.save(post);
         return post.getPostId();
     }
@@ -112,9 +147,8 @@ public class CommunityService {
         return postsRepository.save(post);
     }
 
-
     public Long updatePost(Long postId, Long userId, PostUpdateRequestDto req) {
-        CommunityPosts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
+        CommunityPosts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글 없습니다."));
         if (!post.getUser().getUserId().equals(userId)) throw new IllegalArgumentException("수정 권한이 없습니다.");
 
         if (!isBlank(req.getTitle())) post.setTitle(req.getTitle());
@@ -161,7 +195,6 @@ public class CommunityService {
 
     private static boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
     private static String nvl(String s) { return s == null ? "" : s; }
-    private static String nvlOr(String s, String def) { return isBlank(s) ? def : s; }
 
     private static String interviewTypeLabel(InterviewType t) {
         if (t == null) return null;
@@ -210,5 +243,45 @@ public class CommunityService {
         dto.setInterviewResultId(post.getInterviewResultId());
         dto.setInterviewFeedback(post.getInterviewFeedback());
         return dto;
+    }
+
+    private static String coalesceFirstString(Object target, String... methodNames) {
+        if (target == null) return null;
+        for (String name : methodNames) {
+            try {
+                Method m = target.getClass().getMethod(name);
+                Object v = m.invoke(target);
+                if (v != null) {
+                    String s = String.valueOf(v);
+                    if (!isBlank(s)) return s;
+                }
+            } catch (NoSuchMethodException ignored) {
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
+    }
+
+    private static String mapCategory(String raw) {
+        if (isBlank(raw)) return null;
+        String k = raw.trim().toLowerCase().replaceAll("\\s+", "");
+        if (k.equals("백엔드") || k.equals("backend")) return "BACKEND";
+        if (k.equals("프론트엔드") || k.equals("frontend")) return "FRONTEND";
+        if (k.equals("풀스택") || k.equals("fullstack")) return "FULLSTACK";
+        if (k.equals("devops")) return "DEVOPS";
+        if (k.equals("data/ai") || k.equals("dataai") || k.equals("dataai ") || k.equals("dataai".trim()) || k.equals("dataai".replace(" ", "")) || k.equals("dataai".toLowerCase())) return "DATA_AI";
+        if (raw.matches("^[A-Z_]+$")) return raw;
+        return raw.toUpperCase();
+    }
+
+    private static String mapLevel(String raw) {
+        if (isBlank(raw)) return null;
+        String k = raw.trim();
+        if (k.equals("주니어") || k.equalsIgnoreCase("junior")) return "JUNIOR";
+        if (k.equals("미드레벨") || k.equalsIgnoreCase("mid") || k.equalsIgnoreCase("middle")) return "MID";
+        if (k.equals("시니어") || k.equalsIgnoreCase("senior")) return "SENIOR";
+        if (raw.matches("^[A-Z_]+$")) return raw;
+        return raw.toUpperCase();
     }
 }

@@ -2,19 +2,19 @@
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8" />
-    <title th:text="${post.title} + ' - 게시글 상세보기'">게시글 상세보기</title>
+<meta charset="UTF-8" />
+<title th:text="${post.title} + ' - 게시글 상세보기'">게시글 상세보기</title>
 
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/post-detail.css" />
-    <link rel="stylesheet" href="/css/interview-result.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/post-detail.css" />
+<link rel="stylesheet" href="/css/interview-result.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-</head>
+<meta name="_csrf" th:content="${_csrf.token}">
+<meta name="_csrf_header" th:content="${_csrf.headerName}">
 
+<meta name="current-user-id" th:content="${#authentication?.principal?.userId}" />
+<meta name="current-username" th:content="${#authentication?.principal?.username}" />
 <body data-page="detail"
       th:attr="data-post-id=${post.id},
                data-current-user-id=${#authorization.expression('isAuthenticated()') ? #authentication.principal.userId : null},

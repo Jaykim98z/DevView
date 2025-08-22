@@ -14,8 +14,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 import java.util.Optional;
 
-
-
 @Repository
 public interface CommunityPostsRepository
         extends JpaRepository<CommunityPosts, Long>, JpaSpecificationExecutor<CommunityPosts> {
@@ -107,4 +105,16 @@ public interface CommunityPostsRepository
 
     @Query("select p from CommunityPosts p where p.postId = :postId and p.deleted = false")
     Optional<CommunityPosts> findActiveByPostId(@Param("postId") Long postId);
+
+    @EntityGraph(attributePaths = {"user"})
+    @Query("""
+        select p
+          from CommunityPosts p
+         where p.deleted = false
+           and (:category is null or p.category = :category)
+           and (:level    is null or p.level    = :level)
+        """)
+    Page<CommunityPosts> searchByFilters(@Param("category") String category,
+                                         @Param("level")    String level,
+                                         Pageable pageable);
 }

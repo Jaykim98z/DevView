@@ -26,6 +26,7 @@ function __secureHeaders__(json = true) {
   return h;
 }
 async function fetchJson(url, opts = {}) {
+  if (!('credentials' in opts)) opts.credentials = 'same-origin';
   const res = await fetch(url, opts);
   const ct = res.headers.get('content-type') || '';
   if (ct.includes('text/html')) {
@@ -51,6 +52,23 @@ function getPostId() {
   return null;
 }
 
+function readMeta(name) {
+  return document.querySelector(`meta[name="${name}"]`)?.content || '';
+}
+
+function getPostWriterId() {
+  const card = document.querySelector('.post-detail-card');
+  const fromCard = card?.dataset.writerId;
+  if (fromCard && fromCard !== 'null' && fromCard !== 'undefined' && !Number.isNaN(Number(fromCard))) return Number(fromCard);
+  const fromBody = document.body?.dataset?.writerId;
+  if (fromBody && fromBody !== 'null' && fromBody !== 'undefined' && !Number.isNaN(Number(fromBody))) return Number(fromBody);
+  const fromWindow = window.POST_WRITER_ID;
+  if (fromWindow != null && !Number.isNaN(Number(fromWindow))) return Number(fromWindow);
+  const fromMeta = readMeta('post-writer-id');
+  if (fromMeta && !Number.isNaN(Number(fromMeta))) return Number(fromMeta);
+  return null;
+}
+
 function emailLocal(s) {
   return (typeof s === 'string' && s.includes('@')) ? s.split('@')[0] : null;
 }
@@ -72,6 +90,48 @@ function getCurrentUser() {
     usernameNorm,
     emailNorm
   };
+}
+
+function getCurrentUserFromMeta() {
+  const id = readMeta('current-user-id');
+  const username = readMeta('current-username');
+  const email = readMeta('current-user-email');
+  return {
+    id: id && id !== 'null' && id !== 'undefined' ? String(id) : '',
+    username: username || '',
+    email: email || ''
+  };
+}
+async function ensureCurrentUserGlobals() {
+  if (window.CURRENT_USER_ID && window.CURRENT_USERNAME) return;
+  const b = document.body?.dataset || {};
+  if ((b.currentUserId && b.currentUserId !== 'null' && b.currentUserId !== 'undefined') || b.currentUsername) {
+    window.CURRENT_USER_ID = b.currentUserId ? String(b.currentUserId) : window.CURRENT_USER_ID;
+    window.CURRENT_USERNAME = b.currentUsername ? String(b.currentUsername) : window.CURRENT_USERNAME;
+    window.CURRENT_USER_EMAIL = b.currentUserEmail ? String(b.currentUserEmail) : window.CURRENT_USER_EMAIL;
+    return;
+  }
+  const meta = getCurrentUserFromMeta();
+  if (meta.id || meta.username || meta.email) {
+    window.CURRENT_USER_ID = meta.id || window.CURRENT_USER_ID || '';
+    window.CURRENT_USERNAME = meta.username || window.CURRENT_USERNAME || '';
+    window.CURRENT_USER_EMAIL = meta.email || window.CURRENT_USER_EMAIL || '';
+    return;
+  }
+  try {
+    const me = await fetchJson('/api/auth/me', { headers: __secureHeaders__(false) });
+    if (me && typeof me === 'object') {
+      if (me.userId != null) window.CURRENT_USER_ID = String(me.userId);
+      if (me.username) window.CURRENT_USERNAME = String(me.username);
+      if (me.email) window.CURRENT_USER_EMAIL = String(me.email);
+    }
+  } catch {}
+}
+
+function isOwnerById(ownerId) {
+  const me = getCurrentUser();
+  if (ownerId == null || me.id == null) return false;
+  return Number(ownerId) === Number(me.id);
 }
 
 function toggleIconSolid(iconEl, makeSolid) {
@@ -126,6 +186,24 @@ function buildEditActionsHTML() {
     <button id="btn-cancel-edit" class="btn-action">취소</button>
   `;
 }
+
+function ensureOwnerPostButtons() {
+  const actions = document.querySelector('.post-actions');
+  if (!actions) return;
+  const writerId = getPostWriterId();
+  const owner = isOwnerById(writerId);
+  const hasEdit = actions.querySelector('#btn-edit-post');
+  const hasDel = actions.querySelector('#btn-delete-post');
+  if (owner) {
+    if (!hasEdit && !hasDel) {
+      actions.insertAdjacentHTML('afterbegin', buildActionsHTML());
+    }
+  } else {
+    if (hasEdit) hasEdit.remove();
+    if (hasDel) hasDel.remove();
+  }
+}
+
 function enterEditMode() {
   if (document.querySelector('.title-input') || document.querySelector('.content-input')) {
     document.querySelector('.title-input, .content-input')?.focus();
@@ -146,19 +224,10 @@ function enterEditMode() {
   titleInput.type = 'text';
   titleInput.className = 'title-input';
   titleInput.value = original.title;
-  Object.assign(titleInput.style, {
-    width: '100%', fontSize: '20px', fontWeight: '700',
-    padding: '8px 10px', border: '1px solid #d7e0ea', borderRadius: '10px'
-  });
 
   const textarea = document.createElement('textarea');
   textarea.className = 'content-input';
   textarea.value = original.content;
-  Object.assign(textarea.style, {
-    width: '100%', minHeight: '220px',
-    padding: '12px', border: '1px solid #d7e0ea', borderRadius: '12px',
-    fontSize: '15px', lineHeight: '1.8'
-  });
 
   titleEl.replaceWith(titleInput);
   contentEl.replaceWith(textarea);
@@ -243,6 +312,7 @@ function initEditDelete() {
       if (!confirm('삭제하시겠습니까?')) return;
       const postId = getPostId();
       try {
+        await fetchJson(`/api/community/posts/${postId}/comments`, { method: 'GET', headers: __secureHeaders__(false) });
         await tryDeletePost(postId);
         alert('삭제되었습니다.');
         location.href = '/community';
@@ -312,7 +382,7 @@ function buildCommentItem(c) {
         <span class="comment-item__meta">${escapeHtml(formatKoreanDate(created))}</span>
       </div>
       <div class="comment-item__body comment__content"></div>
-      <div class="comment-item__actions comment__actions" style="display:${showActions ? 'flex' : 'none'}">
+      <div class="comment-item__actions comment__actions ${showActions ? '' : 'is-hidden'}">
         <button class="comment-action btn-action comment__edit" type="button">수정</button>
         <button class="comment-action comment-action--danger btn-action btn-danger comment__delete" type="button">삭제</button>
       </div>
@@ -325,7 +395,7 @@ function buildCommentItem(c) {
     li.querySelector('.comment__delete')?.addEventListener('click', () => onDeleteComment(id, li));
     li.querySelector('.comment__edit')?.addEventListener('click', () => onEditComment(id, li, content));
   } else {
-    li.querySelector('.comment-item__actions').style.display = 'none';
+    li.querySelector('.comment-item__actions')?.classList.add('is-hidden');
   }
 
   return li;
@@ -339,7 +409,7 @@ function updateCommentCount(delta) {
 }
 
 async function loadComments(reset = false) {
-  if (CMT.loading || CMT.last) return;
+  if (CMT.loading || CMT.last && !reset) return;
   const postId = getPostId();
   if (postId == null) return;
 
@@ -360,7 +430,7 @@ async function loadComments(reset = false) {
     CMT.page = page + 1;
 
     const moreBtn = document.getElementById('comment-load-more');
-    if (moreBtn) moreBtn.style.display = CMT.last ? 'none' : 'inline-block';
+    if (moreBtn) moreBtn.classList.toggle('is-hidden', CMT.last);
 
     if (reset && typeof data?.totalElements === 'number') {
       const cc = commentCountEl();
@@ -399,14 +469,9 @@ function onEditComment(commentId, liEl, oldContent) {
   const ta = document.createElement('textarea');
   ta.className = 'comment__edit-input';
   ta.value = oldContent ?? contentEl.textContent ?? '';
-  ta.style.width = '100%';
-  ta.style.minHeight = '80px';
-  ta.style.padding = '10px';
 
   const ctrl = document.createElement('div');
-  ctrl.style.marginTop = '6px';
-  ctrl.style.display = 'flex';
-  ctrl.style.gap = '8px';
+  ctrl.className = 'comment__edit-controls';
   ctrl.innerHTML = `
     <button class="comment__save btn-submit" type="button">저장</button>
     <button class="comment__cancel btn-action" type="button">취소</button>
@@ -414,13 +479,13 @@ function onEditComment(commentId, liEl, oldContent) {
 
   const origText = contentEl.textContent;
   contentEl.replaceChildren(ta);
-  actionsEl.style.display = 'none';
+  actionsEl.classList.add('is-hidden');
   contentEl.after(ctrl);
 
   const cleanup = () => {
     contentEl.textContent = ta.value.trim() || origText || '';
     ctrl.remove();
-    actionsEl.style.display = 'flex';
+    actionsEl.classList.remove('is-hidden');
   };
 
   ctrl.querySelector('.comment__cancel').addEventListener('click', () => {
@@ -531,7 +596,9 @@ async function bumpViewCount() {
 }
 
 (function () {
-  const start = () => {
+  const start = async () => {
+    await ensureCurrentUserGlobals();
+    ensureOwnerPostButtons();
     initLikeScrap();
     initEditDelete();
     initComments();
@@ -542,4 +609,11 @@ async function bumpViewCount() {
   } else {
     start();
   }
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+      CMT.page = 0;
+      CMT.last = false;
+      loadComments(true);
+    }
+  });
 })();
