@@ -53,7 +53,7 @@ Deview는 단순한 연습 도구를 넘어, **학습·분석·경험 공유까�
 
 3. **리포트 아카이빙**
 
-    * 면접 기록을 **PDF 리포트**로 다운로드 가능
+    * 면접 기록을 **결과 리포트**로 확인 가능
     * 이전 기록과 점수를 비교하여 성장 곡선 확인
     * 포트폴리오·취업 준비 자료로도 활용 가능
 
@@ -91,12 +91,12 @@ Deview는 단순한 연습 도구를 넘어, **학습·분석·경험 공유까�
 
 ## 📆 역할 분담 
 
-| 이름  | 주요 도메인   | 상세 작업                                                                                                  |
-| --- | -------- | ------------------------------------------------------------------------------------------------------ |
-| 김진욱 | 인증·랭킹·배포 | - 로그인/회원가입 API & UI<br>- Google OAuth2 연동<br>- Spring Security 적용<br>- 랭킹 페이지 구현<br>- Docker 기반 배포 자동화 |
-| 이소연 |  메인/마이페이지·문서화   | - 메인 페이지 & 마이페이지 UI<br>- Header/Footer 및 공통 UI 컴포넌트<br>- README·Notion 관리<br>- 발표 자료 제작                |
-| 김예은 | 커뮤니티     | - 게시글/댓글/좋아요/스크랩 CRUD<br>- ERD 설계 및 DB 마이그레이션<br>- Swagger API 문서화<br>- 최종 발표                          |
-| 조권호 | 면접 세션·AI | - Gemini API 기반 질문 생성<br>- 앨런 AI API 기반 실시간 피드백<br>- 면접 결과 PDF 리포트 생성<br>- Swagger 작성 및 시연 영상 제작       |
+| 이름  | 주요 도메인   | 상세 작업                                                                                        |
+| --- | -------- |----------------------------------------------------------------------------------------------|
+| 김진욱 | 인증·랭킹·배포 | - 로그인/회원가입 API & UI<br>- Google OAuth2 연동<br>- Spring Security 적용<br>- 랭킹 페이지 구현<br>- EC2 기반 배포 |
+| 이소연 |  메인/마이페이지·문서화   | - 메인 페이지 & 마이페이지 UI<br>- Header/Footer 및 공통 UI 컴포넌트<br>- README·Notion 관리<br>- 발표 자료 제작      |
+| 김예은 | 커뮤니티     | - 게시글/댓글/좋아요/스크랩 CRUD<br>- ERD 설계 및 DB 마이그레이션<br>- Swagger API 문서화<br>- 최종 발표                |
+| 조권호 | 면접 세션·AI | - Gemini API 기반 질문 생성<br>- 앨런 AI API 기반 실시간 피드백<br>- 면접 결과 리포트 생성<br>- Swagger 작성 및 시연 영상 제작 |
 
 ## ⚖️ 협업 방식
 
@@ -207,7 +207,7 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 <summary>📊 InterviewResults (면접 결과/피드백)</summary>
 
 * AI 피드백, 점수, 등급 기록
-* PDF 리포트 생성에 활용
+* 결과 리포트 생성에 활용
 
 | 컬럼명               | 타입        | 설명            |
 | -------------------- | --------- | ------------- |
@@ -331,7 +331,6 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 
 ➡️[상세 ERD/테이블 구조 보러가기 (Notion)](https://www.notion.so/25780666e06880e7b2cec00b635cc279?source=copy_link)
 
-<details>
 <summary>1️⃣ 로그인 & 회원가입</summary>
 
 * **기본 로그인/회원가입**
@@ -346,22 +345,18 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
   * 중복 이메일 가입 시 예외 반환
   * 인증 실패 시 CustomException 적용
 
-</details>
 
 ---
 
-<details>
 <summary>2️⃣ 메인 페이지</summary>
 
 * **Hero 배너** – 플랫폼 핵심 가치 강조 (AI 기반 모의면접)
 * **서비스 소개 섹션** – 기능 요약 (면접 세션, 피드백, 랭킹, 커뮤니티)
 * **후기 섹션** – 실제 사용자 후기(Community 게시글 일부) 노출
 
-</details>
 
 ---
 
-<details>
 <summary>3️⃣ 면접 세션</summary>
 
 * **질문 생성** – Gemini API 기반, 직무 맞춤형 질문 제공
@@ -372,13 +367,10 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
   * 개선점
   * 예시 답변
 
-* **리포트 다운로드** – 면접 결과를 PDF로 저장
 
-</details>
 
 ---
 
-<details>
 <summary>4️⃣ 마이페이지</summary>
 
 * **프로필 관리** – 이름, 직무, 프로필 이미지 수정
@@ -386,11 +378,9 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 * **시각화 차트** – 점수 변화를 라인차트로 표시
 * **내 커뮤니티 활동** – 작성 글·댓글 모아보기
 
-</details>
 
 ---
 
-<details>
 <summary>5️⃣ 커뮤니티</summary>
 
 * **CRUD 기능**
@@ -403,11 +393,9 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 * **페이징 처리**
   * 무한 스크롤 적용 (REST API 기반)
 
-</details>
 
 ---
 
-<details>
 <summary>6️⃣ 랭킹</summary>
 
 * **Top 3 시상대 UI**
@@ -419,12 +407,10 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 * **내 순위 강조**
   * 로그인한 사용자의 위치 표시
 
-</details>
 
 ---
 
-<details>
-<summary>7️⃣ 리포트 PDF</summary>
+<summary>7️⃣ 결과 리포트</summary>
 
 * **내용 구성**
   * 질문 & 답변
@@ -432,27 +418,6 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
   * 예시 답변
   * 전체 평균 점수
 
-* **기술 스택**
-  * iTextPDF (Java 기반 PDF 생성)
-  * 다운로드 버튼 제공
-
-</details>
-
----
-
-<details>
-<summary>8️⃣ 관리자 기능 (추가 고려)</summary>
-
-* **사용자 관리**
-  * 계정 차단, 역할 변경
-
-* **커뮤니티 관리**
-  * 신고 게시물 삭제
-
-* **AI API 모니터링**
-  * 호출 수 제한, 응답 지연 모니터링
-
-</details>
 
 ---
 
@@ -490,9 +455,7 @@ DevView/
 │   │       ├── db/migration/
 │   │       └── application.yml 
 │   └── test/                
-├── build.gradle / pom.xml    
-├── Dockerfile               
-├── docker-compose.yml          
+├── pom.xml             
 └── README.md                  
 
 ```
@@ -515,7 +478,6 @@ DevView/
 ### 3) `feedback/`
 
 * 면접 피드백 로직
-* PDF 변환 유틸리티 (`iTextPDF`)
 * AI API 응답 처리
 
 ### 4) `interview/`
@@ -551,8 +513,6 @@ DevView/
 
 ## 📦 배포 관련 파일
 
-* **Dockerfile** : Spring Boot 컨테이너화
-* **docker-compose.yml** : PostgreSQL + Redis 연동
 * **application.yml** : 환경변수 분리 (dev, prod 프로필 구분)
 * **Nginx 설정파일** : EC2 Reverse Proxy
 
@@ -776,7 +736,6 @@ Git 커밋 메시지는 **일관된 규칙**을 지켜 코드 히스토리를 �
 * **AWS EC2** : 백엔드 서버 (Ubuntu 22.04)
 * **AWS S3** : 이미지/리포트 업로드 스토리지
 * **Nginx** : Reverse Proxy & SSL 인증서 적용
-* **Docker** : Spring Boot 컨테이너화
 * **CI/CD** : GitHub Actions → EC2 배포 자동화
 
 ---
@@ -806,7 +765,7 @@ Git 커밋 메시지는 **일관된 규칙**을 지켜 코드 히스토리를 �
 
 * **ERDCloud / Draw\.io** : ERD 및 시스템 다이어그램 설계
 * **Swagger** : REST API 명세 자동화
-* **ReportLab** : PDF 리포트 생성
+* **ReportLab** : 결과 리포트 생성
 * **Lombok** : 반복 코드 제거
 
 ---
