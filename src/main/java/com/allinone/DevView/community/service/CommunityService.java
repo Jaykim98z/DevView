@@ -19,8 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.allinone.DevView.common.enums.InterviewType;
+import com.allinone.DevView.interview.entity.Interview;
 
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +50,12 @@ public class CommunityService {
         if (isBlank(post.getTitle())) throw new IllegalArgumentException("제목을 입력해주세요.");
         if (post.getInterviewResultId() == null) throw new IllegalArgumentException("인터뷰 결과 ID가 필요합니다.");
 
-        assertMyResult(post.getInterviewResultId(), post.getUser().getUserId());
+        if (isBlank(post.getLevel())) {
+            InterviewResult r = interviewResultRepository.findById(post.getInterviewResultId())
+                    .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과를 찾을 수 없습니다. id=" + post.getInterviewResultId()));
+            String mapped = extractCareerLevelToPostLevel(r);
+            if (!isBlank(mapped)) post.setLevel(mapped);
+        }
 
         return postsRepository.save(post);
     }
@@ -62,8 +67,6 @@ public class CommunityService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-
-        assertMyResult(dto.getInterviewResultId(), userId);
 
         InterviewResult r = interviewResultRepository.findById(dto.getInterviewResultId())
                 .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과를 찾을 수 없습니다. id=" + dto.getInterviewResultId()));
@@ -78,21 +81,8 @@ public class CommunityService {
         post.setGrade(r.getGrade());
         post.setInterviewFeedback(r.getFeedback());
 
-        post.setType("INTERVIEW_SHARE");
-
-        String rawCategory = coalesceFirstString(dto, "getCategoryCode", "getCategory", "getJobCategory", "getJobCategoryCode");
-        String rawLevel    = coalesceFirstString(dto, "getLevelCode", "getLevel", "getCareerLevel", "getCareerLevelCode");
-        String techTag     = coalesceFirstString(dto, "getTechTag", "techTag");
-        String summary     = coalesceFirstString(dto, "getSummary", "summary");
-
-        if (!isBlank(techTag)) post.setTechTag(techTag);
-        if (!isBlank(summary)) post.setSummary(summary);
-
-        String mappedCategory = mapCategory(rawCategory);
-        String mappedLevel    = mapLevel(rawLevel);
-
-        if (!isBlank(mappedCategory)) post.setCategory(mappedCategory);
-        if (!isBlank(mappedLevel))    post.setLevel(mappedLevel);
+        String mapped = extractCareerLevelToPostLevel(r);
+        if (!isBlank(mapped)) post.setLevel(mapped);
 
         postsRepository.save(post);
         return post.getPostId();
@@ -108,23 +98,6 @@ public class CommunityService {
         post.setUser(user);
         post.setTitle(dto.title());
         post.setContent(nvl(dto.content()));
-
-        post.setType("POST");
-
-        String rawCategory = coalesceFirstString(dto, "category", "categoryCode", "jobCategory", "jobCategoryCode");
-        String rawLevel    = coalesceFirstString(dto, "level", "levelCode", "careerLevel", "careerLevelCode");
-        String techTag     = coalesceFirstString(dto, "techTag", "getTechTag");
-        String summary     = coalesceFirstString(dto, "summary", "getSummary");
-
-        if (!isBlank(techTag)) post.setTechTag(techTag);
-        if (!isBlank(summary)) post.setSummary(summary);
-
-        String mappedCategory = mapCategory(rawCategory);
-        String mappedLevel    = mapLevel(rawLevel);
-
-        if (!isBlank(mappedCategory)) post.setCategory(mappedCategory);
-        if (!isBlank(mappedLevel))    post.setLevel(mappedLevel);
-
         postsRepository.save(post);
         return post.getPostId();
     }
@@ -134,21 +107,21 @@ public class CommunityService {
         if (!isBlank(src.getTitle())) post.setTitle(src.getTitle());
         if (!isBlank(src.getContent())) post.setContent(src.getContent());
         if (src.getInterviewResultId() != null && !src.getInterviewResultId().equals(post.getInterviewResultId())) {
-
-            assertMyResult(src.getInterviewResultId(), post.getUser().getUserId());
-
             InterviewResult r = interviewResultRepository.findById(src.getInterviewResultId())
                     .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과를 찾을 수 없습니다. id=" + src.getInterviewResultId()));
             post.setInterviewResultId(r.getId());
             post.setScore(r.getTotalScore());
             post.setGrade(r.getGrade());
             post.setInterviewFeedback(r.getFeedback());
+
+            String mapped = extractCareerLevelToPostLevel(r);
+            if (!isBlank(mapped)) post.setLevel(mapped);
         }
         return postsRepository.save(post);
     }
 
     public Long updatePost(Long postId, Long userId, PostUpdateRequestDto req) {
-        CommunityPosts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글 없습니다."));
+        CommunityPosts post = postsRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
         if (!post.getUser().getUserId().equals(userId)) throw new IllegalArgumentException("수정 권한이 없습니다.");
 
         if (!isBlank(req.getTitle())) post.setTitle(req.getTitle());
@@ -195,6 +168,7 @@ public class CommunityService {
 
     private static boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
     private static String nvl(String s) { return s == null ? "" : s; }
+    private static String nvlOr(String s, String def) { return isBlank(s) ? def : s; }
 
     private static String interviewTypeLabel(InterviewType t) {
         if (t == null) return null;
@@ -204,14 +178,6 @@ public class CommunityService {
             case BEHAVIORAL:    return "인성";
             case COMPREHENSIVE: return "종합";
             default:            return t.name();
-        }
-    }
-
-    private void assertMyResult(Long resultId, Long userId) {
-        if (resultId == null) return;
-        boolean mine = interviewResultRepository.existsByIdAndInterview_User_UserId(resultId, userId);
-        if (!mine) {
-            throw new IllegalArgumentException("본인의 면접 결과만 선택할 수 있습니다.");
         }
     }
 
@@ -245,43 +211,23 @@ public class CommunityService {
         return dto;
     }
 
-    private static String coalesceFirstString(Object target, String... methodNames) {
-        if (target == null) return null;
-        for (String name : methodNames) {
-            try {
-                Method m = target.getClass().getMethod(name);
-                Object v = m.invoke(target);
-                if (v != null) {
-                    String s = String.valueOf(v);
-                    if (!isBlank(s)) return s;
-                }
-            } catch (NoSuchMethodException ignored) {
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return null;
+    private String extractCareerLevelToPostLevel(InterviewResult r) {
+        if (r == null) return null;
+        Interview iv = r.getInterview();
+        if (iv == null) return null;
+        Object career = iv.getCareerLevel();
+        return normalizeCareerLevel(career);
     }
 
-    private static String mapCategory(String raw) {
-        if (isBlank(raw)) return null;
-        String k = raw.trim().toLowerCase().replaceAll("\\s+", "");
-        if (k.equals("백엔드") || k.equals("backend")) return "BACKEND";
-        if (k.equals("프론트엔드") || k.equals("frontend")) return "FRONTEND";
-        if (k.equals("풀스택") || k.equals("fullstack")) return "FULLSTACK";
-        if (k.equals("devops")) return "DEVOPS";
-        if (k.equals("data/ai") || k.equals("dataai") || k.equals("dataai ") || k.equals("dataai".trim()) || k.equals("dataai".replace(" ", "")) || k.equals("dataai".toLowerCase())) return "DATA_AI";
-        if (raw.matches("^[A-Z_]+$")) return raw;
-        return raw.toUpperCase();
-    }
-
-    private static String mapLevel(String raw) {
-        if (isBlank(raw)) return null;
-        String k = raw.trim();
-        if (k.equals("주니어") || k.equalsIgnoreCase("junior")) return "JUNIOR";
-        if (k.equals("미드레벨") || k.equalsIgnoreCase("mid") || k.equalsIgnoreCase("middle")) return "MID";
-        if (k.equals("시니어") || k.equalsIgnoreCase("senior")) return "SENIOR";
-        if (raw.matches("^[A-Z_]+$")) return raw;
-        return raw.toUpperCase();
+    private String normalizeCareerLevel(Object careerLevel) {
+        if (careerLevel == null) return null;
+        String s = careerLevel.toString().trim();
+        if (isBlank(s)) return null;
+        String key = s.toUpperCase();
+        if ("MID_LEVEL".equals(key)) return "MID";
+        if ("JUNIOR".equals(key)) return "JUNIOR";
+        if ("MID".equals(key)) return "MID";
+        if ("SENIOR".equals(key)) return "SENIOR";
+        return key;
     }
 }

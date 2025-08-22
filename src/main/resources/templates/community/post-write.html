@@ -6,10 +6,6 @@
     <meta charset="UTF-8" />
     <title>커뮤니티 글쓰기</title>
 
-    <!-- 파비콘 추가 -->
-    <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}">
-    <link rel="alternate icon" href="/img/favicon.svg" type="image/svg+xml">
-
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/post-write.css">
 
@@ -27,24 +23,24 @@
     <h1 class="page-title">커뮤니티 글쓰기</h1>
 
     <form id="community-post-form"
-          th:action="@{/community/posts/interview}"
+          th:action="@{/api/community/posts/compose}"
           method="post">
 
-        <input type="hidden" name="category" value="INTERVIEW_SHARE" />
+        <input type="hidden" id="postCategory" name="category" value="INTERVIEW_SHARE">
 
         <section class="field">
             <label for="interviewResultId">인터뷰 결과</label>
-            <select id="interviewResultId" name="interviewShare.interviewResultId" required>
-                <option value="">선택하세요</option>
-                <option th:each="o : ${resultOptions}"
-                        th:value="${o.id}"
-                        th:text="${o.title}">내 결과</option>
-            </select>
+            <div class="inline">
+                <select id="interviewResultId" name="interviewResultId" required>
+                    <option value="">인터뷰 결과</option>
+                </select>
+            </div>
         </section>
+
 
         <section class="field">
             <label for="title">제목</label>
-            <input type="text" id="title" name="interviewShare.title"
+            <input type="text" id="title" name="title"
                    placeholder="[면접결과] A 87점" maxlength="150" required />
         </section>
 
@@ -53,7 +49,7 @@
                 <label for="content">추가 메모</label>
                 <small><span id="memo-counter">0</span> / 1000</small>
             </div>
-            <textarea id="content" name="interviewShare.content"
+            <textarea id="content" name="content"
                       placeholder="추천 자료, 링크, 메모 등을 적어주세요. (최대 1000자)"
                       rows="10" maxlength="1000"></textarea>
         </section>

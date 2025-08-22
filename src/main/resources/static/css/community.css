@@ -378,3 +378,5 @@ html, body {
 #levelFilters::-webkit-scrollbar { height: 6px; }
 #categoryFilters::-webkit-scrollbar-thumb,
 #levelFilters::-webkit-scrollbar-thumb { border-radius: 3px; }
+
+.community-container .user-meta:empty { display: none; }
