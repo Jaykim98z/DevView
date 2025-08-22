@@ -20,11 +20,4 @@ public interface InterviewResultRepository extends JpaRepository<InterviewResult
         ORDER BY i.createdAt DESC
     """)
     List<InterviewResult> findByUserId(@Param("userId") Long userId);
-
-    Optional<InterviewResult> findTopByInterview_User_UserIdOrderByInterview_CreatedAtDesc(Long userId);
-
-    Optional<InterviewResult> findByIdAndInterview_User_UserId(Long resultId, Long userId);
-
-    boolean existsByIdAndInterview_User_UserId(Long id, Long userId);
-
 }

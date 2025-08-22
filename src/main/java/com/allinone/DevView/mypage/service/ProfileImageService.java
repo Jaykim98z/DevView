@@ -1,6 +1,5 @@
 package com.allinone.DevView.mypage.service;
 
-import com.allinone.DevView.config.S3Service;
 import com.allinone.DevView.mypage.util.ImageFileUtils;
 import com.allinone.DevView.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,25 +20,21 @@ import java.util.Set;
 public class ProfileImageService {
 
     private final UserRepository userRepository;
-    private final S3Service s3Service;
 
-    /** S3 사용 여부 플래그 */
-    @Value("${app.use-s3:true}")
-    private boolean useS3;
-
-    /** 기존 로컬 저장 설정 (백업용) */
+    /** 애플리케이션 설정: 실제 저장 루트 (기본값: 실행 디렉터리 하위 "uploads") */
     @Value("${app.upload-dir:uploads}")
-    private String uploadRoot;
+    private String uploadRoot; // 예) ${user.home}/devview_uploads
+
+    /** 웹에서 접근할 정적 URL 프리픽스 */
+    private static final String URL_PREFIX = "/uploads/profile/";
 
     /** 허용 확장자 & 사이즈(5MB) */
     private static final Set<String> ALLOWED_EXT = Set.of("jpg", "jpeg", "png", "webp");
     private static final long MAX_SIZE = 5L * 1024 * 1024;
 
     /**
-     * 프로필 이미지 업로드 (S3 또는 로컬)
-     * @param userId 사용자 ID
-     * @param imageFile 업로드할 이미지 파일
-     * @return 이미지 URL (S3 URL 또는 로컬 URL)
+     * 프로필 이미지 업로드(파일시스템 저장만). User 엔티티 업데이트는 호출측(Service)에서 처리.
+     * @return 브라우저에서 접근 가능한 URL (예: /uploads/profile/{userId}/{filename})
      */
     public String uploadProfileImage(Long userId, MultipartFile imageFile) {
         validateUser(userId);
@@ -50,61 +46,7 @@ public class ProfileImageService {
             throw new IllegalArgumentException("허용되지 않은 이미지 형식입니다. (jpg, jpeg, png, webp)");
         }
 
-        if (useS3) {
-            return uploadToS3(userId, imageFile);
-        } else {
-            return uploadToLocal(userId, imageFile);
-        }
-    }
-
-    /**
-     * 프로필 이미지 삭제 (S3 또는 로컬)
-     * @param userId 사용자 ID
-     * @param imageUrl 삭제할 이미지 URL
-     */
-    public void deleteProfileImage(Long userId, String imageUrl) {
-        validateUser(userId);
-        if (imageUrl == null || imageUrl.isBlank()) {
-            return;
-        }
-
-        if (useS3 && isS3Url(imageUrl)) {
-            deleteFromS3(imageUrl);
-        } else {
-            deleteFromLocal(imageUrl);
-        }
-    }
-
-    /* ===================== S3 업로드/삭제 ===================== */
-
-    private String uploadToS3(Long userId, MultipartFile imageFile) {
-        try {
-            String folder = "profile/" + userId;
-            String s3Url = s3Service.uploadFile(imageFile, folder);
-            log.info("S3 업로드 성공 - 사용자: {}, URL: {}", userId, s3Url);
-            return s3Url;
-        } catch (Exception e) {
-            log.error("S3 업로드 실패 - 사용자: {}", userId, e);
-            throw new RuntimeException("프로필 이미지 업로드에 실패했습니다.", e);
-        }
-    }
-
-    private void deleteFromS3(String imageUrl) {
-        try {
-            s3Service.deleteFile(imageUrl);
-            log.info("S3 삭제 성공: {}", imageUrl);
-        } catch (Exception e) {
-            log.warn("S3 삭제 실패: {}", imageUrl, e);
-            throw new RuntimeException("프로필 이미지 삭제에 실패했습니다.", e);
-        }
-    }
-
-    /* ===================== 로컬 업로드/삭제 (기존 코드) ===================== */
-
-    private String uploadToLocal(Long userId, MultipartFile imageFile) {
-        final String originalName = imageFile.getOriginalFilename();
-        final String ext = ImageFileUtils.getFileExtension(originalName).toLowerCase();
-        final String filename = java.util.UUID.randomUUID() + "." + ext;
+        final String filename = UUID.randomUUID() + "." + ext;
 
         // 실제 저장 경로 (파일시스템 절대경로): {uploadRoot}/profile/{userId}/{filename}
         final Path userDir = Paths.get(uploadRoot, "profile", String.valueOf(userId))
@@ -121,17 +63,26 @@ public class ProfileImageService {
                 Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            log.debug("로컬 저장 성공: {}", target);
+            log.debug("Saved profile image to {}", target);
         } catch (IOException e) {
-            log.error("로컬 저장 실패: {}", target, e);
+            log.error("Failed to save profile image: {}", target, e);
             throw new RuntimeException("프로필 이미지 저장에 실패했습니다.", e);
         }
 
         // 반환 URL: /uploads/profile/{userId}/{filename}
-        return "/uploads/profile/" + userId + "/" + filename;
+        return URL_PREFIX + userId + "/" + filename;
     }
 
-    private void deleteFromLocal(String imageUrl) {
+    /**
+     * 파일 URL로 이미지 삭제 (파일 없으면 조용히 무시)
+     * 기대 URL: /uploads/profile/{userId}/{filename}
+     */
+    public void deleteProfileImage(Long userId, String imageUrl) {
+        validateUser(userId);
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return;
+        }
+
         // URL → 로컬 파일 경로: {uploadRoot}/profile/{userId}/{filename}
         // "/uploads/" 프리픽스를 떼고 uploadRoot 밑으로 매핑
         final String url = imageUrl.startsWith("/") ? imageUrl.substring(1) : imageUrl; // uploads/profile/...
@@ -149,19 +100,12 @@ public class ProfileImageService {
                 try { Files.delete(parent); } catch (Exception ignore) { /* no-op */ }
             }
         } catch (IOException e) {
-            log.warn("로컬 파일 삭제 실패: {}", filePath, e);
+            log.warn("Failed to delete profile image: {}", filePath, e);
             throw new RuntimeException("프로필 이미지 삭제에 실패했습니다.", e);
         }
     }
 
-    /* ===================== 유틸리티 메서드 ===================== */
-
-    /**
-     * S3 URL인지 확인
-     */
-    private boolean isS3Url(String url) {
-        return url != null && url.contains("amazonaws.com");
-    }
+    /* ===================== 내부 유틸 ===================== */
 
     private void validateUser(Long userId) {
         userRepository.findById(userId)

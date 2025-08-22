@@ -1,8 +1,6 @@
 package com.allinone.DevView.interview.entity;
 
-import com.allinone.DevView.common.enums.CareerLevel;
 import com.allinone.DevView.common.enums.InterviewType;
-import com.allinone.DevView.common.enums.JobPosition;
 import com.allinone.DevView.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,13 +33,11 @@ public class Interview {
     @Column(nullable = false, length = 20)
     private InterviewType interviewType;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private JobPosition jobPosition;
+    private String jobPosition;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private CareerLevel careerLevel;
+    private String careerLevel;
 
     @Column(nullable = false)
     private int questionCount;

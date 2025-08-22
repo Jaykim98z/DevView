@@ -2,28 +2,27 @@ package com.allinone.DevView.community.repository;
 
 import com.allinone.DevView.community.entity.CommunityPosts;
 import com.allinone.DevView.common.enums.Grade;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CommunityPostsRepository
-        extends JpaRepository<CommunityPosts, Long>, JpaSpecificationExecutor<CommunityPosts> {
+public interface CommunityPostsRepository extends JpaRepository<CommunityPosts, Long> {
 
+    // ✅ 목록에서 삭제글 제외
     @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user WHERE p.deleted = false ORDER BY p.createdAt DESC")
     List<CommunityPosts> findAllWithUser();
 
+    // ✅ 상세에서 삭제글 제외
     @Query("SELECT p FROM CommunityPosts p JOIN FETCH p.user WHERE p.postId = :postId AND p.deleted = false")
     Optional<CommunityPosts> findByIdWithUser(@Param("postId") Long postId);
 
+    // 필요 시 필터에도 deleted 제외를 고려
     List<CommunityPosts> findByCategoryAndLevel(String category, String level);
     List<CommunityPosts> findByCategory(String category);
     List<CommunityPosts> findByGradeOrderByCreatedAtDesc(Grade grade);
@@ -70,6 +69,7 @@ public interface CommunityPostsRepository
     List<CommunityPosts> findByTypeAndContentContainingIgnoreCase(String type, String keyword);
     List<CommunityPosts> findTop10ByTypeOrderByScoreDesc(String type);
 
+    // 카운트 업데이트
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update CommunityPosts p set p.viewCount = p.viewCount + 1 where p.postId = :postId")
     int incrementViewCount(@Param("postId") Long postId);
@@ -98,23 +98,12 @@ public interface CommunityPostsRepository
        """)
     int decrementScrapCount(@Param("postId") Long postId);
 
-    @EntityGraph(attributePaths = {"user"})
-    Page<CommunityPosts> findAllByDeletedFalse(Pageable pageable);
+    Page<CommunityPosts> findByDeletedFalse(Pageable pageable);
 
     Optional<CommunityPosts> findByPostIdAndDeletedFalse(Long postId);
 
     @Query("select p from CommunityPosts p where p.postId = :postId and p.deleted = false")
     Optional<CommunityPosts> findActiveByPostId(@Param("postId") Long postId);
 
-    @EntityGraph(attributePaths = {"user"})
-    @Query("""
-        select p
-          from CommunityPosts p
-         where p.deleted = false
-           and (:category is null or p.category = :category)
-           and (:level    is null or p.level    = :level)
-        """)
-    Page<CommunityPosts> searchByFilters(@Param("category") String category,
-                                         @Param("level")    String level,
-                                         Pageable pageable);
+
 }

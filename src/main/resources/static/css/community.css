@@ -6,12 +6,14 @@ html, body {
 }
 * { box-sizing: border-box; }
 
+/* Container */
 .community-container {
   max-width: 1240px;
   margin: 0 auto;
   padding: 0 16px 56px;
 }
 
+/* Header */
 .community-container .community-header {
   text-align: center;
   padding: 68px 0 20px;
@@ -34,6 +36,7 @@ html, body {
   color: #8a95a5;
 }
 
+/* Filter bar */
 .community-container .filter-bar {
   margin: 18px 0 28px;
   padding: 16px 18px;
@@ -49,6 +52,7 @@ html, body {
   box-shadow: 0 8px 18px rgba(27, 39, 51, .06);
 }
 
+/* Search */
 .community-container .search-box {
   grid-area: search;
   display: flex;
@@ -80,6 +84,7 @@ html, body {
 }
 .community-container .search-box button:active { transform: translateY(1px); }
 
+/* Sort (left controls) */
 .community-container .left-controls {
   grid-area: sort;
   display: flex;
@@ -101,6 +106,7 @@ html, body {
   color: #2d3a4a;
 }
 
+/* Tag groups (shared) */
 .community-container #categoryFilters.tag-group-left,
 .community-container #levelFilters.tag-group-right {
   display: flex;
@@ -117,6 +123,7 @@ html, body {
   justify-self: end;
 }
 
+/* Tag buttons (shared) */
 .community-container .tag-group-left button,
 .community-container .tag-group-right button {
   height: 36px;
@@ -140,6 +147,7 @@ html, body {
   border-color: #334155;
 }
 
+/* Card list */
 .community-container .card-list {
   width: 100%;
   display: grid;
@@ -147,6 +155,7 @@ html, body {
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 }
 
+/* Card */
 .community-container .post-card {
   background: #fff;
   border: 1px solid #e8edf3;
@@ -160,6 +169,7 @@ html, body {
 }
 .community-container .post-card:hover { box-shadow: 0 10px 22px rgba(27, 39, 51, .09); }
 
+/* User info */
 .community-container .user-info {
   display: flex;
   align-items: center;
@@ -189,6 +199,7 @@ html, body {
   color: #9aa7b5;
 }
 
+/* Content */
 .community-container .post-title {
   margin: 6px 0 4px;
   font-size: 18px;
@@ -207,6 +218,7 @@ html, body {
   overflow: hidden;
 }
 
+/* Score & badges */
 .community-container .post-score {
   display: inline-flex;
   align-items: center;
@@ -240,6 +252,7 @@ html, body {
   color: #235ea6;
 }
 
+/* Meta & link */
 .community-container .post-meta {
   display: flex;
   gap: 14px;
@@ -265,6 +278,7 @@ html, body {
 }
 .community-container .detail-link:hover { background: #e8f2ff; }
 
+/* Floating write button */
 .write-btn {
   position: fixed;
   bottom: 24px;
@@ -280,6 +294,7 @@ html, body {
 }
 .write-btn:hover { background-color: #1d4ed8; }
 
+/* Responsive */
 @media (max-width: 1024px) {
   .community-container .filter-bar {
     grid-template-columns: 1fr;
@@ -317,64 +332,3 @@ html, body {
 .comment-item .meta { font-size: 0.9rem; color: #6b7280; display:flex; gap:8px; }
 .comment-item .content { margin-top: 6px; white-space: pre-wrap; }
 .comment-item .actions { margin-top: 8px; display:flex; gap:8px; }
-
-#pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin: 28px 0 0;
-}
-#pagination .page-btn {
-  min-width: 40px;
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid #d9e0e8;
-  border-radius: 10px;
-  background: #fff;
-  color: #334155;
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 38px;
-  cursor: pointer;
-  transition: border-color .15s, box-shadow .15s, transform .05s, background .15s, color .15s;
-  box-shadow: 0 4px 12px rgba(27,39,51,.06);
-}
-#pagination .page-btn:hover {
-  border-color: #b8c6d9;
-  box-shadow: 0 6px 16px rgba(27,39,51,.09);
-}
-#pagination .page-btn:active { transform: translateY(1px); }
-#pagination .page-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, .25);
-}
-#pagination .page-btn.active {
-  background: #334155;
-  border-color: #334155;
-  color: #fff;
-  box-shadow: 0 6px 16px rgba(51,65,85,.25);
-}
-#pagination .page-btn[disabled] {
-  background: #f4f6f8;
-  border-color: #e5ebf2;
-  color: #9aa7b5;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-#pagination .page-btn[data-page="prev"],
-#pagination .page-btn[data-page="next"] { padding: 0 14px; }
-
-#categoryFilters,
-#levelFilters {
-  flex-wrap: nowrap !important;
-  overflow-x: auto !important;
-  overflow-y: hidden;
-  white-space: nowrap !important;
-  min-width: 0;
-}
-
-#categoryFilters::-webkit-scrollbar,
-#levelFilters::-webkit-scrollbar { height: 6px; }
-#categoryFilters::-webkit-scrollbar-thumb,
-#levelFilters::-webkit-scrollbar-thumb { border-radius: 3px; }

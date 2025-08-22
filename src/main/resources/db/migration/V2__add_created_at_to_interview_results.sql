@@ -1,2 +1,0 @@
-ALTER TABLE interview_results
-ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT NOW();

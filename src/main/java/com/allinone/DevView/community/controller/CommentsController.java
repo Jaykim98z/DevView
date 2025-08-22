@@ -22,7 +22,7 @@ public class CommentsController {
     private Long getUserId(CustomUserDetails auth) { return (auth != null) ? auth.getUserId() : null; }
     private String getWriterName(CustomUserDetails auth) { return (auth != null) ? auth.getUsername() : "익명"; }
 
-    @GetMapping(produces = "application/json")
+    @GetMapping
     public Page<CommentsDto.Res> list(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "0") int page,
@@ -35,9 +35,8 @@ public class CommentsController {
         return commentsService.list(postId, me, pageable);
     }
 
-    @PostMapping(consumes = "application/json", produces = "application/json")
+    @PostMapping
     @PreAuthorize("isAuthenticated()")
-    @ResponseStatus(HttpStatus.CREATED)
     public CommentsDto.Res create(
             @PathVariable Long postId,
             @Valid @RequestBody CommentsDto.CreateReq req,
@@ -49,7 +48,7 @@ public class CommentsController {
         return commentsService.create(postId, me, writerName, req);
     }
 
-    @PutMapping(value = "/{commentId}", consumes = "application/json")
+    @PutMapping("/{commentId}")
     @PreAuthorize("isAuthenticated()")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(

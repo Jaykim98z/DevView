@@ -43,12 +43,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // CSRF 보호 설정 - 모든 상태 변경 요청에 적용
+                // CSRF 보호 설정 - 단계적 활성화
                 .csrf(csrf -> csrf
-                                // 쿠키 기반 CSRF 토큰 저장소 사용 (JavaScript에서 접근 가능)
-                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        // ✅ AI 인터뷰 API 예외 제거 - 모든 API에 CSRF 보호 적용
-                        // .ignoringRequestMatchers() 주석 처리 - 모든 POST/PUT/DELETE 요청에 CSRF 필요
+                        // 쿠키 기반 CSRF 토큰 저장소 사용 (JavaScript에서 접근 가능)
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        // 아래 경로들은 CSRF 보호 제외 (단계적 적용)
+                        .ignoringRequestMatchers(
+                                // API 엔드포인트 - 임시 제외 (추후 적용 예정)
+                                "/api/v1/interviews/**"   // AI 인터뷰 API
+                                // 회원가입 중복체크는 CSRF 토큰 없이도 가능하도록 (UX 개선)
+                                // "/api/users/check-email",   // 이메일 중복 체크
+                                // "/api/users/check-username" // 사용자명 중복 체크
+                        )
                 )
                 .httpBasic(basic -> basic.disable())
 
@@ -91,15 +97,15 @@ public class SecurityConfig {
                         .requestMatchers("/", "/user/login", "/user/register").permitAll()
                         .requestMatchers("/rankings").permitAll() // 임시
 
-                        // 인증 없이 접근 가능한 API (GET 요청만)
+                        // 인증 없이 접근 가능한 API
                         .requestMatchers("/api/users/register", "/api/users/check-email", "/api/users/check-username").permitAll()
                         .requestMatchers("/api/rankings/**").permitAll() // 임시
 
                         // OAuth2 관련
                         .requestMatchers("/login/oauth2/code/**", "/oauth2/**").permitAll()
 
-                        // AI 인터뷰 API 인증 필요 (CSRF 보호 포함)
-                        .requestMatchers("/api/v1/interviews/**").authenticated()
+                        // 임시: 테스트용 API
+                        .requestMatchers("/api/v1/interviews/**").permitAll()
 
                         .requestMatchers("/api/community/posts/**").authenticated() // 커뮤니티 글 수정/삭제 API는 로그인 필요
 

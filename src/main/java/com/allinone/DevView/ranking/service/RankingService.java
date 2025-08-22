@@ -10,6 +10,8 @@ import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -185,18 +187,10 @@ public class RankingService {
         );
         Integer currentRank = usersAbove.intValue() + 1;
 
-        User user = ranking.getUser();
-
-        // 프로필 이미지 (UserProfile 연동)
-        String profileImageUrl = null;
-        if (user.getUserProfile() != null) {
-            profileImageUrl = user.getUserProfile().getProfileImageUrl();
-        }
-
         return RankingResponse.builder()
-                .userId(user.getUserId())
-                .username(user.getUsername())
-                .profileImageUrl(profileImageUrl != null ? profileImageUrl : "/img/profile-default.svg")
+                .userId(ranking.getUser().getUserId())
+                .username(ranking.getUser().getUsername())
+                .profileImageUrl("/img/profile-default.svg") // TODO: UserProfiles 연동시 실제 이미지로 변경
                 .rankingScore(ranking.getRankingScore())
                 .currentRank(currentRank)
                 .averageScore(ranking.getAverageScore())

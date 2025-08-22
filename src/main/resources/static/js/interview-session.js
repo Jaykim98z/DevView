@@ -15,17 +15,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const timerEl = document.getElementById('timer');
     const charCounterEl = document.getElementById('char-counter');
 
-    // CSRF 토큰 초기화
-    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
-
     function initializeInterview() {
         interviewId = localStorage.getItem('interviewId');
         const storedQuestions = localStorage.getItem('questions');
         const durationMinutes = localStorage.getItem('durationMinutes');
 
         if (!interviewId || !storedQuestions) {
-            alert('Interview data not found. Redirecting to settings.');
+            alert('Interview data not found.');
             window.location.href = '/interview/settings';
             return;
         }
@@ -78,14 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateCharCounter() {
         const textLength = answerTextareaEl.value.length;
         charCounterEl.textContent = `${textLength}/500 글자`;
-
-        if (textLength > 500) {
-            charCounterEl.classList.add('error');
-            submitAnswerBtnEl.disabled = true;
-        } else {
-            charCounterEl.classList.remove('error');
-            submitAnswerBtnEl.disabled = false;
-        }
     }
 
     function startTimer(durationInSeconds) {
@@ -120,25 +108,16 @@ document.addEventListener('DOMContentLoaded', function() {
         };
 
         try {
-            // CSRF 토큰 포함한 headers
-            const headers = { 'Content-Type': 'application/json' };
-            if (csrfToken && csrfHeader) {
-                headers[csrfHeader] = csrfToken;
-            }
-
             const submitResponse = await fetch('/api/v1/interviews/answers', {
                 method: 'POST',
-                headers: headers,
-                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(submitRequest)
             });
 
             if (!submitResponse.ok) throw new Error('Failed to submit answers.');
 
             const endResponse = await fetch(`/api/v1/interviews/${interviewId}/end`, {
-                method: 'POST',
-                headers: headers,
-                credentials: 'same-origin'
+                method: 'POST'
             });
 
             if (!endResponse.ok) throw new Error('Failed to end interview.');

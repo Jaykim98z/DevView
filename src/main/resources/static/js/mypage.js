@@ -9,15 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
 async function initSummary(){
     try{
         const res = await fetch('/api/mypage',{credentials:'include'});
-        if (!res.ok) {
-            console.error('프로필 통계 API 호출 실패:', res.status);
-            return;
-        }
-
-        const data = await res.json(); // 🎯 수정: data 직접 사용
-        setText('#interviewCount', data?.totalInterviews ?? 0);
-        setText('#avgScore',       data?.avgScore ?? 0);
-        setText('#bestGrade',      data?.grade ?? '-');
+        const {data:main} = await res.json();
+        setText('#interviewCount', main?.totalInterviews ?? 0);
+        setText('#avgScore',       main?.avgScore ?? 0);
+        setText('#bestGrade',      main?.grade ?? '-');
     }catch(e){ console.error('요약 로드 실패', e); }
 }
 
@@ -179,20 +174,12 @@ function renderScoreChartFallback(canvas, labels, scores){
 async function initLists(){
     try{
         const res = await fetch('/api/mypage',{credentials:'include'});
-        if (!res.ok) {
-            console.error('API 호출 실패:', res.status, res.statusText);
-            return;
-        }
-
-        const data = await res.json(); // 🎯 수정: data 직접 사용
-        console.log('API 응답 데이터:', data); // 디버깅용
+        const {data:main} = await res.json();
 
         const sel = document.querySelector('#interviewList') ? '#interviewList' : '.interview-history ul';
-        renderInterviews(sel, data?.interviews || []); // 🎯 수정: data.interviews
-        renderScraps('#scrapList', data?.scraps || []); // 🎯 수정: data.scraps
-    }catch(e){
-        console.error('목록 로드 실패', e);
-    }
+        renderInterviews(sel, main?.interviews || []);
+        renderScraps('#scrapList', main?.scraps || []);
+    }catch(e){ console.error('목록 로드 실패', e); }
 }
 
 /* 커뮤니티 상세 링크 보정: link가 없거나 postId만 있을 때 안전 복구 */
@@ -223,14 +210,8 @@ function renderInterviews(sel, items){
         const gradeTxt = formatGrade(gradeRaw);
         const gCls     = gradeClass(gradeRaw);
 
-        // 🎯 새로운 title 로직: "면접타입 - 경력레벨" 형태
-        const interviewTypeKr = interviewTypeToKr(typeRaw); // 기술면접, 실무면접 등
-        const careerLevelRaw = typeof it.careerLevel==='string'? it.careerLevel : (it.careerLevel&&it.careerLevel.name)||'';
-        const careerLevelDisplay = formatCareerLevel(careerLevelRaw); // JUNIOR, MID-LEVEL, SENIOR
-
-        const title = interviewTypeKr && careerLevelDisplay
-            ? `${interviewTypeKr} - ${careerLevelDisplay}`
-            : (interviewTypeKr || '면접');
+        const title = (it.title && it.title.trim())
+            || (it.jobPosition ? `${it.jobPosition} 면접` : `${typeToKr(typeRaw)} 면접`);
 
         const li = document.createElement('li');
         li.className='interview-item interview-row';
@@ -240,13 +221,11 @@ function renderInterviews(sel, items){
           <span class="pill-dark">${escapeHtml(pill)}</span>
           <span class="dot">•</span>
           <span class="date">${escapeHtml(formatDate(it.interviewDate))}</span>
-          <span class="dot">•</span>
-          <span class="result-id">ID: ${it.resultId || '-'}</span>
         </div>
         <h4 class="iv-title">${escapeHtml(title)}</h4>
       </div>
       <div class="item-right">
-        <div class="score-big">${Number(it.totalScore ?? 0)}</div>
+        <div class="score-big">${Number(it.score ?? 0)}</div>
         <div class="grade-txt ${gCls}">${escapeHtml(gradeTxt)}</div>
         <button type="button" class="btn small outline detail-btn">상세 보기</button>
       </div>
@@ -267,48 +246,24 @@ function renderScraps(sel, items){
     items.forEach((it)=>{
         const title = (it && it.title) || '';
         // ✅ DTO의 link 우선, 없으면 postId로 복구
-        const href = buildCommunityDetailLink(it);
+        const href  = buildCommunityDetailLink(it);
         const likes = Number((it && it.likes) || 0);
         const comments = Number((it && it.comments) || 0);
-        const writer = (it && it.writerName) || '익명';
-        const preview = (it && it.preview) || '';
 
-        const li = document.createElement('li');
-        // 🎯 수정: 서버사이드와 동일한 HTML 구조로 생성
-        li.innerHTML = `
-            <a href="${escapeHtml(href)}" class="scrap-item">
-                <h4 class="scrap-title">${escapeHtml(title)}</h4>
-                <p class="scrap-desc">${escapeHtml(preview)}</p>
-                <div class="scrap-meta">
-                    <span class="writer">👤 <span>${escapeHtml(writer)}</span></span>
-                    <span class="likes">❤️ <span>${likes}</span></span>
-                </div>
-            </a>
-        `;
+        const li=document.createElement('li');
+        li.className='scrap-item';
+        li.innerHTML=`
+      <a class="link" href="${escapeHtml(href)}">
+        <span class="title">${escapeHtml(title)}</span>
+        <span class="meta">
+          <span class="likes">👍 ${likes}</span>
+          <span class="comments">💬 ${comments}</span>
+        </span>
+      </a>
+    `;
         frag.appendChild(li);
     });
     box.appendChild(frag);
-}
-
-// InterviewType을 한국어로 변환
-function interviewTypeToKr(type) {
-    const map = {
-        'TECHNICAL': '기술면접',
-        'PRACTICAL': '실무면접',
-        'BEHAVIORAL': '인성면접',
-        'COMPREHENSIVE': '종합면접'
-    };
-    return map[String(type || '').toUpperCase()] || type || '';
-}
-
-// CareerLevel 포맷팅
-function formatCareerLevel(level) {
-    const map = {
-        'JUNIOR': 'JUNIOR',
-        'MID_LEVEL': 'MID-LEVEL',
-        'SENIOR': 'SENIOR'
-    };
-    return map[String(level || '').toUpperCase()] || level || '';
 }
 
 /* 헬퍼 */

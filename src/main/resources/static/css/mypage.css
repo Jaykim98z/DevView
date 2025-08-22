@@ -1,11 +1,3 @@
-body {
-    font-family: 'Noto Sans KR', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f9f9f9;
-    color: #374B5F;
-}
-
 /* ==============================   공통 컨테이너 / 리셋   ============================== */
 .mypage-container {
     --card-bg: #fff;
@@ -239,29 +231,36 @@ body {
     margin-bottom: 12px;
     position: relative;
 }
-
 .mypage-container .interview-item .row {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 12px;
 }
 
+/* 칩 라인: 1번째 칩(타입/직무)만 알약, 2번째 칩(날짜)은 평문 */
 .mypage-container .chips {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
-
 .mypage-container .chips .chip {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: #6b7a90;
+    font-weight: 600;
+    align-content: center;
+}
+.mypage-container .chips .chip:first-child,
+.mypage-container .chip-type,
+.mypage-container .pill-dark {
     background: #20374d !important;
     color: #fff !important;
     padding: 6px 12px;
     border-radius: 999px;
     font-weight: 700;
-    font-size: 0.9rem;
 }
-
 .mypage-container .chip-date,
 .mypage-container .date-chip,
 .mypage-container .chips .date {
@@ -271,15 +270,7 @@ body {
     color: #6b7a90 !important;
 }
 
-/* 날짜(중앙) */
-.mypage-container .interview-item .left .interview-date {
-    color: #6b7280;
-    font-weight: 500;
-    min-width: 110px;
-    white-space: nowrap;
-}
-
-/* 점수/등급 영역(행 기준) */
+/* 점수/등급 영역 */
 .mypage-container .score-wrap {
     display: flex;
     flex-direction: column;
@@ -287,13 +278,6 @@ body {
     gap: 8px;
     margin-left: auto;
 }
-.mypage-container .interview-item .score-wrap {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    white-space: nowrap;
-}
-
 .mypage-container .score {
     background: transparent;
     padding: 0;
@@ -307,13 +291,6 @@ body {
     font-weight: 700;
     font-size: 16px;
     color: #2fb344;
-}
-
-/* result-id 스타일 */
-.mypage-container .meta-line .result-id {
-    color: #6b7a90;
-    font-weight: 600;
-    font-size: 0.9rem;
 }
 
 /* JS 렌더(.interview-row) */
@@ -355,24 +332,11 @@ body {
     margin: 0;
     font-size: 1.08rem;
     font-weight: 700;
-    color: #ffffff !important; /* 흰색 글자 */
+    color: #2d3643;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-
-    background-color: #384B5F; /* 진한 남색 */
-    padding: 4px 12px;
-    border-radius: 20px; /* 둥근 모서리 */
-    display: inline-block;
-    max-width: fit-content;
-
-    /* 약간의 그림자 효과 추가 */
-    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);
-
-    /* 부드러운 전환 효과 */
-    transition: all 0.2s ease;
 }
-
 
 .mypage-container .score-big {
     font-size: 24px;
@@ -397,8 +361,8 @@ body {
 /* ========== 상세보기 버튼: 카드 우하단 고정 (SSR + JS 공통, 선택자 보강) ========== */
 .mypage-container .interview-item,
 .mypage-container .interview-row {
-    position: relative;
-    padding-bottom: 64px;
+    position: relative;           /* 절대배치 기준 */
+    padding-bottom: 64px;         /* 버튼 높이+여백만큼 공간 확보(겹침 방지) */
 }
 /* SSR: <a class="btn small">상세 보기</a> (직접 자식) */
 .mypage-container .interview-item > a.btn.small {
@@ -422,7 +386,6 @@ body {
     padding: 0;
     margin: 0;
 }
-
 .mypage-container .scrap-item {
     display: block;
     background: #fff;
@@ -435,54 +398,17 @@ body {
     transition: background 0.15s ease, transform 0.06s ease, box-shadow 0.15s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
-
 .mypage-container .scrap-item:hover {
     background: #f4f6f8;
     transform: translateY(-1px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
-
-/* 🎯 누락된 스크랩 세부 스타일 추가 */
-.mypage-container .scrap-title {
-    margin: 0 0 8px;
+.mypage-container .scrap-item h4 {
+    margin: 0 0 6px;
     font-size: 1rem;
     font-weight: 600;
-    color: #2d3643;
-    line-height: 1.4;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
 }
-
-.mypage-container .scrap-desc {
-    margin: 0 0 12px;
-    font-size: 0.9rem;
-    color: #6b7a90;
-    line-height: 1.5;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-
-.mypage-container .scrap-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.86rem;
-    color: #6b7a90;
-}
-
-.mypage-container .scrap-meta .writer,
-.mypage-container .scrap-meta .likes {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-/* 기존 meta 클래스와 충돌 방지 */
-.mypage-container .scrap-item .meta {
+.mypage-container .meta {
     font-size: 0.86rem;
     color: #555;
     display: flex;
@@ -495,22 +421,9 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 16px;
 }
-
-/* result-id 스타일 */
-.mypage-container .meta-line .result-id {
-    color: #6b7a90;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-/* 빈 상태 스타일 */
-.mypage-container .empty {
-    text-align: center;
-    padding: 32px 16px;
-    color: #6b7a90;
-    font-style: italic;
-}
 /* ==============================   자기소개 카드 스타일   ============================== */
+
+/* 자기소개 카드 */
 .mypage-container .self-intro-card {
     background: var(--card-bg);
     border-radius: var(--radius);
@@ -518,6 +431,7 @@ body {
     padding: 20px;
 }
 
+/* 카드 제목 (기존 account-card와 동일한 스타일) */
 .mypage-container .self-intro-card .card-title {
     display: flex;
     align-items: center;
@@ -527,11 +441,14 @@ body {
     font-weight: 700;
     color: #0f172a;
 }
+
 .mypage-container .self-intro-card .card-title .icon {
     width: 20px;
     height: 20px;
     display: inline-block;
+    /* 다른 카드들과 동일한 기본 색상으로 변경 */
 }
+
 .mypage-container .self-intro-card .card-title h3 {
     margin: 0;
     font-size: inherit;
@@ -552,8 +469,8 @@ body {
     margin: 0;
     color: #334155;
     font-size: 0.95rem;
-    white-space: pre-wrap;
-    word-break: break-word;
+    white-space: pre-wrap; /* 줄바꿈 유지 */
+    word-break: break-word; /* 긴 단어 줄바꿈 */
 }
 
 /* 자기소개 안내 문구 (없을 때) */
@@ -598,23 +515,49 @@ body {
     font-weight: 500;
     transition: background-color 0.15s ease, transform 0.1s ease;
 }
+
 .mypage-container .self-intro-card .add-intro-btn:hover {
     background: #3a9bc1;
     transform: translateY(-1px);
 }
+
 .mypage-container .self-intro-card .add-intro-btn .btn-icon {
     width: 16px;
     height: 16px;
-    filter: brightness(0) invert(1);
-
-/* ==============================   반응형   ============================== */
-@media (max-width: 640px) {
-    .mypage-container .self-intro-card { padding: 16px; }
-    .mypage-container .self-intro-card .self-intro-content { padding: 12px; font-size: 0.9rem; }
-    .mypage-container .self-intro-card .self-intro-empty { padding: 20px 12px; }
-    .mypage-container .self-intro-card .empty-message { font-size: 0.85rem; }
-    .mypage-container .self-intro-card .add-intro-btn { font-size: 0.85rem; padding: 7px 14px; }
+    filter: brightness(0) invert(1); /* 흰색으로 변경 */
 }
-@media (max-width: 1024px) { .mypage-container .profile-layout { grid-template-columns: 1fr; } }
-@media (max-width: 860px)  { .mypage-container .scrap-section .scrap-grid { grid-template-columns: 1fr; } }
-@media (max-width: 640px)  { .mypage-container .graph-card canvas { height: 300px !important; } }
+
+/* 반응형: 모바일에서 자기소개 카드 조정 */
+@media (max-width: 640px) {
+    .mypage-container .self-intro-card {
+        padding: 16px;
+    }
+
+    .mypage-container .self-intro-card .self-intro-content {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+
+    .mypage-container .self-intro-card .self-intro-empty {
+        padding: 20px 12px;
+    }
+
+    .mypage-container .self-intro-card .empty-message {
+        font-size: 0.85rem;
+    }
+
+    .mypage-container .self-intro-card .add-intro-btn {
+        font-size: 0.85rem;
+        padding: 7px 14px;
+    }
+}
+/* ==============================   반응형   ============================== */
+@media (max-width: 1024px) {
+    .mypage-container .profile-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+    .mypage-container .scrap-section .scrap-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+    .mypage-container .graph-card canvas { height: 300px !important; }
+}

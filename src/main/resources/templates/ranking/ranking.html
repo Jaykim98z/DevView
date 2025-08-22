@@ -43,9 +43,9 @@
                     <div th:if="${iterStat.index == 1}" class="medal">🥈</div>
                     <div th:if="${iterStat.index == 2}" class="medal">🥉</div>
 
-                    <img class="profile-image"
-                         th:src="${ranking.profileImageUrl != null} ? @{${ranking.profileImageUrl}} : '/img/진욱.svg'"
+                    <img th:src="${ranking.profileImageUrl}"
                          th:alt="${ranking.username} + ' 프로필'"
+                         class="profile-image"
                          onerror="this.src='/img/profile-default.svg'">
                 </div>
 
@@ -82,9 +82,9 @@
                     th:text="${iterStat.index + 1}">1</td>
 
                 <td class="user-info">
-                    <img class="table-profile-img"
-                         th:src="${ranking.profileImageUrl != null} ? @{${ranking.profileImageUrl}} : '/img/진욱.svg'"
+                    <img th:src="${ranking.profileImageUrl}"
                          th:alt="${ranking.username} + ' 프로필'"
+                         class="table-profile-img"
                          onerror="this.src='/img/profile-default.svg'">
                     <span class="user-name" th:text="${ranking.username}">유저1</span>
                 </td>

@@ -175,29 +175,4 @@ public class MypageEditController {
         Long userId = getUserIdFromSession(session);
         return ResponseEntity.ok(mypageService.deleteProfileImage(userId));
     }
-
-    /**
-     * 마이페이지 메인 데이터 조회 (JavaScript에서 호출)
-     * GET /api/mypage
-     */
-    @Operation(summary = "마이페이지 데이터 조회", description = "면접 목록, 스크랩 등 마이페이지 메인 데이터를 JSON으로 반환합니다.")
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MypageResponseDto> getMypageData(HttpSession session) {
-        try {
-            Long userId = getUserIdFromSession(session);
-            MypageResponseDto data = mypageService.getMypageData(userId);
-
-            log.info("마이페이지 데이터 조회 성공: userId={}, interviews={}",
-                    userId, data.getInterviews().size());
-
-            return ResponseEntity.ok(data);
-        } catch (IllegalStateException e) {
-            log.warn("마이페이지 데이터 조회 실패 - 인증 필요");
-            return ResponseEntity.status(401).build();
-        } catch (Exception e) {
-            log.error("마이페이지 데이터 조회 중 오류", e);
-            return ResponseEntity.status(500).build();
-        }
-    }
-
 }

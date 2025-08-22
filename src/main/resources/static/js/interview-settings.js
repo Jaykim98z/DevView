@@ -2,10 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const interviewForm = document.getElementById('interview-form');
     const optionGroups = document.querySelectorAll('.options-group');
 
-    // CSRF 토큰 초기화
-    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
-
     optionGroups.forEach(group => {
         if (group.id !== 'question-count-group') {
             group.addEventListener('click', function(event) {
@@ -46,16 +42,9 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             try {
-                // CSRF 토큰 포함한 headers
-                const headers = { 'Content-Type': 'application/json' };
-                if (csrfToken && csrfHeader) {
-                    headers[csrfHeader] = csrfToken;
-                }
-
                 const startResponse = await fetch('/api/v1/interviews/start', {
                     method: 'POST',
-                    headers: headers,
-                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(startRequest)
                 });
                 if (!startResponse.ok) throw new Error('Failed to start interview.');
@@ -64,9 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const interviewId = interviewData.interviewId;
 
                 const questionsResponse = await fetch(`/api/v1/interviews/${interviewId}/questions`, {
-                    method: 'POST',
-                    headers: headers,
-                    credentials: 'same-origin'
+                    method: 'POST'
                 });
                 if (!questionsResponse.ok) throw new Error('Failed to fetch questions.');
 

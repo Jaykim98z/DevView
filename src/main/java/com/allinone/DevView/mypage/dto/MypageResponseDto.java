@@ -1,6 +1,5 @@
 package com.allinone.DevView.mypage.dto;
 
-import com.allinone.DevView.interview.dto.response.InterviewResultResponse;
 import com.allinone.DevView.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +19,7 @@ public class MypageResponseDto {
     private final String job;
     private final String careerLevel;
     private String profileImageUrl;
-    private final String selfIntroduction;
+    private final String selfIntroduction; //자기소개
 
     // 📌 계정 정보
     private final Long memberId;
@@ -32,14 +31,14 @@ public class MypageResponseDto {
     private final String grade;
 
     // 📋 상세 리스트
-    private final List<InterviewResultResponse> interviews;
+    private final List<InterviewDto> interviews;
     private final List<ScrapDto> scraps;
 
     public static MypageResponseDto from(User user,
                                          int totalInterviews,
                                          int avgScore,
                                          String grade,
-                                         List<InterviewResultResponse> interviews,
+                                         List<InterviewDto> interviews,
                                          List<ScrapDto> scraps) {
 
         String job = null;

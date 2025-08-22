@@ -14,23 +14,15 @@ public class CommentsDto {
     private Long commentId;
     private Long postId;
     private Long userId;
-    private String writerName;
     private String content;
     private LocalDateTime createdAt;
 
-    private boolean canEdit;
-    private boolean canDelete;
-
-    public CommentsDto(Long commentId, Long postId, Long userId,
-                       String writerName, String content, LocalDateTime createdAt) {
+    public CommentsDto(Long commentId, Long postId, Long userId, String content, LocalDateTime createdAt) {
         this.commentId = commentId;
         this.postId = postId;
         this.userId = userId;
-        this.writerName = writerName;
         this.content = content;
         this.createdAt = createdAt;
-        this.canEdit = false;
-        this.canDelete = false;
     }
 
     public static CommentsDto fromEntity(com.allinone.DevView.community.entity.Comments c) {
@@ -38,7 +30,6 @@ public class CommentsDto {
                 c.getId(),
                 c.getPostId(),
                 c.getUserId(),
-                c.getWriterName(),
                 c.getContent(),
                 c.getCreatedAt()
         );
@@ -83,7 +74,9 @@ public class CommentsDto {
         }
 
         public static Res of(com.allinone.DevView.community.entity.Comments c, String username) {
-            String display = (username != null && !username.isBlank()) ? username : c.getWriterName();
+            String display = (username != null && !username.isBlank())
+                    ? username
+                    : c.getWriterName();
             return new Res(
                     c.getId(),
                     c.getUserId(),
@@ -92,12 +85,6 @@ public class CommentsDto {
                     c.getContent(),
                     c.getCreatedAt()
             );
-        }
-
-        public static Res of(com.allinone.DevView.community.entity.Comments c, String username, Long viewerId, boolean isAdmin) {
-            Res r = of(c, username);
-            r.setMine(isAdmin || (viewerId != null && viewerId.equals(c.getUserId())));
-            return r;
         }
     }
 }

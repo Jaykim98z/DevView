@@ -1,9 +1,9 @@
 package com.allinone.DevView.community.controller;
 
 import com.allinone.DevView.community.dto.CombinedPostRequest;
+import com.allinone.DevView.community.dto.CommunityPostDetailDto;
 import com.allinone.DevView.community.dto.CommunityPostsDto;
 import com.allinone.DevView.community.service.CommunityService;
-import com.allinone.DevView.community.service.InterviewResultQueryService;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -29,7 +29,6 @@ public class CommunityViewController {
 
     private final CommunityService communityService;
     private final UserRepository userRepository;
-    private final InterviewResultQueryService interviewResultQueryService;
 
     @GetMapping
     public String getCommunityMain(Model model) {
@@ -40,32 +39,18 @@ public class CommunityViewController {
             log.error("Failed to load community posts", e);
             posts = Collections.emptyList();
         }
-        if (posts == null) {
-            posts = Collections.emptyList();
-        }
         model.addAttribute("posts", posts);
         return "community/community";
     }
 
     @GetMapping("/posts/{id}/detail")
     public String getPostDetail(@PathVariable Long id, Model model) {
-        CommunityPostsDto post = communityService.getPostDetail(id);
+        CommunityPostDetailDto post = communityService.getPostDetailDto(id);
         if (post == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다.");
         }
         model.addAttribute("post", post);
-
-        if (post.getInterviewResultId() != null) {
-            Object interviewResult = interviewResultQueryService.getDetail(post.getInterviewResultId());
-            model.addAttribute("interviewResult", interviewResult);
-        }
-
         return "community/post-detail";
-    }
-
-    @GetMapping("/posts/{id}")
-    public String getPostDetailFallback(@PathVariable Long id) {
-        return "redirect:/community/posts/" + id + "/detail";
     }
 
     @GetMapping("/posts/new")
@@ -74,15 +59,7 @@ public class CommunityViewController {
             return "redirect:/user/login?redirect=/community/posts/new";
         }
         model.addAttribute("form", CombinedPostRequest.empty());
-
-        String email = principal.getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자 정보를 찾을 수 없습니다."));
-        Long userId = user.getUserId();
-
-        model.addAttribute("resultOptions", interviewResultQueryService.findOptionsByUserId(userId));
-
-        return "community/post-write";
+        return "community/post-new";
     }
 
     @PostMapping("/posts/interview")
@@ -90,18 +67,10 @@ public class CommunityViewController {
     public String createCombinedByForm(
             @Valid @ModelAttribute("form") CombinedPostRequest form,
             BindingResult bindingResult,
-            Model model,
             Principal principal
     ) {
         if (bindingResult.hasErrors()) {
-            if (principal != null) {
-                String email = principal.getName();
-                User user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "사용자 정보를 찾을 수 없습니다."));
-                Long userId = user.getUserId();
-                model.addAttribute("resultOptions", interviewResultQueryService.findOptionsByUserId(userId));
-            }
-            return "community/post-write";
+            return "community/post-new";
         }
         if (principal == null) {
             return "redirect:/user/login?redirect=/community/posts/new";
@@ -114,21 +83,15 @@ public class CommunityViewController {
 
         Long userId = user.getUserId();
 
-        Long postId;
-        CombinedPostRequest.PostCategory category = form.getCategory();
-        if (category == null) {
-            category = (form.getInterviewShare() != null)
-                    ? CombinedPostRequest.PostCategory.INTERVIEW_SHARE
-                    : CombinedPostRequest.PostCategory.FREE;
-        }
+        Long interviewPostId = communityService.createInterviewSharePost(
+                form.getInterviewShare(), userId
+        );
 
-        if (category == CombinedPostRequest.PostCategory.INTERVIEW_SHARE) {
-            postId = communityService.createInterviewSharePost(form.getInterviewShare(), userId);
-        } else {
-            postId = communityService.createFreePost(form.getFreePost(), userId);
-        }
+        communityService.createPost(
+                form.getFreePost(), userId
+        );
 
-        return "redirect:/community/posts/" + postId + "/detail";
+        return "redirect:/community/posts/" + interviewPostId + "/detail";
     }
 
     @GetMapping("/posts/interview/new")

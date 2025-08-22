@@ -15,8 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 사용자 관련 비즈니스 로직 서비스
- * - LOCAL 사용자: 이메일/비밀번호 로그인
- * - GOOGLE 사용자: OAuth2 로그인 (provider_id 활용)
+ * 명확한 예외 처리와 일관된 응답을 제공
  */
 @Service
 @RequiredArgsConstructor
@@ -28,7 +27,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     /**
-     * 회원가입 처리 (LOCAL 사용자만)
+     * 회원가입 처리
      */
     public UserResponse register(RegisterRequest request) {
         log.info("회원가입 처리 시작: email={}", request.getEmail());
@@ -38,22 +37,20 @@ public class UserService {
         User user = createLocalUser(request);
         User savedUser = userRepository.save(user);
 
-        log.info("회원가입 완료: userId={}, email={}, provider={}",
-                savedUser.getUserId(), savedUser.getEmail(), savedUser.getProvider());
+        log.info("회원가입 완료: userId={}, email={}", savedUser.getUserId(), savedUser.getEmail());
         return UserResponse.from(savedUser);
     }
 
     /**
      * 로그인 처리 (Spring Security가 아닌 직접 호출용)
-     * LOCAL 사용자만 처리
      */
     public UserResponse login(LoginRequest request) {
         log.info("로그인 처리 시작: email={}", request.getEmail());
 
-        User user = findLocalUserByEmail(request.getEmail());
+        User user = findUserByEmail(request.getEmail());
         validateLoginCredentials(user, request.getPassword());
 
-        log.info("로그인 성공: userId={}, provider={}", user.getUserId(), user.getProvider());
+        log.info("로그인 성공: userId={}", user.getUserId());
         return UserResponse.from(user);
     }
 
@@ -71,29 +68,22 @@ public class UserService {
     }
 
     /**
-     * 이메일로 LOCAL 사용자 조회 (Spring Security 핸들러용)
+     * 이메일로 사용자 조회 (Spring Security 핸들러용)
      */
     @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
-        log.debug("이메일로 LOCAL 사용자 조회: email={}", email);
+        log.debug("이메일로 사용자 조회: email={}", email);
 
-        User user = findLocalUserByEmail(email);
+        User user = findUserByEmail(email);
         return UserResponse.from(user);
     }
 
     /**
-     * LOCAL provider 기준으로 이메일 사용 가능 여부 확인
-     * 로컬 회원가입 시에는 LOCAL 사용자만 확인 (GOOGLE 사용자는 무시)
+     * 이메일 사용 가능 여부 확인
      */
     @Transactional(readOnly = true)
     public boolean isEmailAvailable(String email) {
-        log.debug("LOCAL 이메일 중복 확인: email={}", email);
-
-        // LOCAL 사용자 중에서만 이메일 중복 확인
-        boolean available = !userRepository.existsByEmailAndProvider(email, "LOCAL");
-
-        log.debug("LOCAL 이메일 사용 가능 여부: email={}, available={}", email, available);
-        return available;
+        return !userRepository.existsByEmail(email);
     }
 
     /**
@@ -101,17 +91,87 @@ public class UserService {
      */
     @Transactional(readOnly = true)
     public boolean isUsernameAvailable(String username) {
-        log.debug("사용자명 중복 확인: username={}", username);
-
-        boolean available = !userRepository.existsByUsername(username);
-
-        log.debug("사용자명 사용 가능 여부: username={}, available={}", username, available);
-        return available;
+        return !userRepository.existsByUsername(username);
     }
 
     /**
+     * 회원탈퇴 처리 (하드 삭제)
+     * 관련된 모든 데이터를 순서대로 삭제한 후 사용자 삭제
+     */
+    @Transactional
+    public void deleteUser(Long userId) {
+        log.info("회원탈퇴 처리 시작: userId={}", userId);
+
+        // 1. 사용자 존재 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        try {
+            // 2. 관련 데이터 삭제 (User 포함, 모든 삭제를 Native Query로 처리)
+            userRepository.deleteUserRelatedData(userId);
+
+            log.info("회원탈퇴 완료: userId={}, email={}", userId, user.getEmail());
+
+        } catch (Exception e) {
+            log.error("회원탈퇴 처리 중 오류 발생: userId={}", userId, e);
+            throw new RuntimeException("회원탈퇴 처리 실패", e);
+        }
+    }
+
+    // === Private Helper Methods ===
+
+    private void validateRegisterRequest(RegisterRequest request) {
+        if (!request.isPasswordMatched()) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
+        }
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("이미 사용중인 사용자명입니다.");
+        }
+    }
+
+    private User createLocalUser(RegisterRequest request) {
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        return User.createLocalUser(
+                request.getUsername(),
+                request.getEmail(),
+                encodedPassword
+        );
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다: " + email));
+    }
+
+    private void validateLoginCredentials(User user, String rawPassword) {
+        if (user.getPassword() == null) {
+            throw new IllegalArgumentException("소셜 로그인을 이용해주세요.");
+        }
+
+        if (!user.isLocalUser()) {
+            throw new IllegalArgumentException("소셜 로그인 사용자입니다. 해당 방식으로 로그인해주세요.");
+        }
+
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+        }
+    }
+
+
+    // UserService.java에 추가할 메서드들
+
+    /**
      * 비밀번호 변경 처리
-     * LOCAL 사용자만 가능 (GOOGLE 사용자는 불가)
+     *
+     * @param userId 사용자 ID
+     * @param request 비밀번호 변경 요청 데이터
+     * @return UserResponse 변경된 사용자 정보
      */
     @Transactional
     public UserResponse changePassword(Long userId, PasswordChangeRequest request) {
@@ -126,8 +186,7 @@ public class UserService {
 
         // 3. OAuth2 사용자는 비밀번호 변경 불가
         if (user.isGoogleUser()) {
-            log.warn("OAuth2 사용자가 비밀번호 변경 시도: userId={}, email={}, provider={}",
-                    userId, user.getEmail(), user.getProvider());
+            log.warn("OAuth2 사용자가 비밀번호 변경 시도: userId={}, email={}", userId, user.getEmail());
             throw new IllegalArgumentException("소셜 로그인 사용자는 비밀번호를 변경할 수 없습니다.");
         }
 
@@ -148,89 +207,6 @@ public class UserService {
     }
 
     /**
-     * 회원탈퇴 처리 (하드 삭제)
-     * 관련된 모든 데이터를 순서대로 삭제한 후 사용자 삭제
-     */
-    @Transactional
-    public void deleteUser(Long userId) {
-        log.info("회원탈퇴 처리 시작: userId={}", userId);
-
-        // 1. 사용자 존재 확인
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
-
-        try {
-            // 2. 관련 데이터 삭제 (User 포함, 모든 삭제를 Native Query로 처리)
-            userRepository.deleteUserRelatedData(userId);
-
-            log.info("회원탈퇴 완료: userId={}, email={}, provider={}",
-                    userId, user.getEmail(), user.getProvider());
-
-        } catch (Exception e) {
-            log.error("회원탈퇴 처리 중 오류 발생: userId={}", userId, e);
-            throw new RuntimeException("회원탈퇴 처리 실패", e);
-        }
-    }
-
-    // =====================================================================
-    // Private Helper Methods
-    // =====================================================================
-
-
-    private void validateRegisterRequest(RegisterRequest request) {
-        if (!request.isPasswordMatched()) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-
-        // LOCAL 사용자 중에서만 이메일 중복 확인
-        if (userRepository.existsByEmailAndProvider(request.getEmail(), "LOCAL")) {
-            throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
-        }
-
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("이미 사용중인 사용자명입니다.");
-        }
-    }
-
-    /**
-     * LOCAL 사용자 생성
-     */
-    private User createLocalUser(RegisterRequest request) {
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
-
-        return User.createLocalUser(
-                request.getUsername(),
-                request.getEmail(),
-                encodedPassword
-        );
-    }
-
-    /**
-     * 이메일로 LOCAL 사용자만 찾기
-     */
-    private User findLocalUserByEmail(String email) {
-        return userRepository.findLocalUserByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("LOCAL 사용자를 찾을 수 없습니다: " + email));
-    }
-
-    /**
-     * 로그인 자격 증명 검증 (LOCAL 사용자용)
-     */
-    private void validateLoginCredentials(User user, String rawPassword) {
-        if (user.getPassword() == null) {
-            throw new IllegalArgumentException("소셜 로그인을 이용해주세요.");
-        }
-
-        if (!user.isLocalUser()) {
-            throw new IllegalArgumentException("소셜 로그인 사용자입니다. 해당 방식으로 로그인해주세요.");
-        }
-
-        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
-        }
-    }
-
-    /**
      * 비밀번호 변경 요청 검증
      */
     private void validatePasswordChangeRequest(PasswordChangeRequest request) {
@@ -244,4 +220,6 @@ public class UserService {
             throw new IllegalArgumentException("새 비밀번호는 현재 비밀번호와 달라야 합니다.");
         }
     }
+
+
 }
