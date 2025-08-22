@@ -34,9 +34,11 @@
     text-decoration: none;
 }
 
-.logo img {
-    height: 77px;
-    width: 267px;
+.header .logo img {
+    height: 77px !important;
+    width: 267px !important;
+    vertical-align: initial !important; /* main.css의 vertical-align: middle 차단 */
+    max-width: none !important; /* main.css의 max-width: 100% 차단 */
 }
 
 /* 메뉴 */
@@ -182,15 +184,16 @@
     gap: 12px;
 }
 
-.username {
-    color: #374B5F;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 8px 12px;
-    background-color: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #e9ecef;
-    white-space: nowrap;
+.header .user-info .username {
+    color: #374B5F !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    padding: 8px 12px !important;
+    background-color: #f8f9fa !important;
+    border-radius: 6px !important;
+    border: 1px solid #e9ecef !important;
+    white-space: nowrap !important;
+    margin-bottom: 0 !important; /* 랭킹 페이지 스타일 차단 */
 }
 
 .logout-btn {
@@ -284,9 +287,9 @@
         padding: 6px 12px;
     }
 
-    .username {
-        font-size: 13px;
-        padding: 6px 8px;
+    .header .user-info .username {
+        font-size: 13px !important;
+        padding: 6px 8px !important;
     }
 
     .logout-btn {
@@ -335,9 +338,9 @@
         padding: 5px 8px;
     }
 
-    .username {
-        font-size: 12px;
-        padding: 5px 6px;
+    .header .user-info .username {
+        font-size: 12px !important;
+        padding: 5px 6px !important;
         max-width: 100px;
         overflow: hidden;
         text-overflow: ellipsis;

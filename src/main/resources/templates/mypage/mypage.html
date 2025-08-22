@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <title>마이페이지</title>
 
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}">
+    <link rel="alternate icon" href="/img/favicon.svg" type="image/svg+xml">
+
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
@@ -145,6 +148,7 @@
                 </ul>
             </section>
 
+
             <!-- 스크랩 목록 -->
             <section class="scrap-section">
                 <div class="section-title">
@@ -153,23 +157,38 @@
                 </div>
 
                 <ul id="scrapList" class="scrap-grid">
-                    <li th:each="scrap : ${user.scraps}"
-                        th:with="isExternal=${#strings.startsWith(scrap.link,'http')}">
-                        <a th:href="@{${scrap.link}}"
-                           th:attr="target=${isExternal ? '_blank' : null},
-                  rel=${isExternal ? 'noopener noreferrer' : null}"
+                    <li th:each="scrap : ${user.scraps}">
+                        <a th:href="@{/community/posts/{id}/detail(id=${scrap.postId})}"
                            class="scrap-item">
+                            <div class="scrap-header">
+                                <div class="scrap-author">
+                                    <i class="fa-solid fa-user"></i>
+                                    <span th:text="${scrap.writerName}">작성자</span>
+                                </div>
+                                <div class="scrap-stats">
+                        <span class="like-count">
+                            <i class="fa-solid fa-heart"></i>
+                            <span th:text="${scrap.likes}">0</span>
+                        </span>
+                                </div>
+                            </div>
+
                             <h4 class="scrap-title" th:text="${scrap.title}">제목</h4>
-                            <p class="scrap-desc" th:text="${scrap.preview}">요약 내용</p>
-                            <div class="scrap-meta">
-                                <span class="writer">👤 <span th:text="${scrap.writerName}">작성자</span></span>
-                                <span class="likes">❤️ <span th:text="${scrap.likes}">0</span></span>
+                            <p class="scrap-preview" th:text="${scrap.preview}">미리보기 내용</p>
+
+                            <div class="scrap-footer">
+                                <span class="scrap-tag">스크랩됨</span>
                             </div>
                         </a>
                     </li>
-                    <!-- 스크랩이 비어있을 때 메시지 (옵션) -->
-                    <li th:if="${#lists.isEmpty(user.scraps)}" class="empty">
-                        아직 스크랩이 없습니다.
+
+                    <!-- 빈 상태 -->
+                    <li th:if="${#lists.isEmpty(user.scraps)}" class="empty-state">
+                        <div class="empty-content">
+                            <i class="fa-regular fa-bookmark"></i>
+                            <p>아직 스크랩한 글이 없습니다</p>
+                            <a href="/community" class="empty-link">커뮤니티 둘러보기</a>
+                        </div>
                     </li>
                 </ul>
             </section>
