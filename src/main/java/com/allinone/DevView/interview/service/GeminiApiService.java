@@ -43,15 +43,21 @@ public class GeminiApiService implements ExternalAiApiService {
     public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount, InterviewType interviewType, String selfIntroduction) {
         String prompt = String.format(
                 "You are an interviewer. Please generate exactly %d distinct '%s' questions for a %s position targeting a %s developer. " +
-                        (selfIntroduction != null && !selfIntroduction.trim().isEmpty() ?
-                                "The candidate has this background: \"" + selfIntroduction + "\". Please consider their experience when generating questions. " : "") +
-                        "CRITICAL: Your response must only contain the questions. Each question must be on a new line. " +
+                        (selfIntroduction != null && !selfIntroduction.trim().isEmpty()
+                                ? (interviewType == InterviewType.TECHNICAL
+                                ? "The candidate has this background: \"%s\". Use this background only to adjust difficulty or phrasing of questions, but never change the main topic. "
+                                : "The candidate has this background: \"%s\". Actively use this background to create realistic and relevant questions in addition to the job position.")
+                                : ""
+                        ) +
+                        "CRITICAL: For TECHNICAL interviews, all questions must strictly relate to the %s position and %s developer role. " +
+                        "For PRACTICAL, BEHAVIORAL, and COMPREHENSIVE interviews, questions should combine the %s role with the candidate’s background. " +
+                        "Your response must only contain the questions. Each question must be on a new line. " +
                         "Do NOT include any numbers, bullet points, markdown formatting, or any extra text. " +
-                        "For example, a valid response for 2 questions would be:\n" +
-                        "What is the difference between a class and an object?\n" +
-                        "Explain the concept of RESTful APIs.\n\n" +
                         "Please generate the questions in Korean.",
-                questionCount, interviewType.toString(), jobPosition, careerLevel
+                questionCount, interviewType.toString(), jobPosition, careerLevel,
+                selfIntroduction != null ? selfIntroduction : "",   // 첫 번째 selfIntroduction
+                selfIntroduction != null ? selfIntroduction : "",   // 두 번째 selfIntroduction
+                jobPosition, careerLevel, careerLevel
         );
 
         String rawResponse = generateContent(prompt);
