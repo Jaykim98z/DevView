@@ -50,11 +50,16 @@ public class CommunityService {
         if (isBlank(post.getTitle())) throw new IllegalArgumentException("제목을 입력해주세요.");
         if (post.getInterviewResultId() == null) throw new IllegalArgumentException("인터뷰 결과 ID가 필요합니다.");
 
+        InterviewResult r = interviewResultRepository.findById(post.getInterviewResultId())
+                .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과를 찾을 수 없습니다. id=" + post.getInterviewResultId()));
+
         if (isBlank(post.getLevel())) {
-            InterviewResult r = interviewResultRepository.findById(post.getInterviewResultId())
-                    .orElseThrow(() -> new IllegalArgumentException("인터뷰 결과를 찾을 수 없습니다. id=" + post.getInterviewResultId()));
-            String mapped = extractCareerLevelToPostLevel(r);
-            if (!isBlank(mapped)) post.setLevel(mapped);
+            String mappedLevel = extractCareerLevelToPostLevel(r);
+            if (!isBlank(mappedLevel)) post.setLevel(mappedLevel);
+        }
+        if (isBlank(post.getCategory())) {
+            String mappedCategory = extractJobPositionToCategory(r);
+            if (!isBlank(mappedCategory)) post.setCategory(mappedCategory);
         }
 
         return postsRepository.save(post);
@@ -76,13 +81,15 @@ public class CommunityService {
         post.setTitle(dto.getTitle());
         post.setContent(nvl(dto.getContent()));
         post.setInterviewResultId(dto.getInterviewResultId());
-
         post.setScore(r.getTotalScore());
         post.setGrade(r.getGrade());
         post.setInterviewFeedback(r.getFeedback());
 
-        String mapped = extractCareerLevelToPostLevel(r);
-        if (!isBlank(mapped)) post.setLevel(mapped);
+        String mappedCategory = extractJobPositionToCategory(r);
+        if (!isBlank(mappedCategory)) post.setCategory(mappedCategory);
+
+        String mappedLevel = extractCareerLevelToPostLevel(r);
+        if (!isBlank(mappedLevel)) post.setLevel(mappedLevel);
 
         postsRepository.save(post);
         return post.getPostId();
@@ -114,8 +121,11 @@ public class CommunityService {
             post.setGrade(r.getGrade());
             post.setInterviewFeedback(r.getFeedback());
 
-            String mapped = extractCareerLevelToPostLevel(r);
-            if (!isBlank(mapped)) post.setLevel(mapped);
+            String mappedCategory = extractJobPositionToCategory(r);
+            if (!isBlank(mappedCategory)) post.setCategory(mappedCategory);
+
+            String mappedLevel = extractCareerLevelToPostLevel(r);
+            if (!isBlank(mappedLevel)) post.setLevel(mappedLevel);
         }
         return postsRepository.save(post);
     }
@@ -224,10 +234,37 @@ public class CommunityService {
         String s = careerLevel.toString().trim();
         if (isBlank(s)) return null;
         String key = s.toUpperCase();
-        if ("MID_LEVEL".equals(key)) return "MID";
+        if ("MID".equals(key) || "MIDLEVEL".equals(key)) return "MID_LEVEL";
+        if ("MID_LEVEL".equals(key)) return "MID_LEVEL";
         if ("JUNIOR".equals(key)) return "JUNIOR";
-        if ("MID".equals(key)) return "MID";
         if ("SENIOR".equals(key)) return "SENIOR";
         return key;
+    }
+
+    private String extractJobPositionToCategory(InterviewResult r) {
+        if (r == null) return null;
+        Interview iv = r.getInterview();
+        if (iv == null) return null;
+        Object job = iv.getJobPosition();
+        return normalizeJobCategory(job);
+    }
+
+    private String normalizeJobCategory(Object jobPosition) {
+        if (jobPosition == null) return null;
+        String s = jobPosition.toString().trim();
+        if (isBlank(s)) return null;
+        String k = s.toUpperCase().replace('/', '_');
+        if ("백엔드".equalsIgnoreCase(s)) return "BACKEND";
+        if ("프론트엔드".equalsIgnoreCase(s)) return "FRONTEND";
+        if ("풀스택".equalsIgnoreCase(s)) return "FULLSTACK";
+        if ("데브옵스".equalsIgnoreCase(s)) return "DEVOPS";
+        if ("DATA_AI".equals(k) || "DATA".equals(k) || "AI".equals(k)) return "DATA_AI";
+        switch (k) {
+            case "BACKEND":   return "BACKEND";
+            case "FRONTEND":  return "FRONTEND";
+            case "FULLSTACK": return "FULLSTACK";
+            case "DEVOPS":    return "DEVOPS";
+            default:          return "DATA_AI".equals(k) ? "DATA_AI" : k;
+        }
     }
 }

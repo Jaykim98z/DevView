@@ -27,17 +27,18 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!raw) return "";
     const s = String(raw).trim().toLowerCase();
     const map = {
-      "백엔드": "BACKEND",
-      "backend": "BACKEND",
-      "프론트엔드": "FRONTEND",
-      "frontend": "FRONTEND",
-      "풀스택": "FULLSTACK",
-      "fullstack": "FULLSTACK",
-      "devops": "DEVOPS",
-      "데브옵스": "DEVOPS",
-      "data/ai": "DATA_AI",
-      "data": "DATA",
-      "ai": "AI"
+       "백엔드": "BACKEND",
+       "backend": "BACKEND",
+       "프론트엔드": "FRONTEND",
+       "frontend": "FRONTEND",
+       "풀스택": "FULLSTACK",
+       "fullstack": "FULLSTACK",
+       "full stack": "FULLSTACK",
+       "devops": "DEVOPS",
+       "데브옵스": "DEVOPS",
+       "data/ai": "DATA_AI",
+       "data": "DATA_AI",
+       "ai": "DATA_AI"
     };
     return map[s] ?? raw.toUpperCase();
   }
@@ -83,6 +84,8 @@ document.addEventListener("DOMContentLoaded", function () {
     loadPosts();
     [...categoryFilters.querySelectorAll("button")].forEach(b => b.classList.remove("active"));
     if (currentCategory) btn.classList.add("active");
+    else categoryFilters.querySelector('button[data-category=""]')?.classList.add("active");
+
   });
 
   levelFilters?.addEventListener("click", (e) => {
@@ -98,6 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadPosts();
     [...levelFilters.querySelectorAll("button")].forEach(b => b.classList.remove("active"));
     if (currentLevel) btn.classList.add("active");
+    else levelFilters.querySelector('button[data-level=""]')?.classList.add("active");
   });
 
   if (IS_DETAIL) {
@@ -127,12 +131,14 @@ document.addEventListener("DOMContentLoaded", function () {
       const cat = normalizeCategory(currentCategory);
       params.set("category", cat);
       params.set("jobCategory", cat);
+      params.set("job", cat);
     }
 
     if (currentLevel) {
       const lvl = normalizeLevel(currentLevel);
       params.set("level", lvl);
       params.set("careerLevel", lvl);
+      params.set("positionLevel", lvl);
     }
 
     const url = `/api/community/posts?${params.toString()}`;
