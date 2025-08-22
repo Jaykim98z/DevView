@@ -34,10 +34,19 @@ public class CommunityController {
             @RequestParam(required = false) String level,
             @RequestParam(required = false) String careerLevel,
             @RequestParam(required = false) String job,
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, name = "qTitle") String qTitle
     ) {
         String catStr = normalizeCategory(firstNonBlank(category, jobCategory));
         String lvlStr = normalizeLevel(firstNonBlank(level, careerLevel));
+
+        if (qTitle != null && !qTitle.isBlank()) {
+            JobPosition catEnumForTitle = toJobPosition(catStr);
+            CareerLevel lvlEnumForTitle = toCareerLevel(lvlStr);
+            return ResponseEntity.ok(
+                    communityQueryService.getPosts(pageable, catEnumForTitle, lvlEnumForTitle, qTitle)
+            );
+        }
 
         boolean useSearch = (job != null && !job.isBlank()) || (keyword != null && !keyword.isBlank());
         if (useSearch) {
