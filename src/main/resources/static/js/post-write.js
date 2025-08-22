@@ -6,7 +6,6 @@
   const isBlank = (v) => v == null || String(v).trim() === '';
   const toNum   = (v) => Number(v ?? NaN);
 
-  // ✅ CSRF 토큰 초기화
   let csrfToken = null;
   let csrfHeader = null;
 
@@ -22,7 +21,6 @@
     }
   }
 
-  // ✅ 보안 헤더를 포함한 fetch 함수
   function buildSecureHeaders(includeContentType = true) {
     const headers = {
       'X-Requested-With': 'XMLHttpRequest',
@@ -33,7 +31,6 @@
       headers['Content-Type'] = 'application/json';
     }
 
-    // CSRF 토큰 헤더 추가
     if (csrfToken && csrfHeader) {
       headers[csrfHeader] = csrfToken;
     }
@@ -126,34 +123,60 @@
   function fillFormFromResult(data) {
     if (!data || typeof data !== 'object') return;
     const el = $els();
-    setIfBlank(el.resultId, data.resultId ?? data.id);
+
     if (el.title && isBlank(el.title.value)) {
       const g = data.grade ?? '';
       const s = data.totalScore ?? '';
       const base = `[면접결과] ${g}${g ? ' ' : ''}${s !== '' ? `${s}점` : ''}`.trim();
       if (base) el.title.value = base;
     }
+
     if (el.memo && isBlank(el.memo.value)) {
       el.memo.value = '';
       updateMemoCounter(el);
+    }
+
+    const targetId = data.resultId ?? data.id;
+    if (el.resultId && !isBlank(targetId)) {
+      const opt = el.resultId.querySelector(`option[value="${String(targetId)}"]`);
+      if (opt) {
+        el.resultId.value = String(targetId);
+      } else {
+        console.warn('URL/프리필 ID가 내 목록에 없어 선택하지 않습니다:', targetId);
+      }
     }
   }
 
   (async function bootPrefill() {
     try {
-      // 페이지 로드 시 CSRF 토큰 초기화
       initCsrfToken();
 
       const params = new URLSearchParams(location.search);
       const rid = params.get('interviewResultId');
+
       let data = null;
-      if (rid && !isBlank(rid)) data = await fetchResultById(rid);
-      else data = await fetchLatestResult();
+      if (rid && !isBlank(rid)) {
+        data = await fetchResultById(rid).catch(() => null);
+      } else {
+        data = await fetchLatestResult().catch(() => null);
+      }
       fillFormFromResult(data);
     } catch (e) {
       console.error('프리필 오류:', e);
     }
   })();
+
+  document.addEventListener('change', function(e) {
+    const el = $els();
+    if (e.target && e.target.id === 'interviewResultId') {
+      if (el.title && isBlank(el.title.value)) {
+        const selectedText = el.resultId.options[el.resultId.selectedIndex]?.text || '';
+        if (!isBlank(selectedText)) {
+          el.title.value = `[면접결과] ${selectedText}`;
+        }
+      }
+    }
+  });
 
   function buildPayload() {
     const el = $els();
@@ -168,47 +191,32 @@
       throw new Error('면접 결과를 선택해주세요.');
     }
 
-    return { interviewResultId, title, content };
+    return {
+      category: 'INTERVIEW_SHARE',
+      interviewShare: {
+        interviewResultId,
+        title,
+        content
+      }
+    };
   }
 
   document.addEventListener('DOMContentLoaded', function() {
     const el = $els();
 
-    // 글자 수 카운터
     if (el.memo) {
       el.memo.addEventListener('input', () => updateMemoCounter(el));
       updateMemoCounter(el);
     }
 
-    // 폼 제출
-    if (el.form) {
-      el.form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        try {
-          const payload = buildPayload();
-
-          if (el.submit) el.submit.disabled = true;
-
-          // ✅ 보안 헤더를 포함한 글 작성 요청
-          const result = await fetchJson(API_COMPOSE, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
-
-          if (result && result.postId) {
-            alert('글이 성공적으로 작성되었습니다.');
-            window.location.href = `/community/posts/${result.postId}/detail`;
-          } else {
-            throw new Error('글 작성에 실패했습니다.');
-          }
-        } catch (err) {
-          console.error('글 작성 오류:', err);
-          alert(err.message || '글 작성 중 오류가 발생했습니다.');
-        } finally {
-          if (el.submit) el.submit.disabled = false;
+    if (el.form && el.resultId) {
+      el.form.addEventListener('submit', function(e) {
+        if (isBlank(el.resultId.value)) {
+          e.preventDefault();
+          alert('면접 결과를 선택해주세요.');
         }
-      });
+      }, { capture: true });
     }
+
   });
 })();

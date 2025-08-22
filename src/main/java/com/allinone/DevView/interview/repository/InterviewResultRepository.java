@@ -24,4 +24,7 @@ public interface InterviewResultRepository extends JpaRepository<InterviewResult
     Optional<InterviewResult> findTopByInterview_User_UserIdOrderByInterview_CreatedAtDesc(Long userId);
 
     Optional<InterviewResult> findByIdAndInterview_User_UserId(Long resultId, Long userId);
+
+    boolean existsByIdAndInterview_User_UserId(Long id, Long userId);
+
 }
