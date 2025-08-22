@@ -4,6 +4,7 @@
   const API_LATEST = '/api/community/interview-results/latest';
   const API_BY_ID  = (id) => `/api/community/interview-results/${encodeURIComponent(id)}`;
   const API_COMPOSE = '/api/community/posts/compose';
+  const API_MINE = '/api/community/interview-results/mine';
 
   const isBlank = (v) => v == null || String(v).trim() === '';
   const toNum   = (v) => Number(v ?? NaN);
@@ -66,6 +67,7 @@
 
   async function fetchResultById(resultId)  { return fetchJson(API_BY_ID(resultId)); }
   async function fetchLatestResult()        { return fetchJson(API_LATEST); }
+  async function fetchMineList()            { return fetchJson(API_MINE); }
 
   function updateMemoCounter(el) {
     if (!el.memo || !el.memoCounter) return;
@@ -77,10 +79,51 @@
     if (isBlank(input.value) && !isBlank(val)) input.value = String(val);
   }
 
+   function resultLabel(data) {
+    if (!data || typeof data !== 'object') return '선택';
+    const id = data.resultId ?? data.id ?? '';
+    return id !== '' ? `#${id}` : '선택';
+  }
+
+  function ensureOption(selectEl, value, label) {
+    if (!selectEl) return;
+    const exists = Array.from(selectEl.options).some(o => o.value == String(value));
+    if (!exists) {
+      const opt = document.createElement('option');
+      opt.value = String(value);
+      opt.textContent = String(label ?? value);
+      selectEl.appendChild(opt);
+    }
+    selectEl.value = String(value);
+  }
+
+  function fillSelectWithMine(list) {
+    const el = $els();
+    if (!el.resultId || !Array.isArray(list)) return;
+    el.resultId.innerHTML = '';
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = '인터뷰 결과';
+    el.resultId.appendChild(ph);
+    list.forEach(item => {
+      const id = item.resultId ?? item.id;
+      if (id == null) return;
+      const opt = document.createElement('option');
+      opt.value = String(id);
+      opt.textContent = resultLabel(item);
+      el.resultId.appendChild(opt);
+    });
+  }
+
   function fillFormFromResult(data) {
     if (!data || typeof data !== 'object') return;
     const el = $els();
-    setIfBlank(el.resultId, data.resultId ?? data.id);
+
+    const rid = data.resultId ?? data.id;
+    if (el.resultId && rid != null && !Number.isNaN(Number(rid))) {
+      ensureOption(el.resultId, rid, resultLabel(data));
+    }
+
     if (el.title && isBlank(el.title.value)) {
       const g = data.grade ?? '';
       const s = data.totalScore ?? '';
@@ -98,6 +141,20 @@
       initCsrfToken();
       const params = new URLSearchParams(location.search);
       const rid = params.get('interviewResultId');
+
+      let mine = null;
+      try { mine = await fetchMineList(); } catch {}
+      if (Array.isArray(mine) && mine.length > 0) {
+        fillSelectWithMine(mine);
+        if (rid) {
+          const found = mine.find(m => String(m.resultId ?? m.id) === String(rid));
+          if (found) fillFormFromResult(found);
+        } else {
+          fillFormFromResult(mine[0]);
+        }
+        return;
+      }
+
       const data = rid && !isBlank(rid) ? await fetchResultById(rid) : await fetchLatestResult();
       fillFormFromResult(data);
     } catch (e) {
