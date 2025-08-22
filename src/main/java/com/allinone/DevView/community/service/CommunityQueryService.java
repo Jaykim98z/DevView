@@ -41,7 +41,6 @@ public class CommunityQueryService {
         return postsRepository.findAllByDeletedFalse(safe).map(this::toPostListDto);
     }
 
-    // 문자열 파라미터도 허용(호환용)
     @Transactional(readOnly = true)
     public Page<PostListDto> getPosts(Pageable pageable, String category, String level) {
         JobPosition catEnum = toJobPosition(category);
@@ -49,7 +48,6 @@ public class CommunityQueryService {
         return getPosts(pageable, catEnum, lvlEnum);
     }
 
-    // ★ 여기서 Enum → String으로 맞춰 비교
     @Transactional(readOnly = true)
     public Page<PostListDto> getPosts(Pageable pageable, JobPosition category, CareerLevel level) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, POST_SORT_WHITELIST);
@@ -72,7 +70,6 @@ public class CommunityQueryService {
         return postsRepository.findAll(spec, safe).map(this::toPostListDto);
     }
 
-    // job+keyword 검색에서도 String 비교만 사용
     @Transactional(readOnly = true)
     public Page<PostListDto> getPostsByJob(Pageable pageable, String job, String category, String level, String keyword) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, POST_SORT_WHITELIST);
@@ -223,5 +220,30 @@ public class CommunityQueryService {
         } catch (IllegalArgumentException e) {
             return null;
         }
+    }
+
+    private Specification<CommunityPosts> titleContains(String keyword) {
+        if (!StringUtils.hasText(keyword)) return null;
+        String like = "%" + keyword.trim().toLowerCase() + "%";
+        return (root, cq, cb) -> cb.like(cb.lower(root.get("title")), like);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<PostListDto> getPosts(Pageable pageable, JobPosition category, CareerLevel level, String qTitle) {
+        Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, POST_SORT_WHITELIST);
+        Specification<CommunityPosts> spec = (root, q, cb) -> cb.isFalse(root.get("deleted"));
+
+        if (category != null) {
+            String cat = category.name();
+            spec = spec.and((r, q2, cb2) -> cb2.equal(cb2.upper(r.get("category")), cat));
+        }
+        if (level != null) {
+            String lvl = level.name();
+            spec = spec.and((r, q2, cb2) -> cb2.equal(cb2.upper(r.get("level")), lvl));
+        }
+        if (StringUtils.hasText(qTitle)) {
+            spec = spec.and(titleContains(qTitle));
+        }
+        return postsRepository.findAll(spec, safe).map(this::toPostListDto);
     }
 }
