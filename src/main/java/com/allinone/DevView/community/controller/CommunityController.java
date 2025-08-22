@@ -27,14 +27,18 @@ public class CommunityController {
             @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String level
+            @RequestParam(required = false) String jobCategory,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) String careerLevel
     ) {
-        boolean noFilter = (category == null || category.isBlank() || "전체".equals(category))
-                && (level == null || level.isBlank() || "전체".equals(level));
+        String cat = normalizeCategory(firstNonBlank(category, jobCategory));
+        String lvl = normalizeLevel(firstNonBlank(level, careerLevel));
+
+        boolean noFilter = (cat == null || "전체".equals(cat)) && (lvl == null || "전체".equals(lvl));
         if (noFilter) {
             return ResponseEntity.ok(communityQueryService.getPosts(pageable));
         }
-        return ResponseEntity.ok(communityQueryService.getPosts(pageable, category, level));
+        return ResponseEntity.ok(communityQueryService.getPosts(pageable, cat, lvl));
     }
 
     @GetMapping("/posts/dto")
@@ -42,13 +46,17 @@ public class CommunityController {
             @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String level
+            @RequestParam(required = false) String jobCategory,
+            @RequestParam(required = false) String level,
+            @RequestParam(required = false) String careerLevel
     ) {
-        boolean noFilter = (category == null || category.isBlank() || "전체".equals(category))
-                && (level == null || level.isBlank() || "전체".equals(level));
+        String cat = normalizeCategory(firstNonBlank(category, jobCategory));
+        String lvl = normalizeLevel(firstNonBlank(level, careerLevel));
+
+        boolean noFilter = (cat == null || "전체".equals(cat)) && (lvl == null || "전체".equals(lvl));
         Page<PostListDto> page = noFilter
                 ? communityQueryService.getPosts(pageable)
-                : communityQueryService.getPosts(pageable, category, level);
+                : communityQueryService.getPosts(pageable, cat, lvl);
         Page<CommunityPostsDto> converted = page.map(this::toCommunityPostsDto);
         return ResponseEntity.ok(converted);
     }
@@ -100,7 +108,6 @@ public class CommunityController {
         communityService.removeLike(userId, postId);
         return ResponseEntity.noContent().build();
     }
-
 
     @PostMapping("/posts/{postId}/scraps")
     public Scraps addScrap(@PathVariable Long postId, @RequestBody Scraps scrap) {
@@ -170,4 +177,42 @@ public class CommunityController {
         return dst;
     }
 
+    private static String firstNonBlank(String... v) {
+        if (v == null) return null;
+        for (String s : v) {
+            if (s != null) {
+                String t = s.trim();
+                if (!t.isEmpty()) return t;
+            }
+        }
+        return null;
+    }
+
+    private static String normalizeCategory(String s) {
+        if (s == null) return null;
+        String k = s.trim().toLowerCase();
+        return switch (k) {
+            case "백엔드","backend" -> "BACKEND";
+            case "프론트엔드","frontend" -> "FRONTEND";
+            case "풀스택","fullstack" -> "FULLSTACK";
+            case "devops","데브옵스" -> "DEVOPS";
+            case "data/ai" -> "DATA_AI";
+            case "data" -> "DATA";
+            case "ai" -> "AI";
+            case "전체" -> "전체";
+            default -> s.toUpperCase();
+        };
+    }
+
+    private static String normalizeLevel(String s) {
+        if (s == null) return null;
+        String k = s.trim().toLowerCase();
+        return switch (k) {
+            case "주니어" -> "JUNIOR";
+            case "미드","미드레벨" -> "MID";
+            case "시니어" -> "SENIOR";
+            case "전체" -> "전체";
+            default -> s.toUpperCase();
+        };
+    }
 }

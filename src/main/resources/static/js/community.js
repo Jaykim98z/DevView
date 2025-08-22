@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentPage = 0;
   let pageSize = 12;
   let currentSort = "createdAt,desc";
-  let currentKeyword = ""; // 서버가 아직 검색 파라미터를 받지 않으면 이 값은 미사용
+  let currentKeyword = "";
   let currentCategory = "";
   let currentLevel = "";
 
@@ -22,6 +22,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
   const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+  function normalizeCategory(raw) {
+    if (!raw) return "";
+    const s = String(raw).trim().toLowerCase();
+    const map = {
+      "백엔드": "BACKEND",
+      "backend": "BACKEND",
+      "프론트엔드": "FRONTEND",
+      "frontend": "FRONTEND",
+      "풀스택": "FULLSTACK",
+      "fullstack": "FULLSTACK",
+      "devops": "DEVOPS",
+      "데브옵스": "DEVOPS",
+      "data/ai": "DATA_AI",
+      "data": "DATA",
+      "ai": "AI"
+    };
+    return map[s] ?? raw.toUpperCase();
+  }
+
+  function normalizeLevel(raw) {
+    if (!raw) return "";
+    const s = String(raw).trim().toLowerCase();
+    const map = { "주니어": "JUNIOR", "미드": "MID", "미드레벨": "MID", "시니어": "SENIOR" };
+    return map[s] ?? raw.toUpperCase();
+  }
 
   if (!IS_DETAIL) loadPosts();
 
@@ -41,28 +67,37 @@ document.addEventListener("DOMContentLoaded", function () {
     e.preventDefault();
     currentKeyword = keywordInput?.value?.trim() || "";
     currentPage = 0;
-    // 서버에서 검색 미지원이면 주석 처리하거나 서버 구현 후 사용
     loadPosts();
   });
 
   categoryFilters?.addEventListener("click", (e) => {
-    if (e.target instanceof HTMLButtonElement) {
-      currentCategory = e.target.dataset.category ?? "";
-      currentPage = 0;
-      loadPosts();
-      [...categoryFilters.querySelectorAll("button")].forEach(b => b.classList.remove("active"));
-      e.target.classList.add("active");
+    const btn = (e.target instanceof HTMLButtonElement) ? e.target : e.target.closest("button");
+    if (!btn) return;
+    const value = btn.dataset.category ?? "";
+    if (currentCategory === value) {
+      currentCategory = "";
+    } else {
+      currentCategory = value;
     }
+    currentPage = 0;
+    loadPosts();
+    [...categoryFilters.querySelectorAll("button")].forEach(b => b.classList.remove("active"));
+    if (currentCategory) btn.classList.add("active");
   });
 
   levelFilters?.addEventListener("click", (e) => {
-    if (e.target instanceof HTMLButtonElement) {
-      currentLevel = e.target.dataset.level ?? "";
-      currentPage = 0;
-      loadPosts();
-      [...levelFilters.querySelectorAll("button")].forEach(b => b.classList.remove("active"));
-      e.target.classList.add("active");
+    const btn = (e.target instanceof HTMLButtonElement) ? e.target : e.target.closest("button");
+    if (!btn) return;
+    const value = btn.dataset.level ?? "";
+    if (currentLevel === value) {
+      currentLevel = "";
+    } else {
+      currentLevel = value;
     }
+    currentPage = 0;
+    loadPosts();
+    [...levelFilters.querySelectorAll("button")].forEach(b => b.classList.remove("active"));
+    if (currentLevel) btn.classList.add("active");
   });
 
   if (IS_DETAIL) {
@@ -70,7 +105,6 @@ document.addEventListener("DOMContentLoaded", function () {
       const likeBtn  = e.target.closest("[data-like-btn], .btn-like, .like-btn");
       const scrapBtn = e.target.closest("[data-scrap-btn], .btn-scrap, .bookmark-btn");
       if (!likeBtn && !scrapBtn) return;
-
       if (likeBtn)  await handleLike(likeBtn);
       if (scrapBtn) await handleScrap(scrapBtn);
     });
@@ -84,11 +118,22 @@ document.addEventListener("DOMContentLoaded", function () {
     params.set("size", String(pageSize));
     if (currentSort) params.set("sort", currentSort);
 
-    // 검색 파라미터는 서버에서 지원할 때만 아래 라인 활성화
-    // if (currentKeyword) params.set("keyword", currentKeyword);
+    if (currentKeyword !== "") {
+      params.set("keyword", currentKeyword);
+      params.set("q", currentKeyword);
+    }
 
-    if (currentCategory) params.set("category", currentCategory);
-    if (currentLevel) params.set("level", currentLevel);
+    if (currentCategory) {
+      const cat = normalizeCategory(currentCategory);
+      params.set("category", cat);
+      params.set("jobCategory", cat);
+    }
+
+    if (currentLevel) {
+      const lvl = normalizeLevel(currentLevel);
+      params.set("level", lvl);
+      params.set("careerLevel", lvl);
+    }
 
     const url = `/api/community/posts?${params.toString()}`;
 
@@ -117,7 +162,6 @@ document.addEventListener("DOMContentLoaded", function () {
     cardListEl.innerHTML = items.map(p => {
       const postId     = p.postId ?? p.id;
       const writerName = p.writerName ?? p.username ?? "익명";
-      const levelVal   = p.level ?? "";
       const techTag    = p.techTag ?? "";
       const createdAt  = formatDate(p.createdAt);
 
@@ -129,8 +173,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const hasScore = !(scoreRaw === null || scoreRaw === undefined);
       const scoreText = hasScore ? `${scoreRaw}점` : "-";
 
-      const gradeRaw = (p.grade ?? p.gradeLabel ?? p.gradeName);
-      const gradeText = gradeRaw ? escapeHtml(String(gradeRaw)) : "-";
+      const gradeFromInterview = levelLabel(p.level);
+      const gradeFromEnum = gradeLabel(p.grade ?? p.writerGrade ?? p.gradeLabel ?? p.gradeName);
+      const displayGrade = gradeFromInterview || gradeFromEnum || "";
 
       const likeStat = `
         <span class="icon-stat is-readonly" aria-label="좋아요 수">
@@ -141,20 +186,27 @@ document.addEventListener("DOMContentLoaded", function () {
           <i class="fa fa-bookmark"></i> <span class="count" data-scrap-count="${postId}">${scrapCount}</span>
         </span>`;
 
+      const gradeBadge = displayGrade ? `<span class="user-meta">${escapeHtml(displayGrade)}</span>` : "";
+      const techBadge  = techTag ? `<span class="user-meta">${escapeHtml(techTag)}</span>` : "";
+
+      const scoreGrade = gradeFromEnum || gradeFromInterview || "";
+      const scoreLine  = scoreGrade ? `${scoreText} · ${scoreGrade}` : `${scoreText}`;
+
       return `
         <div class="post-card" data-post-id="${postId}">
           <div class="user-info">
             <img src="/img/profile-default.svg" alt="프로필" class="profile-img" />
             <div>
               <strong>${escapeHtml(writerName)}</strong>
-              <span class="user-meta">${escapeHtml(techTag)} · ${escapeHtml(levelVal)}</span>
+              ${gradeBadge}
+              ${techBadge}
             </div>
           </div>
 
           <h3 class="post-title">${escapeHtml(p.title ?? "")}</h3>
           <p class="post-summary">${escapeHtml(p.summary ?? "")}</p>
 
-          <div class="post-score">${scoreText} · ${gradeText}</div>
+          <div class="post-score">${scoreLine}</div>
 
           <div class="post-meta">
             ${likeStat}
@@ -215,7 +267,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const postId = btn.dataset.postId || document.querySelector("[data-post-id]")?.dataset.postId;
     if (!postId) return alert("잘못된 요청입니다.");
 
-    // 상세 페이지에서만 사용. 컨트롤러 스펙에 맞춰 userId 필요
     const userId = document.body.dataset.userId;
     if (!userId) return alert("로그인이 필요합니다.");
 
@@ -235,7 +286,6 @@ document.addEventListener("DOMContentLoaded", function () {
         document.querySelector(`[data-like-count="${postId}"]`) ||
         btn.querySelector(".count") || btn.querySelector("span");
       if (countEl) {
-        // 서버가 새 count를 안 보내므로 프론트에서 증감 처리
         const cur = parseInt(countEl.textContent || "0", 10);
         countEl.textContent = String(btn.classList.contains("active") ? cur + 1 : Math.max(0, cur - 1));
       }
@@ -284,6 +334,28 @@ document.addEventListener("DOMContentLoaded", function () {
     } catch {
       return String(dt);
     }
+  }
+
+  function levelLabel(raw) {
+    if (raw == null) return "";
+    const s = String(raw).trim();
+    if (!s) return "";
+    const key = s.toUpperCase();
+    if (key === "JUNIOR" || s === "주니어") return "JUNIOR";
+    if (key === "MID" || key === "MIDDLE" || s === "미드레벨" || s === "미드") return "MID";
+    if (key === "SENIOR" || s === "시니어") return "SENIOR";
+    return "";
+  }
+
+  function gradeLabel(raw) {
+    if (!raw && raw !== 0) return "";
+    const s = String(raw).trim();
+    if (!s) return "";
+    const key = s.toUpperCase();
+    if (key === "JUNIOR" || s === "주니어") return "JUNIOR";
+    if (key === "MID" || key === "MIDDLE" || s === "미드레벨" || s === "미드") return "MID";
+    if (key === "SENIOR" || s === "시니어") return "SENIOR";
+    return "";
   }
 
   function escapeHtml(str) {

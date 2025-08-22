@@ -9,6 +9,7 @@ import com.allinone.DevView.community.repository.CommentsRepository;
 import com.allinone.DevView.community.repository.CommunityPostsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -21,7 +22,6 @@ public class CommunityQueryService {
 
     private final CommunityPostsRepository postsRepository;
     private final CommentsRepository commentsRepository;
-    private final CommunityPostsRepository communityPostsRepository;
 
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_SIZE = 20;
@@ -34,44 +34,34 @@ public class CommunityQueryService {
             "createdAt"
     );
 
-    private static final Map<String, String> CATEGORY_MAP = Map.ofEntries(
-            Map.entry("백엔드", "BACKEND"),
-            Map.entry("프론트엔드", "FRONTEND"),
-            Map.entry("풀스택", "FULLSTACK"),
-            Map.entry("devops", "DEVOPS"),
-            Map.entry("devops ", "DEVOPS"),
-            Map.entry("data/ai", "DATA_AI"),
-            Map.entry("dataai", "DATA_AI"),
-            Map.entry("data ai", "DATA_AI")
-    );
-
-    private static final Map<String, String> LEVEL_MAP = Map.ofEntries(
-            Map.entry("주니어", "JUNIOR"),
-            Map.entry("미드레벨", "MID"),
-            Map.entry("시니어", "SENIOR")
-    );
-
     @Transactional(readOnly = true)
     public Page<PostListDto> getPosts(Pageable pageable) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, POST_SORT_WHITELIST);
-        return postsRepository.findAll(safe).map(this::toPostListDto);
+        return postsRepository.findAllByDeletedFalse(safe).map(this::toPostListDto);
     }
 
     @Transactional(readOnly = true)
     public Page<PostListDto> getPosts(Pageable pageable, String category, String level) {
         Pageable safe = sanitizePageable(pageable, "createdAt", Sort.Direction.DESC, POST_SORT_WHITELIST);
 
-        String c = normalizeFilter(category);
-        String l = normalizeFilter(level);
+        Specification<CommunityPosts> spec = (root, q, cb) -> cb.isFalse(root.get("deleted"));
 
-        String mappedCategory = mapCategory(c);
-        String mappedLevel = mapLevel(l);
-
-        if (mappedCategory == null && mappedLevel == null) {
-            return postsRepository.findAll(safe).map(this::toPostListDto);
+        if (StringUtils.hasText(category) && !"전체".equals(category)) {
+            String cat = category.trim().toUpperCase();
+            spec = spec.and((r, q2, cb2) -> cb2.equal(
+                    cb2.upper(cb2.trim(r.get("category"))),
+                    cat
+            ));
         }
-        return communityPostsRepository.searchByFilters(mappedCategory, mappedLevel, safe)
-                .map(this::toPostListDto);
+        if (StringUtils.hasText(level) && !"전체".equals(level)) {
+            String lvl = level.trim().toUpperCase();
+            spec = spec.and((r, q2, cb2) -> cb2.equal(
+                    cb2.upper(cb2.trim(r.get("level"))),
+                    lvl
+            ));
+        }
+
+        return postsRepository.findAll(spec, safe).map(this::toPostListDto);
     }
 
     @Transactional(readOnly = true)
@@ -109,24 +99,6 @@ public class CommunityQueryService {
             }
         }
         return orders.isEmpty() ? Sort.unsorted() : Sort.by(orders);
-    }
-
-    private String normalizeFilter(String v) {
-        if (v == null) return null;
-        String s = v.trim();
-        if (s.isEmpty() || "전체".equals(s)) return null;
-        return s;
-    }
-
-    private String mapCategory(String v) {
-        if (v == null) return null;
-        String key = v.toLowerCase().replaceAll("\\s+", "");
-        return CATEGORY_MAP.getOrDefault(key, v);
-    }
-
-    private String mapLevel(String v) {
-        if (v == null) return null;
-        return LEVEL_MAP.getOrDefault(v, v);
     }
 
     private PostListDto toPostListDto(CommunityPosts p) {
