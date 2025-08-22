@@ -15,6 +15,7 @@ import com.allinone.DevView.interview.repository.InterviewAnswerRepository;
 import com.allinone.DevView.interview.repository.InterviewQuestionRepository;
 import com.allinone.DevView.interview.repository.InterviewRepository;
 import com.allinone.DevView.interview.repository.InterviewResultRepository;
+import com.allinone.DevView.mypage.repository.UserProfileRepository;
 import com.allinone.DevView.user.entity.User;
 import com.allinone.DevView.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +46,9 @@ public class InterviewServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private UserProfileRepository userProfileRepository;
 
     @Mock
     private InterviewQuestionRepository interviewQuestionRepository;
@@ -103,32 +107,48 @@ public class InterviewServiceTest {
     }
 
     @Test
-    @DisplayName("면접 질문 저장 - 성공")
-    void saveQuestion_success() {
+    @DisplayName("질문 요청 및 저장 - 성공")
+    void askAndSaveQuestions_success() {
         // given
-        // 테스트에 필요한 객체들을 준비합니다.
-        User user = User.builder().userId(1L).build();
+        Long interviewId = 1L;
+        User mockUser = User.builder().userId(1L).build();
         Interview mockInterview = Interview.builder()
-                .id(1L)
-                .user(user)
+                .user(mockUser)
                 .jobPosition(JobPosition.BACKEND)
-                .build();
-        String questionText = "What is SOLID?";
-        InterviewQuestion savedQuestion = InterviewQuestion.builder()
-                .id(100L)
-                .interview(mockInterview)
-                .text(questionText)
+                .careerLevel(CareerLevel.JUNIOR)
+                .questionCount(3)
+                .interviewType(InterviewType.TECHNICAL)
                 .build();
 
-        given(interviewQuestionRepository.save(any(InterviewQuestion.class))).willReturn(savedQuestion);
+        List<String> fakeQuestions = List.of("Question 1", "Question 2", "Question 3");
+
+        given(interviewRepository.findById(interviewId)).willReturn(Optional.of(mockInterview));
+        given(userProfileRepository.findByUserUserId(anyLong())).willReturn(Optional.empty());
+        given(gemini.getQuestionFromAi(
+                anyString(),
+                anyString(),
+                anyInt(),
+                any(InterviewType.class),
+                any()
+        )).willReturn(fakeQuestions);
 
         // when
-        QuestionResponse response = interviewService.saveQuestion(mockInterview, questionText);
+        List<QuestionResponse> response = interviewService.askAndSaveQuestions(interviewId);
 
         // then
-        assertThat(response).isNotNull();
-        assertThat(response.getQuestionId()).isEqualTo(100L);
-        assertThat(response.getText()).isEqualTo(questionText);
+        ArgumentCaptor<String> jobPosCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> careerLvlCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<Integer> countCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<InterviewType> typeCaptor = ArgumentCaptor.forClass(InterviewType.class);
+        ArgumentCaptor<String> introCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(gemini).getQuestionFromAi(jobPosCaptor.capture(), careerLvlCaptor.capture(), countCaptor.capture(), typeCaptor.capture(), introCaptor.capture());
+
+        System.out.println("Actual jobPosition: " + jobPosCaptor.getValue());
+        System.out.println("Actual careerLevel: " + careerLvlCaptor.getValue());
+        System.out.println("Actual questionCount: " + countCaptor.getValue());
+        System.out.println("Actual interviewType: " + typeCaptor.getValue());
+        System.out.println("Actual selfIntroduction: " + introCaptor.getValue());
     }
 
     @Test
@@ -139,16 +159,18 @@ public class InterviewServiceTest {
         ReflectionTestUtils.setField(item1, "questionId", 1L);
         ReflectionTestUtils.setField(item1, "answerText", "Answer 1");
 
-        SubmitAnswerRequest.AnswerItem item2 = new SubmitAnswerRequest.AnswerItem();
-        ReflectionTestUtils.setField(item2, "questionId", 2L);
-        ReflectionTestUtils.setField(item2, "answerText", "Answer 2");
-
         SubmitAnswerRequest request = new SubmitAnswerRequest();
-        ReflectionTestUtils.setField(request, "answers", List.of(item1, item2));
+        ReflectionTestUtils.setField(request, "interviewId", 1L);
+        ReflectionTestUtils.setField(request, "answers", List.of(item1));
 
         InterviewQuestion question1 = InterviewQuestion.builder().id(1L).build();
-        InterviewQuestion question2 = InterviewQuestion.builder().id(2L).build();
-        given(interviewQuestionRepository.findAllById(List.of(1L, 2L))).willReturn(List.of(question1, question2));
+
+        Interview mockInterview = Interview.builder()
+                .id(1L)
+                .questions(List.of(question1))
+                .build();
+
+        given(interviewRepository.findById(request.getInterviewId())).willReturn(Optional.of(mockInterview));
 
         // when
         interviewService.submitAnswers(request);
@@ -158,9 +180,7 @@ public class InterviewServiceTest {
         verify(interviewAnswerRepository).saveAll(captor.capture());
 
         List<InterviewAnswer> savedAnswers = captor.getValue();
-        assertThat(savedAnswers).hasSize(2);
-        assertThat(savedAnswers.get(0).getAnswerText()).isEqualTo("Answer 1");
-        assertThat(savedAnswers.get(1).getQuestion().getId()).isEqualTo(2L);
+        assertThat(savedAnswers).hasSize(1);
     }
 
     @Test
@@ -213,12 +233,13 @@ public class InterviewServiceTest {
         // given
         Long interviewId = 1L;
         Interview mockInterview = Interview.builder().id(interviewId).build();
+        String fakeFeedbackJson = "{\"summary\":\"Great job!\"}";
         InterviewResult mockResult = InterviewResult.builder()
                 .id(1L)
                 .interview(mockInterview)
                 .totalScore(85)
                 .grade(Grade.B)
-                .feedback("{\"summary\":\"Great job!\"}")
+                .feedback(fakeFeedbackJson)
                 .build();
 
         given(interviewResultRepository.findByInterviewId(interviewId)).willReturn(Optional.of(mockResult));
@@ -230,5 +251,6 @@ public class InterviewServiceTest {
         assertThat(response).isNotNull();
         assertThat(response.getInterviewId()).isEqualTo(interviewId);
         assertThat(response.getResultId()).isEqualTo(1L);
+        assertThat(response.getFeedback()).isEqualTo(fakeFeedbackJson);
     }
 }
