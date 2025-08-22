@@ -195,14 +195,7 @@ async function initLists(){
     }
 }
 
-/* 커뮤니티 상세 링크 보정: link가 없거나 postId만 있을 때 안전 복구 */
-function buildCommunityDetailLink(item) {
-    const raw = (item && item.link) || '';
-    if (raw && /^https?:\/\//i.test(raw)) return raw;   // 절대 URL
-    if (raw && raw.trim().length > 0) return raw;       // 상대 경로
-    const pid = item && (item.postId || item.id);
-    return pid != null ? `/community/posts/${pid}/detail` : '#';
-}
+
 
 /* 1번 이미지 레이아웃 */
 function renderInterviews(sel, items){
@@ -257,31 +250,57 @@ function renderInterviews(sel, items){
     box.appendChild(frag);
 }
 
+/* 스크랩 렌더링 함수 - 라우팅 로직 단순화 */
 function renderScraps(sel, items){
     const box = document.querySelector(sel);
     if(!box) return;
     box.innerHTML='';
-    if(!items.length){ box.innerHTML='<li class="empty">스크랩한 글이 없습니다.</li>'; return; }
 
-    const frag=document.createDocumentFragment();
-    items.forEach((it)=>{
-        const title = (it && it.title) || '';
-        // ✅ DTO의 link 우선, 없으면 postId로 복구
-        const href = buildCommunityDetailLink(it);
-        const likes = Number((it && it.likes) || 0);
-        const comments = Number((it && it.comments) || 0);
-        const writer = (it && it.writerName) || '익명';
-        const preview = (it && it.preview) || '';
+    if(!items.length){
+        box.innerHTML = `
+            <li class="empty-state">
+                <div class="empty-content">
+                    <i class="fa-regular fa-bookmark"></i>
+                    <p>아직 스크랩한 글이 없습니다</p>
+                    <a href="/community" class="empty-link">커뮤니티 둘러보기</a>
+                </div>
+            </li>
+        `;
+        return;
+    }
+
+    const frag = document.createDocumentFragment();
+    items.forEach((item) => {
+        const title = (item && item.title) || '';
+        const likes = Number((item && item.likes) || 0);
+        const writer = (item && item.writerName) || '익명';
+        const preview = (item && item.preview) || '';
+
+        // 🎯 라우팅 로직 단순화: postId만 사용
+        const postId = item && (item.postId || item.id);
+        const href = postId ? `/community/posts/${postId}/detail` : '#';
 
         const li = document.createElement('li');
-        // 🎯 수정: 서버사이드와 동일한 HTML 구조로 생성
         li.innerHTML = `
             <a href="${escapeHtml(href)}" class="scrap-item">
+                <div class="scrap-header">
+                    <div class="scrap-author">
+                        <i class="fa-solid fa-user"></i>
+                        <span>${escapeHtml(writer)}</span>
+                    </div>
+                    <div class="scrap-stats">
+                        <span class="like-count">
+                            <i class="fa-solid fa-heart"></i>
+                            <span>${likes}</span>
+                        </span>
+                    </div>
+                </div>
+
                 <h4 class="scrap-title">${escapeHtml(title)}</h4>
-                <p class="scrap-desc">${escapeHtml(preview)}</p>
-                <div class="scrap-meta">
-                    <span class="writer">👤 <span>${escapeHtml(writer)}</span></span>
-                    <span class="likes">❤️ <span>${likes}</span></span>
+                <p class="scrap-preview">${escapeHtml(preview)}</p>
+
+                <div class="scrap-footer">
+                    <span class="scrap-tag">스크랩됨</span>
                 </div>
             </a>
         `;
@@ -318,7 +337,14 @@ function formatGrade(g){ if(!g) return '- 등급'; const norm=String(g).toUpperC
 function gradeClass(g){ const s=String(g||'').toUpperCase(); if(s.startsWith('A'))return'g-a'; if(s.startsWith('B'))return'g-b'; if(s.startsWith('C'))return'g-c'; return'g-etc'; }
 function parseJSONSafe(s){ try{return JSON.parse(s||'[]')}catch{return[]} }
 function setText(s,v){ const el=document.querySelector(s); if(el) el.textContent=v; }
-function escapeHtml(v){ return v==null?'':String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeHtml(v){
+    return v == null ? '' : String(v)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 // ===== 회원탈퇴 모달 기능 (추가된 부분) =====
 

@@ -415,39 +415,86 @@ body {
     bottom: 16px;
     margin-top: 0;
 }
-
-/* ==============================   스크랩 목록   ============================== */
+/* ==============================   스크랩 목록 - 개선된 디자인   ============================== */
 .mypage-container .scrap-section ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
+.mypage-container .scrap-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+}
+
 .mypage-container .scrap-item {
     display: block;
     background: #fff;
-    border: 1px solid #eef0f3;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 16px 18px;
-    margin-bottom: 10px;
+    padding: 0;
     text-decoration: none;
     color: inherit;
-    transition: background 0.15s ease, transform 0.06s ease, box-shadow 0.15s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
 }
 
 .mypage-container .scrap-item:hover {
-    background: #f4f6f8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    border-color: #4AB2E3;
+    box-shadow: 0 4px 16px rgba(74, 178, 227, 0.15);
+    transform: translateY(-2px);
 }
 
-/* 🎯 누락된 스크랩 세부 스타일 추가 */
+/* 스크랩 카드 헤더 */
+.mypage-container .scrap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 16px 0;
+    margin-bottom: 12px;
+}
+
+.mypage-container .scrap-author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.mypage-container .scrap-author i {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.mypage-container .scrap-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mypage-container .like-count {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.mypage-container .like-count i {
+    font-size: 0.75rem;
+    color: #ef4444;
+}
+
+/* 스크랩 카드 본문 */
 .mypage-container .scrap-title {
     margin: 0 0 8px;
-    font-size: 1rem;
+    padding: 0 16px;
+    font-size: 1.05rem;
     font-weight: 600;
-    color: #2d3643;
+    color: #1e293b;
     line-height: 1.4;
     overflow: hidden;
     display: -webkit-box;
@@ -455,60 +502,91 @@ body {
     -webkit-box-orient: vertical;
 }
 
-.mypage-container .scrap-desc {
-    margin: 0 0 12px;
+.mypage-container .scrap-preview {
+    margin: 0 0 16px;
+    padding: 0 16px;
     font-size: 0.9rem;
-    color: #6b7a90;
+    color: #64748b;
     line-height: 1.5;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 }
 
-.mypage-container .scrap-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 0.86rem;
-    color: #6b7a90;
+/* 스크랩 카드 푸터 */
+.mypage-container .scrap-footer {
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
 }
 
-.mypage-container .scrap-meta .writer,
-.mypage-container .scrap-meta .likes {
-    display: flex;
+.mypage-container .scrap-tag {
+    display: inline-flex;
     align-items: center;
     gap: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #4AB2E3;
+    background: rgba(74, 178, 227, 0.1);
+    padding: 4px 8px;
+    border-radius: 12px;
 }
 
-/* 기존 meta 클래스와 충돌 방지 */
-.mypage-container .scrap-item .meta {
-    font-size: 0.86rem;
-    color: #555;
-    display: flex;
-    gap: 12px;
-}
-
-/* 그리드 */
-.mypage-container .scrap-section .scrap-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-
-/* result-id 스타일 */
-.mypage-container .meta-line .result-id {
-    color: #6b7a90;
-    font-weight: 600;
-    font-size: 0.9rem;
+.mypage-container .scrap-tag::before {
+    content: "📌";
+    font-size: 0.7rem;
 }
 
 /* 빈 상태 스타일 */
-.mypage-container .empty {
+.mypage-container .empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.mypage-container .empty-content {
     text-align: center;
-    padding: 32px 16px;
-    color: #6b7a90;
-    font-style: italic;
+    color: #64748b;
+}
+
+.mypage-container .empty-content i {
+    font-size: 2.5rem;
+    color: #cbd5e1;
+    margin-bottom: 12px;
+}
+
+.mypage-container .empty-content p {
+    margin: 0 0 16px;
+    font-size: 0.95rem;
+}
+
+.mypage-container .empty-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #4AB2E3;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border: 1px solid #4AB2E3;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.mypage-container .empty-link:hover {
+    background: #4AB2E3;
+    color: white;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .mypage-container .scrap-grid {
+        grid-template-columns: 1fr;
+    }
 }
 /* ==============================   자기소개 카드 스타일   ============================== */
 .mypage-container .self-intro-card {
