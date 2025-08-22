@@ -10,7 +10,7 @@
 <body>
 
 <!-- Header Fragment -->
-<div th:replace="fragments/header :: header"></div>
+<div th:replace="~{fragments/header :: header}"></div>
 
 <main class="main-section">
     <section class="hero">
@@ -18,7 +18,7 @@
             <h1><span class="highlight">DevView</span> <span class="ai-text">AI 면접 준비 서비스</span></h1>
             <h2>AI와 함께 실전연습을 연습하세요.</h2>
             <div class="hero-buttons">
-                <a href="/interview/start" class="btn-primary">
+                <a href="/interview/settings" class="btn-primary">
                     <img src="/img/play.svg" alt="시작하기 아이콘">
                     시작하기
                 </a>
@@ -39,7 +39,8 @@
 
     <section class="intro">
         <h2><strong>프로젝트 소개</strong></h2>
-        <p>DevView는 AI 기술을 활용한 혁신적인 면접 준비 플랫폼입니다. 실제 면접 환경을 시뮬레이션하여 개발자들이 자신감을 갖게 하며 면접에 잘 대비할 수 있도록 도와줍니다.</p>
+        <p>DevView는 AI 기술을 활용한 혁신적인 면접 준비 플랫폼입니다.
+            실제 면접 환경을 시뮬레이션하여 개발자들이 자신감을 갖게 하며 면접에 잘 대비할 수 있도록 도와줍니다.</p>
         <p>개인화된 피드백과 AI 분석을 통해 효율적인 면접 준비를 할 수 있도록 지원합니다.</p>
     </section>
 
@@ -111,7 +112,7 @@
 </main>
 
 <!-- Footer Fragment -->
-<div th:replace="fragments/footer :: footer"></div>
+<div th:replace="~{fragments/footer :: footer}"></div>
 
 <script src="/js/main.js"></script>
 </body>
