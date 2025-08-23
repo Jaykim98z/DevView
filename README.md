@@ -308,7 +308,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 <summary>2️⃣ 메인 페이지</summary>
 <p align="center">
-  <img width="800" alt="Image" src="https://github.com/user-attachments/assets/428d8b77-d844-46f1-8467-13f0cbe692a6" />
+  <img width="800" alt="Image" src="https://github.com/user-attachments/assets/269ffd68-18cf-4a0a-8352-c0a47e3179d4" />
 </p>
 
 * **Hero 배너** — 플랫폼 핵심 가치 강조(모의면접)
