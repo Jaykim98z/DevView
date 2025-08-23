@@ -327,13 +327,17 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 
 <summary>1️⃣ 로그인 & 회원가입</summary>
 <img width="1000" height="400" alt="Image" src="https://github.com/user-attachments/assets/e8859ec0-182e-4359-af70-d6ecf30ca2d9" />
+
 * **기본 로그인/회원가입**
 
   * 이메일 + 비밀번호 등록 (BCrypt 암호화)
   * CSRF, 세션 보안 적용
 
+
 * **소셜 로그인**
+* 
   <img width="1000" height="400" alt="Image" src="https://github.com/user-attachments/assets/31cff2af-82a1-4b9b-a0ab-24cd1bda0192" />
+ 
   * Google OAuth2 지원
   * 최초 로그인 시 User 테이블에 provider 저장
 
@@ -346,6 +350,7 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 
 <summary>2️⃣ 메인 페이지</summary>
 <img width="1000" height="400" alt="Image" src="https://github.com/user-attachments/assets/e68e2ba1-599d-472c-b8ea-b997c33827c9" />
+
 * **Hero 배너** – 플랫폼 핵심 가치 강조 (AI 기반 모의면접)
 * **서비스 소개 섹션** – 기능 요약 (면접 세션, 피드백, 랭킹, 커뮤니티)
 * **후기 섹션** – 실제 사용자 후기(Community 게시글 일부) 노출
@@ -354,6 +359,7 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 
 <summary>3️⃣ 면접 세션</summary>
 <img width="1000" height="400" alt="Image" src="https://github.com/user-attachments/assets/2c6b7297-9e27-4c92-b607-f1f62f713fab" />
+
 * **질문 생성** – Gemini API 기반, 직무 맞춤형 질문 제공
 * **답변 입력** – 사용자 텍스트 입력 (추후 음성 입력 확장 가능)
 * **실시간 피드백** – 앨런 AI API 활용
@@ -367,6 +373,7 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 
 <summary>4️⃣ 마이페이지</summary>
 <img width="1000" height="400" alt="Image" src="https://github.com/user-attachments/assets/34aacb25-ebc9-4a51-bf0d-381a2768a2e8" />
+
 * **프로필 관리** – 이름, 직무, 프로필 이미지 수정
 * **면접 기록 조회** – 과거 면접별 점수·피드백 확인
 * **시각화 차트** – 점수 변화를 라인차트로 표시
@@ -376,6 +383,7 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 
 <summary>5️⃣ 커뮤니티</summary>
 <img width="1000" height="400" alt="Image" src="https://github.com/user-attachments/assets/ff2f576e-2f33-4086-8583-3d2e746a5d72" />
+
 * **CRUD 기능**
 
   * 후기 작성, 수정, 삭제
@@ -393,6 +401,7 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 
 <summary>6️⃣ 랭킹</summary>
 <img width="1000" height="400" alt="Image" src="https://github.com/user-attachments/assets/49581107-87a4-4336-8be8-2e5e136cc5bf" />
+
 * **Top 3 시상대 UI**
 
   * 점수 기반 상위 3명 시각화
@@ -409,6 +418,7 @@ Deview 프로젝트는 **사용자 중심 데이터 흐름**과 **면접 세션�
 
 <summary>7️⃣ 결과 리포트</summary>
 <img width="1000" height="400" alt="Image" src="https://github.com/user-attachments/assets/f4429aa1-257c-4f13-9ca4-cae0baf86466" />
+
 * **내용 구성**
 
   * 질문 & 답변
