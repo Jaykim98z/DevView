@@ -149,6 +149,10 @@
     padding: 0;
 }
 
+.recommendations-details h3 {
+    margin-bottom: 1rem;
+}
+
 .recommendations-details ul {
     list-style: none;
     padding: 0;
