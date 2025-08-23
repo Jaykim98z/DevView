@@ -3,6 +3,9 @@ package com.allinone.DevView.community.controller;
 import com.allinone.DevView.community.dto.*;
 import com.allinone.DevView.community.entity.*;
 import com.allinone.DevView.community.service.*;
+import com.allinone.DevView.security.CustomUserDetails;
+import com.allinone.DevView.common.enums.JobPosition;
+import com.allinone.DevView.common.enums.CareerLevel;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -10,9 +13,9 @@ import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import com.allinone.DevView.security.CustomUserDetails;
+
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/community")
@@ -29,16 +32,36 @@ public class CommunityController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String jobCategory,
             @RequestParam(required = false) String level,
-            @RequestParam(required = false) String careerLevel
+            @RequestParam(required = false) String careerLevel,
+            @RequestParam(required = false) String job,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, name = "qTitle") String qTitle
     ) {
-        String cat = normalizeCategory(firstNonBlank(category, jobCategory));
-        String lvl = normalizeLevel(firstNonBlank(level, careerLevel));
+        String catStr = normalizeCategory(firstNonBlank(category, jobCategory));
+        String lvlStr = normalizeLevel(firstNonBlank(level, careerLevel));
 
-        boolean noFilter = (cat == null || "전체".equals(cat)) && (lvl == null || "전체".equals(lvl));
-        if (noFilter) {
+        if (qTitle != null && !qTitle.isBlank()) {
+            JobPosition catEnumForTitle = toJobPosition(catStr);
+            CareerLevel lvlEnumForTitle = toCareerLevel(lvlStr);
+            return ResponseEntity.ok(
+                    communityQueryService.getPosts(pageable, catEnumForTitle, lvlEnumForTitle, qTitle)
+            );
+        }
+
+        boolean useSearch = (job != null && !job.isBlank()) || (keyword != null && !keyword.isBlank());
+        if (useSearch) {
+            return ResponseEntity.ok(
+                    communityQueryService.getPostsByJob(pageable, job, catStr, lvlStr, keyword)
+            );
+        }
+
+        JobPosition catEnum = toJobPosition(catStr);
+        CareerLevel lvlEnum = toCareerLevel(lvlStr);
+
+        if (catEnum == null && lvlEnum == null) {
             return ResponseEntity.ok(communityQueryService.getPosts(pageable));
         }
-        return ResponseEntity.ok(communityQueryService.getPosts(pageable, cat, lvl));
+        return ResponseEntity.ok(communityQueryService.getPosts(pageable, catEnum, lvlEnum));
     }
 
     @GetMapping("/posts/dto")
@@ -50,13 +73,14 @@ public class CommunityController {
             @RequestParam(required = false) String level,
             @RequestParam(required = false) String careerLevel
     ) {
-        String cat = normalizeCategory(firstNonBlank(category, jobCategory));
-        String lvl = normalizeLevel(firstNonBlank(level, careerLevel));
+        String catStr = normalizeCategory(firstNonBlank(category, jobCategory));
+        String lvlStr = normalizeLevel(firstNonBlank(level, careerLevel));
+        JobPosition catEnum = toJobPosition(catStr);
+        CareerLevel lvlEnum = toCareerLevel(lvlStr);
 
-        boolean noFilter = (cat == null || "전체".equals(cat)) && (lvl == null || "전체".equals(lvl));
-        Page<PostListDto> page = noFilter
+        Page<PostListDto> page = (catEnum == null && lvlEnum == null)
                 ? communityQueryService.getPosts(pageable)
-                : communityQueryService.getPosts(pageable, cat, lvl);
+                : communityQueryService.getPosts(pageable, catEnum, lvlEnum);
         Page<CommunityPostsDto> converted = page.map(this::toCommunityPostsDto);
         return ResponseEntity.ok(converted);
     }
@@ -196,9 +220,7 @@ public class CommunityController {
             case "프론트엔드","frontend" -> "FRONTEND";
             case "풀스택","fullstack" -> "FULLSTACK";
             case "devops","데브옵스" -> "DEVOPS";
-            case "data/ai" -> "DATA_AI";
-            case "data" -> "DATA";
-            case "ai" -> "AI";
+            case "data/ai","data","ai" -> "DATA_AI";
             case "전체" -> "전체";
             default -> s.toUpperCase();
         };
@@ -208,11 +230,28 @@ public class CommunityController {
         if (s == null) return null;
         String k = s.trim().toLowerCase();
         return switch (k) {
-            case "주니어" -> "JUNIOR";
-            case "미드","미드레벨" -> "MID";
-            case "시니어" -> "SENIOR";
+            case "주니어","junior" -> "JUNIOR";
+            case "미드","미드레벨","mid","midlevel","mid_level" -> "MID_LEVEL";
+            case "시니어","senior" -> "SENIOR";
             case "전체" -> "전체";
             default -> s.toUpperCase();
         };
+    }
+
+    private static JobPosition toJobPosition(String s) {
+        if (s == null || "전체".equalsIgnoreCase(s)) return null;
+        return JobPosition.fromString(s);
+    }
+
+    private static CareerLevel toCareerLevel(String s) {
+        if (s == null || "전체".equalsIgnoreCase(s)) return null;
+        try {
+            return CareerLevel.valueOf(s.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            if ("MID".equalsIgnoreCase(s) || "MIDLEVEL".equalsIgnoreCase(s) || "MID_LEVEL".equalsIgnoreCase(s)) {
+                return CareerLevel.MID_LEVEL;
+            }
+            return null;
+        }
     }
 }

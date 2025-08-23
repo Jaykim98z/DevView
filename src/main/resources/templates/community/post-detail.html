@@ -17,13 +17,13 @@
 <meta name="_csrf" th:content="${_csrf.token}">
 <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
-<meta name="current-user-id" th:content="${#authentication?.principal?.userId}" />
-<meta name="current-username" th:content="${#authentication?.principal?.username}" />
+<meta name="current-user-id" th:content="${session.loginUser?.userId}" />
+<meta name="current-username" th:content="${session.loginUser?.username}" />
 <body data-page="detail"
       th:attr="data-post-id=${post.id},
-               data-current-user-id=${#authorization.expression('isAuthenticated()') ? #authentication.principal.userId : null},
-               data-current-username=${#authorization.expression('isAuthenticated()') ? #authentication.name : null},
-               data-current-user-email=${#authorization.expression('isAuthenticated()') ? #authentication.name : ''}">
+               data-current-user-id=${session.loginUser?.userId ?: ''},
+               data-current-username=${session.loginUser?.username ?: ''},
+               data-current-user-email=${session.loginUser?.email ?: ''}">
 
 
 <div th:replace="~{fragments/header :: header}"></div>
@@ -120,7 +120,7 @@
         </section>
 
         <div class="post-actions"
-             th:if="${#authorization.expression('isAuthenticated()') and post.userId == #authentication?.principal?.userId}">
+             th:if="${session.loginUser != null and post.userId == session.loginUser.userId}">
             <button id="btn-edit-post"  class="btn-action">수정</button>
             <button id="btn-delete-post" class="btn-action btn-danger">삭제</button>
         </div>

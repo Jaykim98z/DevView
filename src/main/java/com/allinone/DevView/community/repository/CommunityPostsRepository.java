@@ -108,13 +108,14 @@ public interface CommunityPostsRepository
 
     @EntityGraph(attributePaths = {"user"})
     @Query("""
-        select p
-          from CommunityPosts p
-         where p.deleted = false
-           and (:category is null or p.category = :category)
-           and (:level    is null or p.level    = :level)
-        """)
+    select p
+      from CommunityPosts p
+     where p.deleted = false
+       and (:category is null or upper(trim(p.category)) = upper(trim(:category)))
+       and (:level    is null or upper(trim(p.level))    = upper(trim(:level)))
+    """)
     Page<CommunityPosts> searchByFilters(@Param("category") String category,
                                          @Param("level")    String level,
                                          Pageable pageable);
+
 }
