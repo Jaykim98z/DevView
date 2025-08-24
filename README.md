@@ -40,8 +40,9 @@
 📅 **진행 기간** : 2025.07.29 \~ 2025.08.25 (총 4주)
 
 🅰️ **팀명** : 올인원 (All-in-One)
-📤 **배포** : [📤 서비스 배포 링크](https://devview.kro.kr/)
-🅿️ **발표자료** : [📑 발표 자료 보기 (Google Slides)](https://docs.google.com/presentation/d/16nU0tfxW_LWEZtgjntebanmCDljiWTkw/edit?usp=sharing&ouid=116558675202954145579&rtpof=true&sd=true)
+[📤 서비스 배포 링크](https://devview.kro.kr/)
+[📑 발표 자료 보기 (Google Slides)](https://docs.google.com/presentation/d/16nU0tfxW_LWEZtgjntebanmCDljiWTkw/edit?usp=sharing&ouid=116558675202954145579&rtpof=true&sd=true)
+[📜Notion](https://www.notion.so/AI-DevView-23180666e0688168b53fe0edc7ec7662)
 
 👨‍💻 **역할 방식** : 프론트엔드·백엔드 영역 구분 없이 **풀스택 협업**, 필요 시 유연 분담
 
