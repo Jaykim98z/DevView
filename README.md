@@ -43,11 +43,6 @@
 
 👨‍💻 **역할 방식** : 프론트엔드·백엔드 영역 구분 없이 **풀스택 협업**, 필요 시 유연 분담
 
-
-<br>[📤 서비스 배포 링크](https://devview.kro.kr/)
-<br>[📑 발표 자료 보기 (Google Slides)](https://docs.google.com/presentation/d/16nU0tfxW_LWEZtgjntebanmCDljiWTkw/edit?usp=sharing&ouid=116558675202954145579&rtpof=true&sd=true)
-<br>[📜Notion](https://www.notion.so/AI-DevView-23180666e0688168b53fe0edc7ec7662)
-<br>
 ## 🚀 프로젝트 차별성
 
 DevView는 단순한 연습 도구를 넘어, **학습·분석·경험 공유까지 연결되는 플랫폼**을 목표로 합니다.
@@ -75,6 +70,13 @@ DevView는 단순한 연습 도구를 넘어, **학습·분석·경험 공유까
 * 교육 기관 : 학생들의 **학습 추세 데이터** 확보 & 관리
 * 기업 : 지원자의 **기술·커뮤니케이션 능력 검증 도구**로 활용
 
+<br>
+
+<br>[📤 배포](https://devview.kro.kr/)
+<br>[🎦 시연영상](https://youtu.be/cSnN2AwqB2s)
+<br>[📑 발표 자료](https://docs.google.com/presentation/d/16nU0tfxW_LWEZtgjntebanmCDljiWTkw/edit?usp=sharing&ouid=116558675202954145579&rtpof=true&sd=true)
+<br>[📜Notion](https://www.notion.so/AI-DevView-23180666e0688168b53fe0edc7ec7662)
+<br>
 ---
 
 # 2. 팀원 소개 & 역할 분담
