@@ -78,6 +78,7 @@ DevView는 단순한 연습 도구를 넘어, **학습·분석·경험 공유까
 
 본 프로젝트는 **올인원(All-in-One)** 팀이 진행했으며, 팀원 모두가 프론트엔드와 백엔드를 가리지 않고 **풀스택 개발**을 경험했습니다. 효율적 진행을 위해 **주요 담당 도메인**을 분배했습니다.
 
+<div align="center">
 ## 🧑‍💻 팀원 소개
 | <img src="src/main/resources/static/img/진욱.svg" width="120px"/> | <img src="src/main/resources/static/img/나.svg" width="120px"/> | <img src="src/main/resources/static/img/예은.svg" width="120px"/> | <img src="src/main/resources/static/img/권호.svg" width="120" style="border-radius: 50%;"/> |
 | :-------------------------------------------------------------: | :------------------------------------------------------------: |:---------------------------------------------------------------:| :---------------------------------------------------------------------------------------: |
@@ -86,6 +87,7 @@ DevView는 단순한 연습 도구를 넘어, **학습·분석·경험 공유까
 ---
 
 
+<div align="center">
 ## 📆 역할 분담
 | **김진욱 (팀장)** | **이소연** | **김예은** | **조권호** |
 |------------------|------------|------------|------------|
@@ -306,7 +308,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ### <summary>2️⃣ 메인 페이지</summary>
 <p align="center">
-<img width="800" height="1200" alt="Image" src="https://github.com/user-attachments/assets/269ffd68-18cf-4a0a-8352-c0a47e3179d4" />
+<img width="800" height="1800" alt="Image" src="https://github.com/user-attachments/assets/269ffd68-18cf-4a0a-8352-c0a47e3179d4" />
 </p>
 
 * **Hero 배너** — 플랫폼 핵심 가치 강조(모의면접)
