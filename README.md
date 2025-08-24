@@ -290,7 +290,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ➡️ [상세 ERD/테이블 구조 보러가기 (Notion)](https://www.notion.so/25780666e06880e7b2cec00b635cc279?source=copy_link)
 
-### <summary>1️⃣ 로그인 & 회원가입</summary>
+### 1️⃣ 로그인 & 회원가입
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/e8859ec0-182e-4359-af70-d6ecf30ca2d9" />
 </p>
@@ -311,7 +311,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-### <summary>2️⃣ 메인 페이지</summary>
+### 2️⃣ 메인 페이지
 <p align="center">
 <img width="800" height="1800" alt="Image" src="https://github.com/user-attachments/assets/269ffd68-18cf-4a0a-8352-c0a47e3179d4" />
 </p>
@@ -322,7 +322,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-### <summary>3️⃣ 면접 세션</summary>
+### 3️⃣ 면접 세션
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/2c6b7297-9e27-4c92-b607-f1f62f713fab" />
 </p>
@@ -333,7 +333,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-### <summary>4️⃣ 마이페이지</summary>
+### 4️⃣ 마이페이지
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/34aacb25-ebc9-4a51-bf0d-381a2768a2e8" />
 </p>
@@ -345,7 +345,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-### <summary>5️⃣ 커뮤니티</summary>
+### 5️⃣ 커뮤니티
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/ff2f576e-2f33-4086-8583-3d2e746a5d72" />
 </p>
@@ -355,7 +355,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-### <summary>6️⃣ 랭킹</summary>
+### 6️⃣ 랭킹
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/49581107-87a4-4336-8be8-2e5e136cc5bf" />
 </p>
@@ -366,7 +366,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-### <summary>7️⃣ 결과 리포트</summary>
+### 7️⃣ 결과 리포트
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/f4429aa1-257c-4f13-9ca4-cae0baf86466" />
 </p>
