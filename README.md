@@ -478,8 +478,6 @@ DevView/
 **브랜치 네이밍**
 
 * `feature/<영역>-<설명>` 예) `feature/auth-login`
-* `fix/<이슈번호>-<설명>` 예) `fix/123-email-dup-check`
-* `docs/<문서주제>` 예) `docs/readme-deploy`
 
 ### 💬 커밋 메시지 (Conventional Commits)
 
