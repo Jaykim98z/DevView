@@ -6,6 +6,9 @@ import com.allinone.DevView.community.service.*;
 import com.allinone.DevView.security.CustomUserDetails;
 import com.allinone.DevView.common.enums.JobPosition;
 import com.allinone.DevView.common.enums.CareerLevel;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -17,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.*;
 
+@Tag(name = "Community API", description = "커뮤니티 게시글, 댓글, 좋아요, 스크랩 관련 API")
 @RestController
 @RequestMapping("/api/community")
 @RequiredArgsConstructor
@@ -25,8 +29,10 @@ public class CommunityController {
     private final CommunityQueryService communityQueryService;
     private final CommunityService communityService;
 
+    @Operation(summary = "게시글 목록 조회", description = "다양한 필터 옵션을 사용하여 게시글 목록을 페이지네이션하여 조회합니다.")
     @GetMapping("/posts")
     public ResponseEntity<Page<PostListDto>> listPosts(
+            @Parameter(description = "페이지 정보")
             @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable,
             @RequestParam(required = false) String category,
@@ -90,8 +96,10 @@ public class CommunityController {
         return ResponseEntity.ok(communityService.getAllPostDtos());
     }
 
+    @Operation(summary = "게시글 상세 조회", description = "ID로 특정 게시글의 상세 정보를 조회합니다.")
     @GetMapping("/posts/{id}")
-    public ResponseEntity<CommunityPosts> getPostById(@PathVariable Long id) {
+    public ResponseEntity<CommunityPosts> getPostById(
+            @Parameter(description = "조회할 게시글의 ID") @PathVariable Long id) {
         return communityService.getPostById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -122,58 +130,70 @@ public class CommunityController {
         return ResponseEntity.noContent().build();
     }
 
+    @Tag(name = "Engagement API", description = "좋아요/스크랩 관련 API")
+    @Operation(summary = "게시글 좋아요 추가", description = "특정 게시글에 좋아요를 추가합니다. (로그인 필요)")
     @PostMapping("/posts/{postId}/likes/{userId}")
     public Likes addLike(@PathVariable Long postId, @PathVariable Long userId) {
         return communityService.addLike(userId, postId);
     }
 
+    @Tag(name = "Engagement API", description = "좋아요/스크랩 관련 API")
+    @Operation(summary = "게시글 좋아요 삭제", description = "특정 게시글의 좋아요를 삭제합니다. (로그인 필요)")
     @DeleteMapping("/posts/{postId}/likes/{userId}")
     public ResponseEntity<Void> removeLike(@PathVariable Long postId, @PathVariable Long userId) {
         communityService.removeLike(userId, postId);
         return ResponseEntity.noContent().build();
     }
 
+    @Tag(name = "Engagement API", description = "좋아요/스크랩 관련 API")
+    @Operation(summary = "게시글 스크랩 추가", description = "특정 게시글을 스크랩합니다. (로그인 필요)")
     @PostMapping("/posts/{postId}/scraps")
     public Scraps addScrap(@PathVariable Long postId, @RequestBody Scraps scrap) {
         scrap.setPostId(postId);
         return communityService.addScrap(scrap);
     }
 
+    @Tag(name = "Engagement API", description = "좋아요/스크랩 관련 API")
+    @Operation(summary = "게시글 스크랩 삭제", description = "특정 게시글의 스크랩을 삭제합니다. (로그인 필요)")
     @DeleteMapping("/scraps/{id}")
     public ResponseEntity<Void> removeScrap(@PathVariable Long id) {
         communityService.removeScrap(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "게시글 조회수 증가", description = "특정 게시글의 조회수를 1 증가시킵니다.")
     @PostMapping("/posts/{postId}/view")
     public Map<String, Long> increaseView(@PathVariable Long postId) {
         long cnt = communityService.increaseViewCount(postId);
         return Map.of("viewCount", cnt);
     }
 
+    @Operation(summary = "게시글 수정", description = "자신이 작성한 게시글을 수정합니다. (로그인 필요)")
     @PatchMapping("/posts/{postId}")
     public ResponseEntity<?> patchUpdatePost(
-            @PathVariable Long postId,
+            @Parameter(description = "수정할 게시글의 ID") @PathVariable Long postId,
             @Valid @RequestBody PostUpdateRequestDto request,
-            @AuthenticationPrincipal CustomUserDetails user
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails user
     ) {
         Long id = communityService.updatePost(postId, user.getUserId(), request);
         return ResponseEntity.ok(id);
     }
 
+    @Operation(summary = "게시글 삭제", description = "자신이 작성한 게시글을 (논리적) 삭제합니다. (로그인 필요)")
     @DeleteMapping("/posts/{postId}/soft")
     public ResponseEntity<?> softDeletePost(
-            @PathVariable Long postId,
-            @AuthenticationPrincipal CustomUserDetails user
+            @Parameter(description = "삭제할 게시글의 ID") @PathVariable Long postId,
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails user
     ) {
         communityService.deletePost(postId, user.getUserId());
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "통합 게시글 작성", description = "일반글 또는 면접 공유글을 작성합니다. (로그인 필요)")
     @PostMapping("/posts/compose")
     public ResponseEntity<Map<String, Long>> createComposedPost(
             @Valid @RequestBody CombinedPostRequest req,
-            @AuthenticationPrincipal CustomUserDetails user
+            @Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails user
     ) {
         Long userId = user == null ? null : user.getUserId();
         if (userId == null) return ResponseEntity.status(401).body(Map.of("message", -1L));
