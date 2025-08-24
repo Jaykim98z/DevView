@@ -1,6 +1,4 @@
 
----
-
 <div align="center">
     <img src="src/main/resources/static/img/logo.svg" alt="devview logo" style="height: 100px;"/>
 <h2>AI 기반 개발자 모의 면접 시뮬레이터 DevView</h2>
@@ -18,19 +16,19 @@
 </div>
 
 ## 📚 목차
-- [📑 프로젝트 개요 & 차별성](#-프로젝트-개요--차별성)
-- [👥 팀원 소개 & 역할 분담](#-팀원-소개--역할-분담)
-- [🗄️ ERD & 데이터베이스 구조](#-erd--데이터베이스-구조)
-- [⚙️ 주요 기능 소개](#-주요-기능-소개)
-- [🗂️ 디렉토리 구조](#-디렉토리-구조)
-- [🌿 브랜치 전략 & 컨벤션](#-브랜치-전략--컨벤션)
-- [🛠 트러블슈팅 사례 (Troubleshooting)](#-트러블슈팅-사례-troubleshooting)
-- [🧰 기술 스택 (Tech Stack)](#-기술-스택-tech-stack)
-- [💬 팀원별 회고 (Retrospective)](#-팀원별-회고-retrospective)
+1. [프로젝트 개요 & 차별성](#-프로젝트-개요--차별성)
+2. [팀원 소개 & 역할 분담](#-팀원-소개--역할-분담)
+3. [ERD & 데이터베이스 구조](#-erd--데이터베이스-구조)
+4. [주요 기능 소개](#-주요-기능-소개)
+5. [디렉토리 구조](#-디렉토리-구조)
+6. [브랜치 전략 & 컨벤션](#-브랜치-전략--컨벤션)
+7. [트러블슈팅 사례 (Troubleshooting)](#-트러블슈팅-사례-troubleshooting)
+8. [기술 스택 (Tech Stack)](#-기술-스택-tech-stack)
+9. [팀원별 프로젝트 후기 (Retrospective)](#-팀원별-프로젝트-후기-retrospective)
 
 ---
 
-# 📑 프로젝트 개요 & 차별성
+# 1. 프로젝트 개요 & 차별성
 
 ## 🎯 프로젝트 개요
 
@@ -51,20 +49,20 @@ DevView는 단순한 연습 도구를 넘어, **학습·분석·경험 공유까
 
 1. **실시간 AI 피드백**
 
-  * 답변에 대한 **점수**, **강점·개선점**, **예시 답변**을 즉시 제공
-  * 피드백은 AI 모델(Gemini & 앨런 AI)을 통해 자동 생성되어, 반복 학습 효과 극대화
+* 답변에 대한 **점수**, **강점·개선점**, **예시 답변**을 즉시 제공
+* 피드백은 AI 모델(Gemini & 앨런 AI)을 통해 자동 생성되어, 반복 학습 효과 극대화
 2. **맞춤 질문 생성**
 
-  * 사용자의 **자기소개서·희망 직무·기술 스택**을 분석
-  * 개인별 취약 영역을 공략하는 **맞춤형 질문** 제공
+* 사용자의 **자기소개서·희망 직무·기술 스택**을 분석
+* 개인별 취약 영역을 공략하는 **맞춤형 질문** 제공
 3. **리포트 아카이빙**
 
-  * 면접 기록을 **결과 리포트**로 확인
-  * 이전 기록과 점수를 비교하여 성장 곡선 확인, 포트폴리오 활용 가능
+* 면접 기록을 **결과 리포트**로 확인
+* 이전 기록과 점수를 비교하여 성장 곡선 확인, 포트폴리오 활용 가능
 4. **커뮤니티 & 랭킹 시스템**
 
-  * 면접 경험 후기 공유, 점수 기반 랭킹으로 동기부여
-  * Top 3 시상대 시각화로 성취감 강화
+* 면접 경험 후기 공유, 점수 기반 랭킹으로 동기부여
+* Top 3 시상대 시각화로 성취감 강화
 
 ## 📌 기대 효과
 
@@ -74,27 +72,25 @@ DevView는 단순한 연습 도구를 넘어, **학습·분석·경험 공유까
 
 ---
 
-# 👥 팀원 소개 & 역할 분담
+# 2. 팀원 소개 & 역할 분담
 
 ## 🔹 팀 구성
 
 본 프로젝트는 **올인원(All-in-One)** 팀이 진행했으며, 팀원 모두가 프론트엔드와 백엔드를 가리지 않고 **풀스택 개발**을 경험했습니다. 효율적 진행을 위해 **주요 담당 도메인**을 분배했습니다.
 
 ## 🧑‍💻 팀원 소개
+| <img src="src/main/resources/static/img/진욱.svg" width="120px"/> | <img src="src/main/resources/static/img/나.svg" width="120px"/> | <img src="src/main/resources/static/img/예은.svg" width="120px"/> | <img src="src/main/resources/static/img/권호.svg" width="120" style="border-radius: 50%;"/> |
+| :-------------------------------------------------------------: | :------------------------------------------------------------: |:---------------------------------------------------------------:| :---------------------------------------------------------------------------------------: |
+| [**김진욱 (팀장)**](https://github.com/Jaykim98z) | [**이소연**](https://github.com/BlueGiraffe07) |             [**김예은**](https://github.com/yeeunkim7)             | [**조권호**](https://github.com/sswck) |
 
-| <img src="src/main/resources/static/img/진욱.svg" width="120px"/> | <img src="src/main/resources/static/img/나.svg" width="120px"/> | <img src="src/main/resources/static/img/예은.svg" width="190px"/> | <img src="src/main/resources/static/img/권호.svg" width="120" style="border-radius: 50%;"/> |
-| :-------------------------------------------------------------: | :------------------------------------------------------------: | :-------------------------------------------------------------: | :---------------------------------------------------------------------------------------: |
-|                           **김진욱 (팀장)**                          |                             **이소연**                            |                             **김예은**                             |                                          **조권호**                                          |
-|                   로그인/회원가입, 보안, OAuth2, 랭킹, 배포                  |                      메인/마이페이지, 공통 UI, 문서화                      |                         커뮤니티, DB 설계, 발표                         |                                 면접 세션, AI 연동, Swagger, 리포트                                |
+---
+
 
 ## 📆 역할 분담
-| 이름   | 주요 도메인         | 상세 작업                                                                                  |
-| ------ | ------------------ | ----------------------------------------------------------------------------------------- |
-| **김진욱** | 인증·보안·배포       | 로그인/회원가입 API & UI, Google OAuth2, Spring Security 적용,<br>랭킹 페이지 구현, AWS EC2 배포, 시연 영상 제작 |
-| **이소연** | 메인/마이페이지·문서화 | 메인 & 마이페이지 UI, Header/Footer 및 공통 컴포넌트 제작,<br>프로젝트 README·Notion 관리, 발표 자료 준비     |
-| **김예은** | 커뮤니티·DB          | 게시글/댓글/좋아요/스크랩 CRUD 구현, ERD 설계 및 마이그레이션,<br>최종 발표 진행                                 |
-| **조권호** | 면접 세션·AI 연동    | 앨런 AI와 Gemini를 활용한 질문 생성 및 피드백, 결과 리포트 작성,<br>Swagger 문서화                                |
-
+| **김진욱 (팀장)** | **이소연** | **김예은** | **조권호** |
+|------------------|------------|------------|------------|
+| 인증·보안·배포   | 메인/마이페이지·문서화 | 커뮤니티·DB | 면접 세션·AI 연동 |
+| 로그인/회원가입 API,<br>Google OAuth2 및,<br>Spring Security 적용,<br>랭킹 페이지 구현과,<br>AWS EC2 배포와,<br>시연 영상 제작 | 메인 & 마이페이지 UI,<br>Header/Footer 제작,<br>공통 컴포넌트 구성,<br>프로젝트 README 관리,<br>Notion 문서 관리,<br>발표 자료 준비 | 게시글/댓글/좋아요,<br>스크랩 CRUD 구현,<br>ERD 구조 설계와,<br>마이그레이션 작업,<br>최종 발표 준비와,<br>최종 발표 진행 | 앨런 AI와 Gemini,<br>질문 생성과 피드백,<br>결과 리포트 작성,<br>Swagger 문서화,<br>발표 자료 준비,<br>시연 발표 지원 |
 
 ## ⚖️ 협업 방식
 
@@ -104,7 +100,7 @@ DevView는 단순한 연습 도구를 넘어, **학습·분석·경험 공유까
 
 ---
 
-# 🗄️ ERD & 데이터베이스 구조
+# 3. ERD & 데이터베이스 구조
 
 ## 📌 설계 개요
 
@@ -283,18 +279,18 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-# ⚙️ 주요 기능 소개
+# 4. 주요 기능 소개
 
 ➡️ [상세 ERD/테이블 구조 보러가기 (Notion)](https://www.notion.so/25780666e06880e7b2cec00b635cc279?source=copy_link)
 
-<summary>1️⃣ 로그인 & 회원가입</summary>
+### <summary>1️⃣ 로그인 & 회원가입</summary>
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/e8859ec0-182e-4359-af70-d6ecf30ca2d9" />
 </p>
 
 * **기본 로그인/회원가입**
-  * 이메일 + 비밀번호 등록(BCrypt 암호화)
-  * CSRF, 세션 보안 적용
+    * 이메일 + 비밀번호 등록(BCrypt 암호화)
+    * CSRF, 세션 보안 적용
 
 * **소셜 로그인**
 <p align="center">
@@ -304,13 +300,13 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 * Google OAuth2 지원, 최초 로그인 시 provider 저장
 
 * **에러 처리**
-  * 중복 이메일 가입 예외, 인증 실패 시 CustomException 적용
+    * 중복 이메일 가입 예외, 인증 실패 시 CustomException 적용
 
 ---
 
-<summary>2️⃣ 메인 페이지</summary>
+### <summary>2️⃣ 메인 페이지</summary>
 <p align="center">
-<img width="1440" height="2926" alt="Image" src="https://github.com/user-attachments/assets/269ffd68-18cf-4a0a-8352-c0a47e3179d4" />
+<img width="800" height="1200" alt="Image" src="https://github.com/user-attachments/assets/269ffd68-18cf-4a0a-8352-c0a47e3179d4" />
 </p>
 
 * **Hero 배너** — 플랫폼 핵심 가치 강조(모의면접)
@@ -319,7 +315,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-<summary>3️⃣ 면접 세션</summary>
+### <summary>3️⃣ 면접 세션</summary>
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/2c6b7297-9e27-4c92-b607-f1f62f713fab" />
 </p>
@@ -330,7 +326,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-<summary>4️⃣ 마이페이지</summary>
+### <summary>4️⃣ 마이페이지</summary>
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/34aacb25-ebc9-4a51-bf0d-381a2768a2e8" />
 </p>
@@ -342,7 +338,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-<summary>5️⃣ 커뮤니티</summary>
+### <summary>5️⃣ 커뮤니티</summary>
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/ff2f576e-2f33-4086-8583-3d2e746a5d72" />
 </p>
@@ -352,7 +348,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-<summary>6️⃣ 랭킹</summary>
+### <summary>6️⃣ 랭킹</summary>
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/49581107-87a4-4336-8be8-2e5e136cc5bf" />
 </p>
@@ -363,7 +359,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-<summary>7️⃣ 결과 리포트</summary>
+### <summary>7️⃣ 결과 리포트</summary>
 <p align="center">
   <img width="800" alt="Image" src="https://github.com/user-attachments/assets/f4429aa1-257c-4f13-9ca4-cae0baf86466" />
 </p>
@@ -372,7 +368,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 ---
 
-# 🗂️ 디렉토리 구조
+# 5. 디렉토리 구조
 
 **Spring Boot 백엔드 + Thymeleaf 프론트엔드 + AWS 배포** 구조입니다.
 
@@ -412,7 +408,7 @@ DevView/
 * **mypage/** — 프로필 관리, 기록 조회, 차트
 * **ranking/** — Top20 정렬, 점수 업데이트 이벤트
 * **security/** — Spring Security & OAuth2, BCryptPasswordEncoder, CustomUserDetailsService
-* **user/** — 회원가입/로그인, OAuth2 사용자 저장, UserRole(ROLE\_USER, ROLE\_ADMIN)
+* **user/** — 회원가입/로그인, OAuth2 사용자 저장
 
 ## 📦 배포 관련 파일
 
@@ -421,21 +417,20 @@ DevView/
 
 ---
 
-# 🌿 브랜치 전략 & 컨벤션
+# 6. 브랜치 전략 & 컨벤션
 
 ## 🔹 브랜치 전략 (Branch Strategy)
+**협업 흐름** : 
+`feature/*` → **PR** → 코드 리뷰(1인 이상) → **develop** 통합·검증 → **main** 머지(배포)
 
 * **main** : 배포 가능한 안정 브랜치(보호 브랜치)
 * **develop** : **배포 전 통합 테스트** 및 기능 통합 검증 브랜치
-* **feature/**\* : 기능 단위 작업 브랜치 (예: `feature/login-api`, `feature/community-crud`)
-
-**협업 흐름**
-`feature/*` → **PR** → 코드 리뷰(1인 이상) → **develop** 통합·검증 → **main** 머지(배포)
+* **feature/**\* : 기능 단위 작업 브랜치 <br>(예: `feature/login-jinwook`, `feature/mypage-blue`,`feature/interview-sswck`,`feature/community-yeeun` )
 
 ## 📌 컨벤션(Convention)
 
-**컨벤션이란?** 팀원이 함께 정한 공통의 약속/규칙입니다. 코드 스타일, 파일명, 커밋 메시지, 브랜치·PR 운영까지 동일한 기준을 사용해 **협업 효율**과 **품질**을 높입니다.
-효과: 협업 효율 ↑ / 코드 일관성 ↑ / 버그 감소 / 유지보수성 향상
+**컨벤션이란?** <br>팀원이 함께 정한 공통의 약속/규칙입니다. 코드 스타일, 파일명, 커밋 메시지, 브랜치·PR 운영까지 동일한 기준을 사용해 **협업 효율**과 **품질**을 높입니다.
+* 효과: 협업 효율 ↑ / 코드 일관성 ↑ / 버그 감소 / 유지보수성 향상
 
 ### 📁 파일·폴더 및 네이밍
 
@@ -443,12 +438,9 @@ DevView/
 * **클래스명** : PascalCase, 명사 중심, 의미 명확
 * **메서드명** : camelCase, 동사 시작, 의도 드러나게
 * **변수명** : camelCase, 명사 중심, 불필요한 축약 지양
-* **상수명** : `UPPER_SNAKE_CASE`, `static final`
+* **상수명** : `UPPER_SNAKE_CASE`, `staticfinal`
 * **의존 라이브러리 사용**
-
-  * Lombok : 합의된 애너테이션만(@Getter, @Builder 등), 엔티티 과도 사용 지양
-  * STOMP : 채널/엔드포인트 네이밍 일관(케밥/스네이크 혼용 금지), 예) `/topic/ranking`, `/queue/notice`
-
+    * Lombok : 합의된 애너테이션만(@Getter, @Builder 등), 엔티티 과도 사용 지양
 ### 🧼 코드 스타일
 
 * 들여쓰기 **스페이스 4칸**(탭 금지)
@@ -466,7 +458,7 @@ DevView/
 * **CI 통과 필수**, **main 보호 브랜치** 권장(직접 푸시 금지)
 * 머지 방식: **Squash Merge 권장**(히스토리 단순화)
 
-**PR 제목 템플릿**
+**PR 제목 템플릿**<br>
 `[FEAT] 로그인 API 추가` / `[FIX] 회원가입 검증 로직 수정` / `[DOCS] README 배포 가이드 업데이트`
 
 **PR 본문(필수)**
@@ -516,41 +508,53 @@ git commit -m "refactor(ranking): 조회 쿼리 최적화" \
 * ✅ 개요(무엇을, 왜)
 * 🛠 작업 내용
 
-  * [ ] 항목1
-  * [ ] 항목2
+    * [ ] 항목1
+    * [ ] 항목2
 * 📎 참고(스크린샷/로그/링크)
 
 **Tag/Label 권장**
 `feature`, `bug`, `refactor`, `docs`, `style`, `question`, `chore`, `perf`, `build`, `ci`
 
 ---
+# 7. 트러블슈팅 사례 (Troubleshooting)
 
-# 🛠 트러블슈팅 사례 (Troubleshooting)
+### ① Database — Flyway 마이그레이션 충돌
 
-### ① 로그인 API 500 오류
-
-* **문제**: 특정 사용자에서 500 에러(세션 직렬화 불일치로 Redis 저장 불가)
-* **원인**: User 직렬화 설정 충돌, DTO/Entity 구분 미흡
-* **해결**: `UserDetails` 구현체 DTO 분리, Redis 직렬화 JSON 통일
-* **교훈**: 인증 객체는 가볍게 유지, 세션 저장 시 DTO/Entity 분리
-
-### ② 이미지 업로드 실패 (415 Unsupported Media Type)
-
-* **문제**: 이미지 업로드 실패(클라이언트 415)
-* **원인**: 서버 `consumes` 누락
-* **해결**: `consumes = MULTIPART_FORM_DATA` 설정, MIME 검증 강화
-* **교훈**: Content-Type 정합성 + 업로드 테스트 자동화
-
-### ③ 외부 AI API 응답 지연
-
-* **문제**: 질문 생성/피드백 요청 지연(7\~10초)
-* **원인**: 동기 처리, UI 로딩 부재
-* **해결**: 비동기 처리, 로딩 스피너, 캐싱
-* **교훈**: 외부 호출은 비동기+캐싱, UX 대응 필수
+* **문제**: Flyway 스크립트 실행 중 버전 충돌 및 에러 발생
+* **원인**: 팀원 간 마이그레이션 파일 버전 중복
+* **해결**: 마이그레이션 파일 작성 규칙 수립, 버전 관리 철저
+* **교훈**: DB 변경사항은 사전에 공유하고, 공통 규칙 및 프로세스를 준수로 안정적인 협업 가능
 
 ---
 
-## 🧰 기술 스택 (Tech Stack)
+### ② Github — 브랜치 충돌 문제
+
+* **문제**: 브랜치 병합 과정에서 대규모 머지 충돌 발생
+* **원인**: 브랜치 병합 주기 불규칙, 변경사항 공유 부족
+* **해결**: 병합 전 코멘트 또는 디스코드에 변경사항 공지, 주기적 머지 습관화
+* **교훈**: 충돌 방지를 위해 **짧은 주기 머지 + 사전 공유**가 필수
+
+---
+
+### ③ Login API — 500 오류 발생
+
+* **문제**: 로그인 API 요청 시 500 에러 발생
+* **원인**: User 직렬화 설정 충돌, DTO와 Entity 구분 미흡
+* **해결**: `UserDetails` 구현체를 DTO로 분리, OpenAPI(Swagger) 기반 관리로 일관성 확보
+* **교훈**: 인증 객체는 가볍게 유지하고, DTO/Entity 분리로 안정성 확보
+
+---
+
+### ④ AI API — 응답 지연 문제
+
+* **문제**: 질문 생성 및 피드백 요청 시 응답 지연(7~10초 이상)
+* **원인**: 동기 처리, UI 로딩 상태 미구현
+* **해결**: 비동기 처리 적용, 로딩 스피너 추가, 캐싱 도입
+* **교훈**: 외부 API 호출은 **비동기 + 캐싱**을 적용하고, UX 개선 요소 반영 중요
+
+---
+
+## 8. 기술 스택 (Tech Stack)
 
 ### 📌 프론트엔드
 
@@ -588,10 +592,16 @@ git commit -m "refactor(ranking): 조회 쿼리 최적화" \
 ### 📌 설계/문서화 툴
 
 * ERDCloud, Swagger
+<details>
+<summary>📖 Swagger (API 문서 예시)</summary>
+<p align="center">
+  <img width="1200" height="600" alt="Image" src="https://github.com/user-attachments/assets/f910dde2-75a6-4c92-9834-e6f23725242b" />
+<img width="1200" height="600" alt="Image" src="https://github.com/user-attachments/assets/70100d3d-4da6-4b1e-a354-64cacbb7cb0a" />
+</p>
+</details>
 
 ---
-
-## 💬 팀원별 회고 (Retrospective)
+## 9. 팀원별 프로젝트 후기 (Retrospective)
 
 ### 👨‍💻 김진욱 (팀장 / 인증·랭킹·배포 담당)
 
