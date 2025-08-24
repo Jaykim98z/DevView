@@ -1,5 +1,6 @@
 package com.allinone.DevView.community.dto;
 
+import com.allinone.DevView.common.enums.InterviewType;
 import com.allinone.DevView.community.entity.CommunityPosts;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,7 +21,10 @@ public class CommunityPostDetailDto {
     private int likeCount;
     private int scrapCount;
     private LocalDateTime createdAt;
-    private String interviewType;
+    private InterviewType interviewType;
+    private Long interviewResultId;
+    private String interviewFeedback;
+    private String content;
 
     public static CommunityPostDetailDto from(CommunityPosts post) {
         if (post == null) {
@@ -52,6 +56,12 @@ public class CommunityPostDetailDto {
                 .scrapCount(post.getScrapCount())
                 .createdAt(post.getCreatedAt())
                 .interviewType(post.getInterviewType())
+
+
+                .interviewResultId(post.getInterviewResultId())
+                .interviewFeedback(post.getInterviewFeedback())
+                .content(post.getContent())
+
                 .build();
     }
 

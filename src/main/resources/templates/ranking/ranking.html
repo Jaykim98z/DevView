@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>개발자 랭킹 - DevView</title>
+
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}">
+    <link rel="alternate icon" href="/img/favicon.svg" type="image/svg+xml">
+
     <link rel="stylesheet" th:href="@{/css/header.css}">  <!-- 헤더 CSS 추가 -->
     <link rel="stylesheet" th:href="@{/css/ranking.css}">
 </head>
@@ -43,9 +47,9 @@
                     <div th:if="${iterStat.index == 1}" class="medal">🥈</div>
                     <div th:if="${iterStat.index == 2}" class="medal">🥉</div>
 
-                    <img th:src="${ranking.profileImageUrl}"
+                    <img class="profile-image"
+                         th:src="${ranking.profileImageUrl != null} ? @{${ranking.profileImageUrl}} : '/img/진욱.svg'"
                          th:alt="${ranking.username} + ' 프로필'"
-                         class="profile-image"
                          onerror="this.src='/img/profile-default.svg'">
                 </div>
 
@@ -82,9 +86,9 @@
                     th:text="${iterStat.index + 1}">1</td>
 
                 <td class="user-info">
-                    <img th:src="${ranking.profileImageUrl}"
+                    <img class="table-profile-img"
+                         th:src="${ranking.profileImageUrl != null} ? @{${ranking.profileImageUrl}} : '/img/진욱.svg'"
                          th:alt="${ranking.username} + ' 프로필'"
-                         class="table-profile-img"
                          onerror="this.src='/img/profile-default.svg'">
                     <span class="user-name" th:text="${ranking.username}">유저1</span>
                 </td>

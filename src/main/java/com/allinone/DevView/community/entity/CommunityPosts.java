@@ -40,7 +40,7 @@ public class CommunityPosts {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(length = 50, nullable = false)
+    @Column(length = 150, nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT", nullable = false)
@@ -54,15 +54,11 @@ public class CommunityPosts {
     private String category;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20, nullable = false)
+    @Column(length = 20)
     private Grade grade;
 
     @Column(length = 255)
     private String level;
-
-    public String getLevelTag() {
-        return this.level;
-    }
 
     @Column(name = "tech_tag", length = 50)
     private String techTag;
@@ -76,20 +72,24 @@ public class CommunityPosts {
     @Column(name = "view_count", nullable = false)
     private int viewCount = 0;
 
-    @Column(length = 1000)
+    @Column(name = "summary", columnDefinition = "TEXT")
     private String summary;
 
-    @Column(name = "interview_type", length = 20, nullable = false)
-    private String interviewType;
+    //@Column(name = "interview_type", length = 20)
+    //private String interviewType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "interview_type", length = 20)
+    private com.allinone.DevView.common.enums.InterviewType interviewType;
 
     @Column(name = "writer_name", length = 255)
     private String writerName;
 
-    @Column(nullable = false)
-    private int score = 0;
+    @Column(name = "score")
+    private Integer score;
 
-    @Column(length = 255)
-    private String type;
+    @Column(name = "type", length = 255, nullable = false)
+    private String type = "POST";
 
     @Column(name = "interview_result_id")
     private Long interviewResultId;
@@ -102,14 +102,8 @@ public class CommunityPosts {
 
     @PrePersist
     protected void onCreate() {
-        if (this.createdAt == null) {
-            this.createdAt = LocalDateTime.now();
-        }
-
-        this.likeCount = this.likeCount;
-        this.scrapCount = this.scrapCount;
-        this.viewCount = this.viewCount;
-        this.score = this.score;
+        if (this.createdAt == null) this.createdAt = LocalDateTime.now();
+        if (this.type == null || this.type.isBlank()) this.type = "POST";
     }
 
     public void update(String title, String content) {
@@ -119,5 +113,9 @@ public class CommunityPosts {
 
     public void softDelete() {
         this.deleted = true;
+    }
+
+    public String getLevelTag() {
+        return this.level;
     }
 }

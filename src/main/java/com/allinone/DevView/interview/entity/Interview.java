@@ -1,6 +1,8 @@
 package com.allinone.DevView.interview.entity;
 
+import com.allinone.DevView.common.enums.CareerLevel;
 import com.allinone.DevView.common.enums.InterviewType;
+import com.allinone.DevView.common.enums.JobPosition;
 import com.allinone.DevView.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,6 +11,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 면접 정보 엔티티
+ */
 @Entity
 @Table(name = "interviews")
 @Getter
@@ -33,11 +38,13 @@ public class Interview {
     @Column(nullable = false, length = 20)
     private InterviewType interviewType;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String jobPosition;
+    private JobPosition jobPosition;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String careerLevel;
+    private CareerLevel careerLevel;
 
     @Column(nullable = false)
     private int questionCount;
@@ -55,6 +62,9 @@ public class Interview {
         this.createdAt = LocalDateTime.now();
     }
 
+    /**
+     * 면접 세션 종료
+     */
     public void endInterviewSession() {
         if (this.endedAt == null) {
             this.endedAt = LocalDateTime.now();

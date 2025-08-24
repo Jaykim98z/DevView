@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8" />
     <title>마이페이지</title>
-    <!-- CSRF 토큰 메타 태그 추가 -->
+
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}">
+    <link rel="alternate icon" href="/img/favicon.svg" type="image/svg+xml">
+
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
     <link rel="stylesheet" th:href="@{/css/mypage.css}" />
     <link rel="stylesheet" th:href="@{/css/header.css}" />
     <link rel="stylesheet" th:href="@{/css/password-change.css}" />
-    <!-- Chart.js (이미 포함) -->
+
     <script th:src="@{/js/lib/chart.min.js}"></script>
-    <!-- 통합 JS -->
     <script defer th:src="@{/js/mypage.js}"></script>
-    <!-- 비밀번호 변경 JS -->
+
     <script defer th:src="@{/js/password-change.js}"></script>
 </head>
 <body>
@@ -122,20 +124,22 @@
                     <img src="/img/interviewslist.svg" class="icon" alt="나의 면접 목록"/>
                     <h3>나의 면접 목록</h3>
                 </div>
+
                 <ul id="interviewList">
                     <li th:each="interview : ${user.interviews}">
                         <div class="interview-item">
                             <div class="row">
                                 <div class="chips">
-                                    <span class="chip chip-type" th:text="${interview.jobPositionDisplayName}">직무</span>
+                                    <span class="chip chip-type"  th:text="${interview.jobPositionDisplayName}">직무</span>
                                     <span class="chip chip-level" th:text="${interview.careerLevelDisplayName}">레벨</span>
-                                    <span class="chip chip-type" th:text="${interview.interviewType}">면접타입</span>
-                                    <span class="chip chip-date"
-                                          th:text="${interview.interviewDate != null ? interview.interviewDate : ''}">YYYY-MM-DD</span>
+                                    <span class="chip chip-type"  th:text="${interview.interviewType}">면접타입</span>
                                 </div>
+
+                                <span class="interview-date"
+                                      th:text="${interview.interviewDate != null ? #strings.replace(interview.interviewDate,'-','.') : ''}"> YYYY.MM.DD </span>
                                 <div class="score-wrap">
-                                    <span class="score" th:text="${interview.score + '점'}">0점</span>
-                                    <span class="grade" th:text="${interview.grade + '등급'}">-</span>
+                                    <span class="score" th:text="${interview.totalScore}">0</span>
+                                    <span class="grade" th:text="${interview.grade + ' 등급'}">-</span>
                                 </div>
                             </div>
                             <a class="btn small" th:href="${interview.detailUrl}">상세 보기</a>
@@ -143,6 +147,7 @@
                     </li>
                 </ul>
             </section>
+
 
             <!-- 스크랩 목록 -->
             <section class="scrap-section">
@@ -152,25 +157,38 @@
                 </div>
 
                 <ul id="scrapList" class="scrap-grid">
-                    <li th:each="scrap : ${user.scraps}"
-                        th:with="isExternal=${#strings.startsWith(scrap.link,'http')}">
-
-                        <!-- 링크: 컨텍스트 경로 보정(@{...}) + 외부/내부에 따라 target/rel 분기 -->
-                        <a th:href="@{${scrap.link}}"
-                           th:attr="target=${isExternal ? '_blank' : null},
-                  rel=${isExternal ? 'noopener noreferrer' : null}"
+                    <li th:each="scrap : ${user.scraps}">
+                        <a th:href="@{/community/posts/{id}/detail(id=${scrap.postId})}"
                            class="scrap-item">
+                            <div class="scrap-header">
+                                <div class="scrap-author">
+                                    <i class="fa-solid fa-user"></i>
+                                    <span th:text="${scrap.writerName}">작성자</span>
+                                </div>
+                                <div class="scrap-stats">
+                        <span class="like-count">
+                            <i class="fa-solid fa-heart"></i>
+                            <span th:text="${scrap.likes}">0</span>
+                        </span>
+                                </div>
+                            </div>
+
                             <h4 class="scrap-title" th:text="${scrap.title}">제목</h4>
-                            <p class="scrap-desc" th:text="${scrap.preview}">요약 내용</p>
-                            <div class="scrap-meta">
-                                <span class="writer">👤 <span th:text="${scrap.writerName}">작성자</span></span>
-                                <span class="likes">❤️ <span th:text="${scrap.likes}">0</span></span>
+                            <p class="scrap-preview" th:text="${scrap.preview}">미리보기 내용</p>
+
+                            <div class="scrap-footer">
+                                <span class="scrap-tag">스크랩됨</span>
                             </div>
                         </a>
                     </li>
-                    <!-- 스크랩이 비어있을 때 메시지 (옵션) -->
-                    <li th:if="${#lists.isEmpty(user.scraps)}" class="empty">
-                        아직 스크랩이 없습니다.
+
+                    <!-- 빈 상태 -->
+                    <li th:if="${#lists.isEmpty(user.scraps)}" class="empty-state">
+                        <div class="empty-content">
+                            <i class="fa-regular fa-bookmark"></i>
+                            <p>아직 스크랩한 글이 없습니다</p>
+                            <a href="/community" class="empty-link">커뮤니티 둘러보기</a>
+                        </div>
                     </li>
                 </ul>
             </section>

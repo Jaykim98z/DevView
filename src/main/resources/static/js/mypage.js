@@ -9,10 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
 async function initSummary(){
     try{
         const res = await fetch('/api/mypage',{credentials:'include'});
-        const {data:main} = await res.json();
-        setText('#interviewCount', main?.totalInterviews ?? 0);
-        setText('#avgScore',       main?.avgScore ?? 0);
-        setText('#bestGrade',      main?.grade ?? '-');
+        if (!res.ok) {
+            console.error('프로필 통계 API 호출 실패:', res.status);
+            return;
+        }
+
+        const data = await res.json(); // 🎯 수정: data 직접 사용
+        setText('#interviewCount', data?.totalInterviews ?? 0);
+        setText('#avgScore',       data?.avgScore ?? 0);
+        setText('#bestGrade',      data?.grade ?? '-');
     }catch(e){ console.error('요약 로드 실패', e); }
 }
 
@@ -174,22 +179,23 @@ function renderScoreChartFallback(canvas, labels, scores){
 async function initLists(){
     try{
         const res = await fetch('/api/mypage',{credentials:'include'});
-        const {data:main} = await res.json();
+        if (!res.ok) {
+            console.error('API 호출 실패:', res.status, res.statusText);
+            return;
+        }
+
+        const data = await res.json(); // 🎯 수정: data 직접 사용
+        console.log('API 응답 데이터:', data); // 디버깅용
 
         const sel = document.querySelector('#interviewList') ? '#interviewList' : '.interview-history ul';
-        renderInterviews(sel, main?.interviews || []);
-        renderScraps('#scrapList', main?.scraps || []);
-    }catch(e){ console.error('목록 로드 실패', e); }
+        renderInterviews(sel, data?.interviews || []); // 🎯 수정: data.interviews
+        renderScraps('#scrapList', data?.scraps || []); // 🎯 수정: data.scraps
+    }catch(e){
+        console.error('목록 로드 실패', e);
+    }
 }
 
-/* 커뮤니티 상세 링크 보정: link가 없거나 postId만 있을 때 안전 복구 */
-function buildCommunityDetailLink(item) {
-    const raw = (item && item.link) || '';
-    if (raw && /^https?:\/\//i.test(raw)) return raw;   // 절대 URL
-    if (raw && raw.trim().length > 0) return raw;       // 상대 경로
-    const pid = item && (item.postId || item.id);
-    return pid != null ? `/community/posts/${pid}/detail` : '#';
-}
+
 
 /* 1번 이미지 레이아웃 */
 function renderInterviews(sel, items){
@@ -210,8 +216,14 @@ function renderInterviews(sel, items){
         const gradeTxt = formatGrade(gradeRaw);
         const gCls     = gradeClass(gradeRaw);
 
-        const title = (it.title && it.title.trim())
-            || (it.jobPosition ? `${it.jobPosition} 면접` : `${typeToKr(typeRaw)} 면접`);
+        // 🎯 새로운 title 로직: "면접타입 - 경력레벨" 형태
+        const interviewTypeKr = interviewTypeToKr(typeRaw); // 기술면접, 실무면접 등
+        const careerLevelRaw = typeof it.careerLevel==='string'? it.careerLevel : (it.careerLevel&&it.careerLevel.name)||'';
+        const careerLevelDisplay = formatCareerLevel(careerLevelRaw); // JUNIOR, MID-LEVEL, SENIOR
+
+        const title = interviewTypeKr && careerLevelDisplay
+            ? `${interviewTypeKr} - ${careerLevelDisplay}`
+            : (interviewTypeKr || '면접');
 
         const li = document.createElement('li');
         li.className='interview-item interview-row';
@@ -221,11 +233,13 @@ function renderInterviews(sel, items){
           <span class="pill-dark">${escapeHtml(pill)}</span>
           <span class="dot">•</span>
           <span class="date">${escapeHtml(formatDate(it.interviewDate))}</span>
+          <span class="dot">•</span>
+          <span class="result-id">ID: ${it.resultId || '-'}</span>
         </div>
         <h4 class="iv-title">${escapeHtml(title)}</h4>
       </div>
       <div class="item-right">
-        <div class="score-big">${Number(it.score ?? 0)}</div>
+        <div class="score-big">${Number(it.totalScore ?? 0)}</div>
         <div class="grade-txt ${gCls}">${escapeHtml(gradeTxt)}</div>
         <button type="button" class="btn small outline detail-btn">상세 보기</button>
       </div>
@@ -236,34 +250,84 @@ function renderInterviews(sel, items){
     box.appendChild(frag);
 }
 
+/* 스크랩 렌더링 함수 - 라우팅 로직 단순화 */
 function renderScraps(sel, items){
     const box = document.querySelector(sel);
     if(!box) return;
     box.innerHTML='';
-    if(!items.length){ box.innerHTML='<li class="empty">스크랩한 글이 없습니다.</li>'; return; }
 
-    const frag=document.createDocumentFragment();
-    items.forEach((it)=>{
-        const title = (it && it.title) || '';
-        // ✅ DTO의 link 우선, 없으면 postId로 복구
-        const href  = buildCommunityDetailLink(it);
-        const likes = Number((it && it.likes) || 0);
-        const comments = Number((it && it.comments) || 0);
+    if(!items.length){
+        box.innerHTML = `
+            <li class="empty-state">
+                <div class="empty-content">
+                    <i class="fa-regular fa-bookmark"></i>
+                    <p>아직 스크랩한 글이 없습니다</p>
+                    <a href="/community" class="empty-link">커뮤니티 둘러보기</a>
+                </div>
+            </li>
+        `;
+        return;
+    }
 
-        const li=document.createElement('li');
-        li.className='scrap-item';
-        li.innerHTML=`
-      <a class="link" href="${escapeHtml(href)}">
-        <span class="title">${escapeHtml(title)}</span>
-        <span class="meta">
-          <span class="likes">👍 ${likes}</span>
-          <span class="comments">💬 ${comments}</span>
-        </span>
-      </a>
-    `;
+    const frag = document.createDocumentFragment();
+    items.forEach((item) => {
+        const title = (item && item.title) || '';
+        const likes = Number((item && item.likes) || 0);
+        const writer = (item && item.writerName) || '익명';
+        const preview = (item && item.preview) || '';
+
+        // 🎯 라우팅 로직 단순화: postId만 사용
+        const postId = item && (item.postId || item.id);
+        const href = postId ? `/community/posts/${postId}/detail` : '#';
+
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <a href="${escapeHtml(href)}" class="scrap-item">
+                <div class="scrap-header">
+                    <div class="scrap-author">
+                        <i class="fa-solid fa-user"></i>
+                        <span>${escapeHtml(writer)}</span>
+                    </div>
+                    <div class="scrap-stats">
+                        <span class="like-count">
+                            <i class="fa-solid fa-heart"></i>
+                            <span>${likes}</span>
+                        </span>
+                    </div>
+                </div>
+
+                <h4 class="scrap-title">${escapeHtml(title)}</h4>
+                <p class="scrap-preview">${escapeHtml(preview)}</p>
+
+                <div class="scrap-footer">
+                    <span class="scrap-tag">스크랩됨</span>
+                </div>
+            </a>
+        `;
         frag.appendChild(li);
     });
     box.appendChild(frag);
+}
+
+// InterviewType을 한국어로 변환
+function interviewTypeToKr(type) {
+    const map = {
+        'TECHNICAL': '기술면접',
+        'PRACTICAL': '실무면접',
+        'BEHAVIORAL': '인성면접',
+        'COMPREHENSIVE': '종합면접'
+    };
+    return map[String(type || '').toUpperCase()] || type || '';
+}
+
+// CareerLevel 포맷팅
+function formatCareerLevel(level) {
+    const map = {
+        'JUNIOR': 'JUNIOR',
+        'MID_LEVEL': 'MID-LEVEL',
+        'SENIOR': 'SENIOR'
+    };
+    return map[String(level || '').toUpperCase()] || level || '';
 }
 
 /* 헬퍼 */
@@ -273,7 +337,14 @@ function formatGrade(g){ if(!g) return '- 등급'; const norm=String(g).toUpperC
 function gradeClass(g){ const s=String(g||'').toUpperCase(); if(s.startsWith('A'))return'g-a'; if(s.startsWith('B'))return'g-b'; if(s.startsWith('C'))return'g-c'; return'g-etc'; }
 function parseJSONSafe(s){ try{return JSON.parse(s||'[]')}catch{return[]} }
 function setText(s,v){ const el=document.querySelector(s); if(el) el.textContent=v; }
-function escapeHtml(v){ return v==null?'':String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function escapeHtml(v){
+    return v == null ? '' : String(v)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 // ===== 회원탈퇴 모달 기능 (추가된 부분) =====
 

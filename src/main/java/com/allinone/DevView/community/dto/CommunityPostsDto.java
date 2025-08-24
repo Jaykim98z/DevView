@@ -27,12 +27,12 @@ public class CommunityPostsDto {
     private InterviewType interviewType;
     private String interviewTypeLabel;
 
-    private int score;
+    private Integer score;
     private String grade;
 
-    private int viewCount;
-    private int likeCount;
-    private int scrapCount;
+    private Integer viewCount;
+    private Integer likeCount;
+    private Integer scrapCount;
 
     private boolean liked;
     private boolean bookmarked;
@@ -40,7 +40,10 @@ public class CommunityPostsDto {
 
     private LocalDateTime createdAt;
 
-    private int commentCount;
+    private Integer commentCount;
+
+    private Long interviewResultId;
+    private String interviewFeedback;
 
     public CommunityPostsDto(
             Long id,
@@ -53,15 +56,17 @@ public class CommunityPostsDto {
             String content,
             InterviewType interviewType,
             String interviewTypeLabel,
-            int score,
+            Integer score,
             String grade,
-            int viewCount,
-            int likeCount,
-            int scrapCount,
+            Integer viewCount,
+            Integer likeCount,
+            Integer scrapCount,
             boolean liked,
             boolean bookmarked,
             Long scrapId,
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            Long interviewResultId,
+            String interviewFeedback
     ) {
         this.id = id;
         this.userId = userId;
@@ -73,38 +78,42 @@ public class CommunityPostsDto {
         this.content = content;
         this.interviewType = interviewType;
         this.interviewTypeLabel = interviewTypeLabel;
-        this.score = score;
-        this.grade = grade;
-        this.viewCount = viewCount;
-        this.likeCount = likeCount;
-        this.scrapCount = scrapCount;
+        this.score = (score == null) ? 0 : score;
+        this.grade = (grade == null || grade.isBlank()) ? "--" : grade;
+        this.viewCount = (viewCount == null) ? 0 : viewCount;
+        this.likeCount = (likeCount == null) ? 0 : likeCount;
+        this.scrapCount = (scrapCount == null) ? 0 : scrapCount;
         this.liked = liked;
         this.bookmarked = bookmarked;
         this.scrapId = scrapId;
         this.createdAt = createdAt;
+        this.interviewResultId = interviewResultId;
+        this.interviewFeedback = interviewFeedback;
     }
 
-    // 🔧 빈 구현이었던 생성자 — 필드 세팅 추가
-    public CommunityPostsDto(Long postId,
-                             Long userId,
-                             String username,
-                             String techTag,
-                             String levelTag,
-                             String title,
-                             String summary,
-                             String content,
-                             InterviewType interviewType,
-                             String interviewTypeLabel,
-                             int score,
-                             Grade grade,
-                             int viewCount,
-                             int likeCount,
-                             int scrapCount,
-                             boolean liked,
-                             boolean bookmarked,
-                             Object scrapId,
-                             LocalDateTime createdAt) {
-
+    public CommunityPostsDto(
+            Long postId,
+            Long userId,
+            String username,
+            String techTag,
+            String levelTag,
+            String title,
+            String summary,
+            String content,
+            InterviewType interviewType,
+            String interviewTypeLabel,
+            Integer score,
+            Grade grade,
+            Integer viewCount,
+            Integer likeCount,
+            Integer scrapCount,
+            boolean liked,
+            boolean bookmarked,
+            Object scrapId,
+            LocalDateTime createdAt,
+            Long interviewResultId,
+            String interviewFeedback
+    ) {
         this.id = postId;
         this.userId = userId;
         this.username = username;
@@ -115,18 +124,19 @@ public class CommunityPostsDto {
         this.content = content;
         this.interviewType = interviewType;
         this.interviewTypeLabel = interviewTypeLabel;
-        this.score = score;
-        this.grade = (grade == null) ? null : grade.name();
-        this.viewCount = viewCount;
-        this.likeCount = likeCount;
-        this.scrapCount = scrapCount;
+        this.score = (score == null) ? 0 : score;
+        this.grade = (grade == null) ? "--" : grade.name();
+        this.viewCount = (viewCount == null) ? 0 : viewCount;
+        this.likeCount = (likeCount == null) ? 0 : likeCount;
+        this.scrapCount = (scrapCount == null) ? 0 : scrapCount;
         this.liked = liked;
         this.bookmarked = bookmarked;
         this.scrapId = toLong(scrapId);
         this.createdAt = createdAt;
+        this.interviewResultId = interviewResultId;
+        this.interviewFeedback = interviewFeedback;
     }
 
-    // ---- 내부 유틸 ----
     private static Long toLong(Object v) {
         if (v == null) return null;
         if (v instanceof Long l) return l;

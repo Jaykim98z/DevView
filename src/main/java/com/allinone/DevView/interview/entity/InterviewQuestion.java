@@ -3,6 +3,9 @@ package com.allinone.DevView.interview.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * 면접 질문 엔티티
+ */
 @Entity
 @Table(name = "interview_questions")
 @Getter

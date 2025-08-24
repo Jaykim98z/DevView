@@ -2,26 +2,31 @@
 <html lang="ko"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8" />
-    <title th:text="${post.title} + ' - 게시글 상세보기'">게시글 상세보기</title>
+<meta charset="UTF-8" />
+<title th:text="${post.title} + ' - 게시글 상세보기'">게시글 상세보기</title>
 
-    <link rel="stylesheet" href="/css/header.css">
-    <link rel="stylesheet" href="/css/post-detail.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<!-- 파비콘 추가 -->
+<link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}">
+<link rel="alternate icon" href="/img/favicon.svg" type="image/svg+xml">
 
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
-</head>
+<link rel="stylesheet" href="/css/header.css">
+<link rel="stylesheet" href="/css/post-detail.css" />
+<link rel="stylesheet" href="/css/interview-result.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
+<meta name="_csrf" th:content="${_csrf.token}">
+<meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+<meta name="current-user-id" th:content="${session.loginUser?.userId}" />
+<meta name="current-username" th:content="${session.loginUser?.username}" />
 <body data-page="detail"
-      th:attr="data-post-id=${post.id}"
-      th:data-current-user-id="${#authentication?.principal?.userId}"
-      th:data-current-username="${#authentication?.name}"
-      th:data-current-user-email="${#authorization.expression('isAuthenticated()') ? #authentication.principal.username : null}">
+      th:attr="data-post-id=${post.id},
+               data-current-user-id=${session.loginUser?.userId ?: ''},
+               data-current-username=${session.loginUser?.username ?: ''},
+               data-current-user-email=${session.loginUser?.email ?: ''}">
+
 
 <div th:replace="~{fragments/header :: header}"></div>
-
 
 <main class="main-container">
     <div class="post-detail-card" th:attr="data-post-id=${post.id}">
@@ -39,24 +44,86 @@
 
         <h2 class="post-title" th:text="${post.title}">게시글 제목</h2>
 
-        <div class="badges">
-            <span class="badge badge-tech" th:text="${post.interviewType}">PRACTICE</span>
-            <span class="score" th:text="${post.score} + ' 점'">0 점</span>
-            <span class="grade" th:text="|• ${post.grade} 등급|">• C 등급</span>
+        <div class="post-extra" th:if="${post.interviewResultId != null}">
+            <hr class="meta-divider" />
+            <div class="extra-row">
+                <strong>인터뷰 결과 ID</strong>
+                <span th:text="${post.interviewResultId}">123</span>
+            </div>
         </div>
 
-        <div class="post-content" th:text="${post.summary}">
-            게시글 요약/내용
-        </div>
+        <section class="result-container"
+                 id="interview-result-embed"
+                 th:if="${post.interviewResultId != null}"
+                 th:attr="data-interview-id=${post.interviewResultId}">
+            <div class="result-header">
+                <h1>면접이 완료되었습니다!</h1>
+                <p>수고하셨습니다. 면접 결과를 확인해보세요.</p>
+            </div>
+
+            <div class="result-card">
+                <div class="score-summary">
+                    <h2><span id="total-score">--</span>/100</h2>
+                    <div id="grade" class="grade-badge">Grade --</div>
+                </div>
+
+                <div class="skill-scores">
+                    <div class="skill-item">
+                        <div class="label"><span>기술적 지식</span><span id="skill-tech-score">0%</span></div>
+                        <div class="progress-bar"><div class="progress" id="skill-tech-progress"></div></div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="label"><span>문제 해결 능력</span><span id="skill-problem-score">0%</span></div>
+                        <div class="progress-bar"><div class="progress" id="skill-problem-progress"></div></div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="label"><span>의사소통 능력</span><span id="skill-comm-score">0%</span></div>
+                        <div class="progress-bar"><div class="progress" id="skill-comm-progress"></div></div>
+                    </div>
+                    <div class="skill-item">
+                        <div class="label"><span>태도 & 열정</span><span id="skill-attitude-score">0%</span></div>
+                        <div class="progress-bar"><div class="progress" id="skill-attitude-progress"></div></div>
+                    </div>
+                </div>
+
+                <h3 class="section-title">상세 피드백</h3>
+                <div id="feedback-text" class="feedback-details">Loading...</div>
+
+                <h3 class="section-title">종합 평가</h3>
+                <div id="summary-text" class="summary-details">Loading...</div>
+            </div>
+        </section>
+
+        <script th:if="${post.interviewResultId != null}" th:inline="javascript">
+            window.INTERVIEW_RESULT_ID = [[${post.interviewResultId}]];
+        </script>
+
+        <script th:if="${post.interviewResultId != null}" th:inline="javascript">
+            (function () {
+              var id = [[${post.interviewResultId}]];
+              var parts = window.location.pathname.split('/');
+              var last = parts[parts.length - 1];
+              if (!/^\d+$/.test(last)) {
+                history.replaceState(null, '', window.location.pathname.replace(/\/$/, '') + '/' + id);
+              }
+            })();
+        </script>
+
+        <script th:if="${post.interviewResultId != null}" th:src="@{/js/interview-result.js}"></script>
+
+        <section class="extra-memo">
+            <h3 class="extra-title">추가 메모</h3>
+            <div class="extra-body">
+                <div class="post-content"
+                     th:text="${#strings.defaultString(post.content, '')}"></div>
+            </div>
+        </section>
 
         <div class="post-actions"
-             th:if="${#authorization.expression('isAuthenticated()')
-        and (post.writerId == #authentication.principal.userId
-             or #authorization.expression('hasRole(''ADMIN'')'))}">
+             th:if="${session.loginUser != null and post.userId == session.loginUser.userId}">
             <button id="btn-edit-post"  class="btn-action">수정</button>
             <button id="btn-delete-post" class="btn-action btn-danger">삭제</button>
         </div>
-
 
         <div class="post-footer">
             <div class="metrics">
@@ -65,14 +132,18 @@
                     <span id="view-count" class="count" th:text="${post.viewCount}">0</span>
                 </div>
 
-                <button type="button" class="btn-icon btn-like"
+                <button type="button"
+                        class="btn-icon btn-like"
+                        th:classappend="${post.liked} ? ' is-active' : ''"
                         data-post-id="[[${post.id}]]"
                         th:data-url="@{/api/community/posts/{id}/like(id=${post.id})}">
                     <i class="fa-solid fa-heart" aria-hidden="true"></i>
                     <span class="count" th:text="${post.likeCount}">0</span>
                 </button>
 
-                <button type="button" class="btn-icon btn-scrap"
+                <button type="button"
+                        class="btn-icon btn-scrap"
+                        th:classappend="${post.bookmarked} ? ' is-active' : ''"
                         data-post-id="[[${post.id}]]"
                         th:data-url="@{/api/community/posts/{id}/scrap(id=${post.id})}">
                     <i class="fa-regular fa-bookmark" aria-hidden="true"></i>
@@ -82,13 +153,11 @@
             <hr class="meta-divider" />
         </div>
 
-
         <section class="comments-section">
             <div class="comments">
                 <div class="comments__title">
                     <span>댓글</span>
                     <span class="comments__badge">
-                        <!-- ✅ 중첩 ${} 제거 -->
                         <span id="comment-count"
                               th:text="${comments != null ? #lists.size(comments) : 0}">0</span>개
                     </span>
@@ -114,6 +183,9 @@
     </div>
 </main>
 
+<script src="/js/spinner.js"></script>
+<div th:replace="~{fragments/loading-spinner :: spinner}"></div>
+
 <script>
     (function(){
       const d = document.body.dataset;
@@ -124,7 +196,20 @@
     })();
 </script>
 
-<script th:src="@{/js/post-detail-comments.js(v=${#dates.createNow().time})}" defer></script>
+<div id="recommendations-text" style="display:none"></div>
 
+<script>
+    window.escapeHtml = function (s) {
+      if (s == null) return '';
+      return String(s)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    };
+</script>
+
+<script th:src="@{/js/post-detail-comments.js}" defer></script>
 </body>
 </html>

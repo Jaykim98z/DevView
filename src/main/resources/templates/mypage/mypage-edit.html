@@ -3,6 +3,11 @@
 <head>
     <title>프로필 수정</title>
     <meta charset="UTF-8">
+
+    <!-- 파비콘 추가 -->
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}">
+    <link rel="alternate icon" href="/img/favicon.svg" type="image/svg+xml">
+
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
 

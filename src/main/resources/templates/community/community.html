@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>커뮤니티 - AI 면접 시뮬레이터</title>
 
+    <link rel="icon" type="image/svg+xml" th:href="@{/img/favicon.svg}">
+    <link rel="alternate icon" href="/img/favicon.svg" type="image/svg+xml">
+
     <link rel="stylesheet" href="/css/header.css" />
     <link rel="stylesheet" href="/css/community.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -47,29 +50,30 @@
 
         <div class="tag-group-left" id="categoryFilters">
             <button type="button" data-category="">전체</button>
-            <button type="button" data-category="백엔드">백엔드</button>
-            <button type="button" data-category="프론트엔드">프론트엔드</button>
-            <button type="button" data-category="풀스택">풀스택</button>
-            <button type="button" data-category="DevOps">DevOps</button>
+            <button type="button" data-category="BACKEND">백엔드</button>
+            <button type="button" data-category="FRONTEND">프론트엔드</button>
+            <button type="button" data-category="FULLSTACK">풀스택</button>
+            <button type="button" data-category="DEVOPS">DevOps</button>
+            <button type="button" data-category="DATA_AI">Data/AI</button>
         </div>
 
         <div class="tag-group-right" id="levelFilters">
             <button type="button" data-level="">전체</button>
-            <button type="button" data-level="주니어">주니어</button>
-            <button type="button" data-level="미드레벨">미드레벨</button>
-            <button type="button" data-level="시니어">시니어</button>
+            <button type="button" data-level="JUNIOR">주니어</button>
+            <button type="button" data-level="MID">미드레벨</button>
+            <button type="button" data-level="SENIOR">시니어</button>
         </div>
     </div>
 
     <div class="card-list" id="cardList"></div>
 
-    <nav class="pagination" id="pagination" aria-label="페이지 탐색" style="margin: 24px 0; display: flex; gap: 8px; justify-content: center;">
+    <nav class="pagination" id="pagination" aria-label="페이지 탐색"
+         style="margin: 24px 0; display: flex; gap: 8px; justify-content: center;">
     </nav>
 </main>
 
 <a href="/community/posts/new" class="write-btn">✏️ 글쓰기</a>
 
-
-<script src="/js/community.js"></script>
+<script src="/js/community.js?v=2025-08-22-02"></script>
 </body>
 </html>

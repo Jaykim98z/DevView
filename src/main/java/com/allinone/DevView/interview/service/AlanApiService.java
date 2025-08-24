@@ -6,11 +6,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * An implementation of the ExternalAiApiService that communicates with the Alan AI.
+ * This service is specifically used for generating learning resource recommendations.
+ * It is registered with the qualifier "alan".
+ */
 @Service("alan")
 @RequiredArgsConstructor
 public class AlanApiService implements ExternalAiApiService {
@@ -21,39 +26,44 @@ public class AlanApiService implements ExternalAiApiService {
 
     private static final String API_URL = "https://kdt-api-function.azurewebsites.net/api/v1/question";
 
+    /**
+     * This method is not implemented for Alan, as question generation is handled by the Gemini service.
+     * @return null.
+     */
     @Override
-    public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount, InterviewType interviewType) {
-        // 이 메서드는 Gemini가 담당하므로 여기서는 간단히 구현
+    public List<String> getQuestionFromAi(String jobPosition, String careerLevel, int questionCount, InterviewType interviewType, String selfIntroduction) {
         return null;
     }
 
     /**
-     * Alan API를 사용하여 특정 키워드에 대한 추천 자료를 검색합니다.
-     * @param keyword 검색할 키워드 (e.g., "JPA", "Spring Security")
-     * @return 검색된 추천 자료 내용 (content 필드)
+     * Alan API를 사용하여 특정 키워드에 대한 추천 리소스를 검색합니다.
+     * @param keyword 검색할 키워드(예: "JPA", "커뮤니케이션 스킬")
+     * @return API 응답의 content 필드
      */
     public String getRecommendations(String keyword) {
-        String prompt = "Please provide a list of helpful learning resources for '" + keyword + "'. " +
-                "Your response MUST be a single, valid JSON object with one key: 'recommendations'. " +
-                "The value should be an array of objects, where each object has two keys: 'title' (string) and 'url' (string).";
+        String prompt = "For the following comma-separated topics: '" + keyword + "', " +
+                "Please provide a list of 1 to 5 helpful, REAL, and publicly accessible learning resources for EACH topic. (like well-known blog posts, official documentation, or popular tutorials) " +
+                "CRITICAL: DO NOT invent sources, NEVER use placeholder URLs like 'example.com'. (Use the actual results found by searching) " +
+                "Your response MUST be a single, valid JSON object where each key is one of the topics, its value is an array of objects. " +
+                "Each object in the array must have two keys: 'title' (string) and 'url' (string). ";
 
         return generateContent(prompt);
     }
 
     /**
-     * 인터페이스 요구사항을 만족시키는 범용 메서드
+     * 주어진 프롬프트를 Alan API로 전송하고 AI의 전체 텍스트 응답을 반환합니다.
      * @param prompt Alan API에 보낼 전체 프롬프트
-     * @return API 응답의 content 필드
+     * @return API 응답의 원시 텍스트 내용
      */
     @Override
     public String generateContent(String prompt) {
-        URI uri = UriComponentsBuilder.fromUriString(API_URL)
-                .queryParam("client_id", clientId)
-                .queryParam("content", prompt)
-                .build()
-                .toUri();
+        String urlTemplate = API_URL + "?client_id={clientId}&content={content}";
 
-        AlanResponseDto response = restTemplate.getForObject(uri, AlanResponseDto.class);
+        Map<String, String> uriVariables = new HashMap<>();
+        uriVariables.put("clientId", clientId);
+        uriVariables.put("content", prompt);
+
+        AlanResponseDto response = restTemplate.getForObject(urlTemplate, AlanResponseDto.class, uriVariables);
 
         return response != null ? response.content() : "Failed to get response from Alan.";
     }
