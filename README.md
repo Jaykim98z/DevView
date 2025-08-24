@@ -599,6 +599,7 @@ git commit -m "refactor(ranking): 조회 쿼리 최적화" \
 * ERDCloud, Swagger
 <details>
 <summary>📖 Swagger (API 문서 예시)</summary>
+    서비스 내에서 /swagger-ui/index.html 를 통해 더 자세한 내용을 확인하실 수 있습니다. 
 <p align="center">
   <img width="1200" height="600" alt="Image" src="https://github.com/user-attachments/assets/f910dde2-75a6-4c92-9834-e6f23725242b" />
 <img width="1200" height="600" alt="Image" src="https://github.com/user-attachments/assets/70100d3d-4da6-4b1e-a354-64cacbb7cb0a" />
