@@ -70,13 +70,13 @@ DevView는 단순한 연습 도구를 넘어, **학습·분석·경험 공유까
 * 교육 기관 : 학생들의 **학습 추세 데이터** 확보 & 관리
 * 기업 : 지원자의 **기술·커뮤니케이션 능력 검증 도구**로 활용
 
-<br>
+## 🔗 배포 & 자료 링크
 
-<br>[📤 배포](https://devview.kro.kr/)
-<br>[🎦 시연영상](https://youtu.be/cSnN2AwqB2s)
-<br>[📑 발표 자료](https://docs.google.com/presentation/d/16nU0tfxW_LWEZtgjntebanmCDljiWTkw/edit?usp=sharing&ouid=116558675202954145579&rtpof=true&sd=true)
-<br>[📜Notion](https://www.notion.so/AI-DevView-23180666e0688168b53fe0edc7ec7662)
-<br>
+- [📤 배포 서비스](https://devview.kro.kr/)
+- [🎦 시연 영상](https://youtu.be/cSnN2AwqB2s)
+- [📑 발표 자료](https://docs.google.com/presentation/d/16nU0tfxW_LWEZtgjntebanmCDljiWTkw/edit?usp=sharing&ouid=116558675202954145579&rtpof=true&sd=true)
+- [📜 Notion 문서](https://www.notion.so/AI-DevView-23180666e0688168b53fe0edc7ec7662)
+
 ---
 
 # 2. 팀원 소개 & 역할 분담
