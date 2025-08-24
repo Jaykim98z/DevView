@@ -288,7 +288,7 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 
 # 4. 주요 기능 소개
 
-➡️ [상세 ERD/테이블 구조 보러가기 (Notion)](https://www.notion.so/25780666e06880e7b2cec00b635cc279?source=copy_link)
+➡️ [ 전체페이지 상세 보기(Notion)](https://www.notion.so/25780666e06880e7b2cec00b635cc279?source=copy_link)
 
 ### 1️⃣ 로그인 & 회원가입
 <p align="center">
