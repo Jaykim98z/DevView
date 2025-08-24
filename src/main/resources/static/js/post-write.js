@@ -179,7 +179,7 @@
       interviewShare: {
         title: title,
         interviewResultId: interviewResultId,
-        extraMemo: memoTxt
+        content: memoTxt
       },
       freePost: null
     };
