@@ -16,16 +16,16 @@
 </div>
 
 ## 📚 목차
-1. [프로젝트 개요 & 차별성](#1-프로젝트-개요--차별성)
-2. [팀원 소개 & 역할 분담](#2-팀원-소개--역할-분담)
-3. [ERD & 데이터베이스 구조](#3-erd--데이터베이스-구조)
-4. [주요 기능 소개](#4-주요-기능-소개)
-5. [디렉토리 구조](#5-디렉토리-구조)
-6. [브랜치 전략 & 컨벤션](#6-브랜치-전략--컨벤션)
-7. [트러블슈팅 사례 (Troubleshooting)](#7-트러블슈팅-사례-troubleshooting)
-8. [기술 스택 (Tech Stack)](#8-기술-스택-tech-stack)
-9. [팀원별 프로젝트 후기 (Retrospective)](#9-팀원별-프로젝트-후기-retrospective)
-
+1. [프로젝트 개요 & 차별성](#1-프로젝트-개요--차별성)  
+2. [팀원 소개 & 역할 분담](#2-팀원-소개--역할-분담)  
+3. [ERD & 데이터베이스 구조](#3-erd--데이터베이스-구조)  
+4. [주요 기능 소개](#4-주요-기능-소개)  
+5. [API 명세서 (Swagger)](#5-api-명세서-swagger)  
+6. [디렉토리 구조](#6-디렉토리-구조)  
+7. [브랜치 전략 & 컨벤션](#7-브랜치-전략--컨벤션)  
+8. [트러블슈팅 사례 (Troubleshooting)](#8-트러블슈팅-사례-troubleshooting)  
+9. [기술 스택 (Tech Stack)](#9-기술-스택-tech-stack)  
+10. [팀원별 프로젝트 후기 (Retrospective)](#10-팀원별-프로젝트-후기-retrospective) 
 ---
 
 # 1. 프로젝트 개요 & 차별성
@@ -374,8 +374,20 @@ DevView는 **사용자 중심 데이터 흐름**과 **면접 세션·피드백 �
 * **구성** — 질문·답변, AI 피드백(점수/강점/개선점), 예시 답변, 전체 평균 점수
 
 ---
+# 5. API 명세서 (Swagger)
 
-# 5. 디렉토리 구조
+DevView의 API는 **Swagger**를 활용해 문서화되었습니다.  
+서비스 내에서 `/swagger-ui/index.html` 경로를 통해 더 자세한 내용을 확인할 수 있습니다.
+
+<p align="center">
+  <img width="1200" alt="Swagger Example" src="https://github.com/user-attachments/assets/f910dde2-75a6-4c92-9834-e6f23725242b" />
+</p>
+
+<p align="center">
+  <img width="1200" alt="Swagger Example 2" src="https://github.com/user-attachments/assets/70100d3d-4da6-4b1e-a354-64cacbb7cb0a" />
+</p>
+
+# 6. 디렉토리 구조
 
 **Spring Boot 백엔드 + Thymeleaf 프론트엔드 + AWS 배포** 구조입니다.
 
@@ -424,7 +436,7 @@ DevView/
 
 ---
 
-# 6. 브랜치 전략 & 컨벤션
+# 7. 브랜치 전략 & 컨벤션
 
 ## 🔹 브랜치 전략 (Branch Strategy)
 **협업 흐름** : 
@@ -521,7 +533,7 @@ git commit -m "refactor(ranking): 조회 쿼리 최적화" \
 `feature`, `bug`, `refactor`, `docs`, `style`, `question`, `chore`, `perf`, `build`, `ci`
 
 ---
-# 7. 트러블슈팅 사례 (Troubleshooting)
+# 8. 트러블슈팅 사례 (Troubleshooting)
 
 ### ① Database — Flyway 마이그레이션 충돌
 
@@ -559,7 +571,7 @@ git commit -m "refactor(ranking): 조회 쿼리 최적화" \
 
 ---
 
-## 8. 기술 스택 (Tech Stack)
+## 9. 기술 스택 (Tech Stack)
 
 ### 📌 프론트엔드
 
@@ -595,19 +607,11 @@ git commit -m "refactor(ranking): 조회 쿼리 최적화" \
 * GitHub, Notion, Discord, Google Docs/Slides, Figma
 
 ### 📌 설계/문서화 툴
-
-* ERDCloud, Swagger
-<details>
-<summary>📖 Swagger (API 문서 예시)</summary>
-    서비스 내에서 /swagger-ui/index.html 를 통해 더 자세한 내용을 확인하실 수 있습니다. 
-<p align="center">
-  <img width="1200" height="600" alt="Image" src="https://github.com/user-attachments/assets/f910dde2-75a6-4c92-9834-e6f23725242b" />
-<img width="1200" height="600" alt="Image" src="https://github.com/user-attachments/assets/70100d3d-4da6-4b1e-a354-64cacbb7cb0a" />
-</p>
-</details>
+* ERDCloud
+* Swagger (API 문서 자동화)
 
 ---
-## 9. 팀원별 프로젝트 후기 (Retrospective)
+## 10. 팀원별 프로젝트 후기 (Retrospective)
 
 ### 👨‍💻 김진욱 (팀장 / 인증·랭킹·배포 담당)
 

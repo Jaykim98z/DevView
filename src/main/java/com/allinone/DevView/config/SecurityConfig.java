@@ -84,16 +84,14 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
 
-                        // 문서화 도구
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
+                        // 문서화 도구(개발과정에서만 주석해제)
+//                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
 
                         // 인증 없이 접근 가능한 페이지
                         .requestMatchers("/", "/user/login", "/user/register").permitAll()
-                        .requestMatchers("/rankings").permitAll() // 임시
 
                         // 인증 없이 접근 가능한 API (GET 요청만)
                         .requestMatchers("/api/users/register", "/api/users/check-email", "/api/users/check-username").permitAll()
-                        .requestMatchers("/api/rankings/**").permitAll() // 임시
 
                         // OAuth2 관련
                         .requestMatchers("/login/oauth2/code/**", "/oauth2/**").permitAll()
